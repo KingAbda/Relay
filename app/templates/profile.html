@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center" style="margin-bottom: 32px;">
+  <div>
+    <h1>{{ profile_user.full_name }}</h1>
+    <p class="muted">{{ profile_user.email }}</p>
+    {% if profile_user.bio %}
+      <p style="margin-top: 8px;">{{ profile_user.bio }}</p>
+    {% endif %}
+  </div>
+  <div style="text-align: right;">
+    {% if completed_count is defined %}
+      <div class="stat-value" style="font-size: 1.4rem;">{{ completed_count }}</div>
+      <div class="stat-label">sessions completed</div>
+    {% endif %}
+    {% if current_user and current_user.id == profile_user.id %}
+      <div class="credit-badge" style="margin-top: 8px;">This is you</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h3 class="mb-2">🎓 Teaches</h3>
+    {% if skills %}
+      {% for s in skills %}
+        <div class="flex items-center gap-2" style="margin-bottom: 8px;">
+          <span class="tag tag-{{ s.category }}">{{ s.category }}</span>
+          <span>{{ s.name }}</span>
+        </div>
+        {% if s.description %}
+          <p class="muted" style="font-size: 0.85rem; margin-bottom: 8px;">{{ s.description }}</p>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <p class="muted">No skills listed.</p>
+    {% endif %}
+    {% if current_user and current_user.id != profile_user.id and skills %}
+      <a href="/request-session/{{ skills[0].id }}" class="btn btn-sm btn-primary" style="margin-top: 12px;">Request a session</a>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3 class="mb-2">📖 Wants to learn</h3>
+    {% if wants %}
+      {% for w in wants %}
+        <div class="flex items-center gap-2" style="margin-bottom: 8px;">
+          <span class="tag tag-{{ w.category }}">{{ w.category }}</span>
+          <span>{{ w.name }}</span>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="muted">Nothing listed.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

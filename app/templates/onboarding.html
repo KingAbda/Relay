@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Set Up Your Profile{% endblock %}
+{% block content %}
+<div style="max-width: 560px; margin: 0 auto;">
+  <h1 style="text-align: center; margin-bottom: 8px;">Almost there</h1>
+  <p class="muted text-center" style="margin-bottom: 32px;">
+    Relay works best when <strong style="color: var(--ink);">everyone teaches and learns</strong>.
+    List one skill you can teach and one skill you want to learn to get started.
+  </p>
+
+  {% if error %}
+    <div class="form-error" style="margin-bottom: 16px;">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="/onboarding">
+    <div class="card" style="margin-bottom: 24px;">
+      <h3 style="margin-bottom: 16px;">🎓 What can you teach?</h3>
+      <div class="form-group">
+        <label>Skill name</label>
+        <input type="text" name="teach_name" class="form-input" placeholder="e.g. Guitar, Python, Spanish" required />
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select name="teach_category" class="form-select" required>
+          <option value="">Select a category...</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}">{{ cat|capitalize }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>Brief description (optional)</label>
+        <textarea name="teach_description" class="form-textarea" placeholder="What level? What will someone learn in 30 minutes?"></textarea>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 24px;">
+      <h3 style="margin-bottom: 16px;">📖 What do you want to learn?</h3>
+      <div class="form-group">
+        <label>Skill name</label>
+        <input type="text" name="learn_name" class="form-input" placeholder="e.g. Web design, Video editing" required />
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select name="learn_category" class="form-select" required>
+          <option value="">Select a category...</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}">{{ cat|capitalize }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>Brief description (optional)</label>
+        <textarea name="learn_description" class="form-textarea" placeholder="What level are you? What are you hoping to achieve?"></textarea>
+      </div>
+    </div>
+
+    <div class="card" style="background: rgba(255, 157, 46, 0.06); border-color: rgba(255, 157, 46, 0.2); margin-bottom: 24px;">
+      <p style="font-size: 0.9rem;">
+        <strong>⚡ Why both?</strong> When everyone contributes, credits flow.
+        You'll earn credits by teaching and spend them learning —
+        that's how the Relay race works.
+      </p>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+      Start Relay
+    </button>
+  </form>
+</div>
+{% endblock %}

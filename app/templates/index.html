@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div style="text-align: center; padding: 60px 0 40px;">
+  <h1 style="font-size: 3.5rem; margin-bottom: 16px;">
+    Trade skills, <span style="color: var(--amber);">not money</span>.
+  </h1>
+  <p style="font-size: 1.2rem; color: var(--muted); max-width: 600px; margin: 0 auto 40px;">
+    A campus network where students teach what they know and learn what they want — paid in time credits, not cash.
+  </p>
+  <div class="flex" style="justify-content: center; gap: 16px;">
+    {% if user %}
+      <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+      <a href="/browse" class="btn btn-secondary">Browse Skills</a>
+    {% else %}
+      <a href="/signup" class="btn btn-primary">Join Relay</a>
+      <a href="/login" class="btn btn-secondary">Log in</a>
+    {% endif %}
+  </div>
+</div>
+
+<div style="text-align: center; margin-bottom: 60px;">
+  <div style="display: inline-flex; gap: 32px; flex-wrap: wrap; justify-content: center;">
+    <div class="stat">
+      <div class="stat-value">70%</div>
+      <div class="stat-label">Have a skill they want to be compensated for</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">85%</div>
+      <div class="stat-label">Want to learn but can't afford classes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">75%</div>
+      <div class="stat-label">Match rate between teachers and learners</div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align: center; margin-top: 60px;">
+  <p class="muted" style="margin-bottom: 8px;">Currently piloting at NYU</p>
+  <p style="font-size: 0.85rem; color: var(--muted);">30 minutes = 1 credit. Verified through .edu. Coming to a campus near you.</p>
+</div>
+{% endblock %}

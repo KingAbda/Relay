@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Request Session{% endblock %}
+{% block content %}
+<div style="max-width: 520px; margin: 0 auto;">
+  <a href="/browse" style="color: var(--muted); font-size: 0.9rem; text-decoration: none;">&larr; Back to browse</a>
+
+  <h1 style="margin: 16px 0 8px;">Request a session</h1>
+  <p style="color: var(--muted); margin-bottom: 24px;">
+    Learn <strong style="color: var(--ink);">{{ skill.name }}</strong> from {{ skill.user.full_name }}
+  </p>
+
+  {% if skill.description %}
+    <div class="card" style="margin-bottom: 24px;">
+      <p>{{ skill.description }}</p>
+    </div>
+  {% endif %}
+
+  {% if error %}
+    <div class="form-error" style="margin-bottom: 16px; padding: 12px; background: rgba(248, 113, 113, 0.08); border-radius: var(--radius-sm);">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST">
+    <div class="form-group">
+      <label>Notes for the teacher (optional)</label>
+      <textarea name="notes" class="form-textarea" placeholder="What do you want to learn? Your current level? Any specific goals?" style="min-height: 100px;"></textarea>
+    </div>
+
+    <div class="card" style="background: rgba(255, 157, 46, 0.06); border-color: rgba(255, 157, 46, 0.2); margin-bottom: 24px;">
+      <p style="font-size: 0.9rem;">
+        <strong>⚡ 30 min = 1 credit</strong><br />
+        <span class="muted">When you request a session, 1 credit is reserved. After the session, the teacher earns the credit.</span>
+      </p>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Request session (1 credit)</button>
+  </form>
+</div>
+{% endblock %}

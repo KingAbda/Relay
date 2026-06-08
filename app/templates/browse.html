@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Browse Skills{% endblock %}
+{% block content %}
+<h1 style="margin-bottom: 8px;">Browse skills</h1>
+<p class="muted" style="margin-bottom: 24px;">Find someone to teach you something new.</p>
+
+<div class="flex items-center gap-2" style="margin-bottom: 24px; flex-wrap: wrap;">
+  <form method="GET" action="/browse" class="flex items-center gap-2" style="flex: 1;">
+    <input type="text" name="q" class="form-input" placeholder="Search skills..." value="{{ query or '' }}" style="max-width: 300px;" />
+    <select name="category" class="form-select" style="max-width: 180px;" onchange="this.form.submit()">
+      <option value="">All categories</option>
+      {% for cat in categories %}
+        <option value="{{ cat }}" {{ 'selected' if selected_category == cat }}>{{ cat|capitalize }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-sm btn-secondary">Search</button>
+    {% if query or selected_category %}
+      <a href="/browse" class="btn btn-sm btn-outline">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+{% if skills %}
+  <div class="grid-2">
+    {% for s in skills %}
+      <div class="card">
+        <div class="flex justify-between items-center" style="margin-bottom: 8px;">
+          <span class="tag tag-{{ s.category.value }}">{{ s.category.value }}</span>
+          <span class="credit-badge" style="font-size: 0.75rem;">taught by {{ s.user.full_name.split()[0] }}</span>
+        </div>
+        <h3 style="margin-bottom: 4px;">{{ s.name }}</h3>
+        {% if s.description %}
+          <p class="muted" style="font-size: 0.9rem; margin-bottom: 12px;">{{ s.description[:120] }}{% if s.description|length > 120 %}...{% endif %}</p>
+        {% endif %}
+        <div class="flex items-center gap-2" style="margin-top: 12px;">
+          <a href="/request-session/{{ s.id }}" class="btn btn-sm btn-primary">Request session</a>
+          <a href="/profile/{{ s.user_id }}" class="btn btn-sm btn-secondary">View profile</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card" style="text-align: center; padding: 40px;">
+    <p style="font-size: 1.1rem; margin-bottom: 8px;">No skills found</p>
+    {% if query or selected_category %}
+      <p class="muted">Try a different search or <a href="/browse" style="color: var(--amber);">browse all skills</a>.</p>
+    {% else %}
+      <p class="muted">No one has listed skills yet. Be the first!</p>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

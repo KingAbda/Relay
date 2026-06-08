@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Sign Up{% endblock %}
+{% block content %}
+<div style="max-width: 440px; margin: 0 auto;">
+  <h1 style="text-align: center; margin-bottom: 8px;">Join Relay</h1>
+  <p class="muted text-center" style="margin-bottom: 32px;">Enter your .edu email to get started</p>
+
+  {% if error %}
+    <div class="form-error" style="text-align: center; margin-bottom: 16px; padding: 12px; background: rgba(248, 113, 113, 0.08); border-radius: var(--radius-sm);">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="/signup">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" name="full_name" class="form-input" placeholder="e.g. Alex Rivera" required />
+    </div>
+    <div class="form-group">
+      <label>.edu Email</label>
+      <input type="email" name="email" class="form-input" placeholder="e.g. ar1234@nyu.edu" required />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" name="password" class="form-input" placeholder="At least 6 characters" minlength="6" required />
+    </div>
+    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 8px;">Create Account</button>
+  </form>
+
+  <p class="muted text-center" style="margin-top: 24px; font-size: 0.85rem;">
+    Already have an account? <a href="/login" style="color: var(--amber);">Log in</a>
+  </p>
+</div>
+{% endblock %}

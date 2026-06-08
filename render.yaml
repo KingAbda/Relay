@@ -1,0 +1,23 @@
+# Relay — Deploy Config for Render
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: relay
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app.main:app --workers 2 --worker-class gevent --timeout 30
+    envVars:
+      - key: RELAY_ENV
+        value: production
+      - key: RELAY_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: relay-db
+          property: connectionString
+    healthCheckPath: /
+
+databases:
+  - name: relay-db
+    plan: free
+    postgresMajorVersion: 16

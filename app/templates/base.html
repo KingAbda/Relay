@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Relay{% endblock %} — Relay</title>
+  <meta name="description" content="Relay — Trade skills, not money. A campus network where students teach what they know and learn what they want." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="bg-fx"><div class="grid-overlay"></div></div>
+
+  <div class="page">
+    <nav>
+      <div class="container">
+        <a href="/" class="logo">⚡ Relay<span>.</span></a>
+        <div class="nav-links">
+          {% if user %}
+            <a href="/dashboard">Dashboard</a>
+            <a href="/browse">Browse</a>
+            <a href="/profile/{{ user.id }}">Profile</a>
+            {% if user.credit_balance %}
+              <span class="credit-badge">{{ user.credit_balance.balance|int }} credits</span>
+            {% endif %}
+            <a href="/logout">Log out</a>
+          {% else %}
+            <a href="/login">Log in</a>
+            <a href="/signup" class="btn btn-primary btn-sm">Join Relay</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+
+    <main class="container" style="padding-top: 40px; padding-bottom: 60px; flex: 1;">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+      <div class="container">
+        Relay — Trade skills, not money. Built by students, for students.
+        <span style="margin: 0 12px; color: var(--panel-line);">|</span>
+        <a href="/privacy" style="color: var(--muted); text-decoration: none; font-size: 0.85rem;">Privacy</a>
+        <a href="/terms" style="color: var(--muted); text-decoration: none; font-size: 0.85rem; margin-left: 12px;">Terms</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
