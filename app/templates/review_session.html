@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Review Session{% endblock %}
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+  <a href="/dashboard" style="color: var(--muted); font-size: 0.9rem; text-decoration: none;">&larr; Back to dashboard</a>
+
+  <h1 style="margin: 16px 0 8px;">Review your session</h1>
+  <p style="color: var(--muted); margin-bottom: 24px;">
+    How was your <strong style="color: var(--ink);">{{ session.skill_name }}</strong> session with {{ other.full_name }}?
+  </p>
+
+  {% if error %}
+    <div class="form-error" style="margin-bottom: 16px; padding: 12px; background: rgba(248, 113, 113, 0.08); border-radius: var(--radius-sm);">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+    <div class="card" style="margin-bottom: 24px;">
+      <h3 style="margin-bottom: 12px;">Rating</h3>
+      <div style="display: flex; gap: 8px; font-size: 2rem;">
+        {% for i in range(1, 6) %}
+          <label style="cursor: pointer; transition: .2s;">
+            <input type="radio" name="rating" value="{{ i }}" style="display: none;" onchange="this.parentElement.parentElement.querySelectorAll('label').forEach((l,idx) => l.style.color = idx < {{ i }} ? 'var(--amber)' : 'var(--panel-line)');" />
+            <span style="color: var(--panel-line);">★</span>
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Write a review (optional)</label>
+      <textarea name="review" class="form-textarea" placeholder="What went well? What could be better?" style="min-height: 100px;"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Submit review</button>
+  </form>
+</div>
+
+<script>
+document.querySelectorAll('input[name="rating"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    const labels = this.closest('div').querySelectorAll('label span');
+    labels.forEach((span, idx) => {
+      span.style.color = idx < parseInt(this.value) ? 'var(--amber)' : 'var(--panel-line)';
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -1,25 +1,17 @@
-"""Relay — Database setup. SQLite for local dev, easy to swap later."""
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
-
-DATABASE_URL = "sqlite:///./relay.db"
-
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+"""Relay — Database setup. Uses Flask-SQLAlchemy."""
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 
 
 class Base(DeclarativeBase):
     pass
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+db = SQLAlchemy(model_class=Base)
 
 
-def init_db():
-    Base.metadata.create_all(bind=engine)
+def init_db(app):
+    """Initialize the database with the Flask app."""
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()

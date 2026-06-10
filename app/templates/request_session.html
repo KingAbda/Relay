@@ -20,6 +20,7 @@
   {% endif %}
 
   <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <div class="form-group">
       <label>Notes for the teacher (optional)</label>
       <textarea name="notes" class="form-textarea" placeholder="What do you want to learn? Your current level? Any specific goals?" style="min-height: 100px;"></textarea>

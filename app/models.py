@@ -1,13 +1,13 @@
-"""Relay — Data models. Users, skills, sessions, credits."""
+"""Relay — Data models. Users, skills, sessions, credits, reviews."""
 
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Text, Boolean, Enum as SAEnum
-from sqlalchemy.orm import relationship
+from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Text, Boolean, Enum as SAEnum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
 
-from .database import Base
+from .database import db
 
 
 def _uuid():
@@ -37,97 +37,111 @@ class SessionStatus(str, enum.Enum):
 
 
 class TransactionType(str, enum.Enum):
-    EARN = "earn"        # teaching a session
-    SPEND = "spend"      # learning a session
-    BONUS = "bonus"      # signup bonus, referral
-    EXPIRE = "expire"    # credits expired
+    EARN = "earn"
+    SPEND = "spend"
+    BONUS = "bonus"
+    EXPIRE = "expire"
 
 
 # ── User ───────────────────────────────────────────────
 
-class User(Base):
+class User(db.Model):
     __tablename__ = "users"
 
-    id = Column(String, primary_key=True, default=_uuid)
-    email = Column(String, unique=True, nullable=False, index=True)
-    password_hash = Column(String, nullable=False)
-    full_name = Column(String, nullable=False)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False, index=True)
+    password_hash: Mapped[str] = mapped_column(String, nullable=False)
+    full_name: Mapped[str] = mapped_column(String, nullable=False)
+    bio: Mapped[str] = mapped_column(Text, default="")
+    avatar_url: Mapped[str] = mapped_column(String, default="")
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    verification_token: Mapped[str] = mapped_column(String, nullable=True)
+    account_locked_until: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    onboarded: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    last_active: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    # Profile
-    bio = Column(Text, default="")
-    avatar_url = Column(String, default="")
-
-    # Onboarding
-    onboarded = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Relationships
     skills_taught = relationship("UserSkill", back_populates="user",
                                   foreign_keys="UserSkill.user_id")
     credit_balance = relationship("CreditAccount", back_populates="user",
                                    uselist=False)
 
 
-class UserSkill(Base):
-    """A skill a user can teach."""
+class UserSkill(db.Model):
     __tablename__ = "user_skills"
 
-    id = Column(String, primary_key=True, default=_uuid)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    name = Column(String, nullable=False)           # e.g. "Guitar"
-    category = Column(SAEnum(SkillCategory), nullable=False)
-    description = Column(Text, default="")
-    proficiency = Column(Integer, default=3)         # 1-5 scale
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    category: Mapped[SkillCategory] = mapped_column(SAEnum(SkillCategory), nullable=False)
+    description: Mapped[str] = mapped_column(Text, default="")
+    proficiency: Mapped[int] = mapped_column(Integer, default=3)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="skills_taught",
                          foreign_keys=[user_id])
 
 
-class UserWant(Base):
-    """A skill a user wants to learn."""
+class UserWant(db.Model):
     __tablename__ = "user_wants"
 
-    id = Column(String, primary_key=True, default=_uuid)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    name = Column(String, nullable=False)
-    category = Column(SAEnum(SkillCategory), nullable=False)
-    description = Column(Text, default="")
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    category: Mapped[SkillCategory] = mapped_column(SAEnum(SkillCategory), nullable=False)
+    description: Mapped[str] = mapped_column(Text, default="")
 
 
 # ── Credits ────────────────────────────────────────────
 
-class CreditAccount(Base):
+class CreditAccount(db.Model):
     __tablename__ = "credit_accounts"
 
-    id = Column(String, primary_key=True, default=_uuid)
-    user_id = Column(String, ForeignKey("users.id"), unique=True, nullable=False)
-    balance = Column(Float, default=0.0)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), unique=True, nullable=False)
+    balance: Mapped[float] = mapped_column(Float, default=0.0)
 
     user = relationship("User", back_populates="credit_balance")
 
 
-class CreditTransaction(Base):
+class CreditTransaction(db.Model):
     __tablename__ = "credit_transactions"
 
-    id = Column(String, primary_key=True, default=_uuid)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
-    amount = Column(Float, nullable=False)            # positive = earn, negative = spend
-    type = Column(SAEnum(TransactionType), nullable=False)
-    description = Column(String, default="")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False, index=True)
+    amount: Mapped[float] = mapped_column(Float, nullable=False)
+    type: Mapped[TransactionType] = mapped_column(SAEnum(TransactionType), nullable=False)
+    description: Mapped[str] = mapped_column(String, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
 # ── Sessions ───────────────────────────────────────────
 
-class Session(Base):
+class Session(db.Model):
     __tablename__ = "sessions"
 
-    id = Column(String, primary_key=True, default=_uuid)
-    teacher_id = Column(String, ForeignKey("users.id"), nullable=False)
-    learner_id = Column(String, ForeignKey("users.id"), nullable=False)
-    skill_name = Column(String, nullable=False)
-    status = Column(SAEnum(SessionStatus), default=SessionStatus.REQUESTED)
-    notes = Column(Text, default="")
-    scheduled_at = Column(DateTime, nullable=True)
-    completed_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    teacher_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    learner_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    skill_name: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[SessionStatus] = mapped_column(SAEnum(SessionStatus), default=SessionStatus.REQUESTED)
+    notes: Mapped[str] = mapped_column(Text, default="")
+    scheduled_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+# ── Reviews ────────────────────────────────────────────
+
+class SessionReview(db.Model):
+    __tablename__ = "session_reviews"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    session_id: Mapped[str] = mapped_column(String, ForeignKey("sessions.id"), nullable=False)
+    reviewer_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    reviewee_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    rating: Mapped[int] = mapped_column(Integer, nullable=False)
+    review: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Profile{% endblock %}
 {% block content %}
-<div class="flex justify-between items-center" style="margin-bottom: 32px;">
+<div class="flex justify-between items-center" style="margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
   <div>
     <h1>{{ profile_user.full_name }}</h1>
     <p class="muted">{{ profile_user.email }}</p>
@@ -10,8 +10,12 @@
     {% endif %}
   </div>
   <div style="text-align: right;">
+    {% if avg_rating %}
+      <div style="font-family: var(--display); font-size: 1.6rem; color: var(--amber);">{{ avg_rating }} ⭐</div>
+      <div class="stat-label">average rating</div>
+    {% endif %}
     {% if completed_count is defined %}
-      <div class="stat-value" style="font-size: 1.4rem;">{{ completed_count }}</div>
+      <div class="stat-value" style="font-size: 1.4rem; margin-top: 8px;">{{ completed_count }}</div>
       <div class="stat-label">sessions completed</div>
     {% endif %}
     {% if current_user and current_user.id == profile_user.id %}
@@ -20,13 +24,14 @@
   </div>
 </div>
 
-<div class="grid-2">
+<div class="grid-2" style="margin-bottom: 32px;">
   <div class="card">
     <h3 class="mb-2">🎓 Teaches</h3>
     {% if skills %}
       {% for s in skills %}
         <div class="flex items-center gap-2" style="margin-bottom: 8px;">
-          <span class="tag tag-{{ s.category }}">{{ s.category }}</span>
+          {% set cat_name = s.category.value if s.category is not string else s.category %}
+          <span class="tag tag-{{ cat_name }}">{{ cat_name }}</span>
           <span>{{ s.name }}</span>
         </div>
         {% if s.description %}
@@ -46,7 +51,8 @@
     {% if wants %}
       {% for w in wants %}
         <div class="flex items-center gap-2" style="margin-bottom: 8px;">
-          <span class="tag tag-{{ w.category }}">{{ w.category }}</span>
+          {% set cat_name = w.category.value if w.category is not string else w.category %}
+          <span class="tag tag-{{ cat_name }}">{{ cat_name }}</span>
           <span>{{ w.name }}</span>
         </div>
       {% endfor %}
@@ -55,4 +61,22 @@
     {% endif %}
   </div>
 </div>
+
+{% if recent_reviews %}
+<div class="card">
+  <h3 class="mb-2">📝 Recent reviews</h3>
+  {% for r in recent_reviews %}
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--panel-line);">
+      <div class="flex items-center gap-2" style="margin-bottom: 4px;">
+        <strong style="font-size: 0.9rem;">{{ r.reviewer_name }}</strong>
+        <span style="color: var(--amber); font-size: 0.9rem;">{{ r.rating|stars }}</span>
+        <span class="muted" style="font-size: 0.75rem;">{{ r.created_at|time_ago }}</span>
+      </div>
+      {% if r.review %}
+        <p class="muted" style="font-size: 0.85rem;">{{ r.review }}</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
 {% endblock %}

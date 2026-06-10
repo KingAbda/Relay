@@ -4,15 +4,37 @@
 <h1 style="margin-bottom: 8px;">Browse skills</h1>
 <p class="muted" style="margin-bottom: 24px;">Find someone to teach you something new.</p>
 
+<!-- Referral banner for logged-in users -->
+{% if user and ref_link %}
+<div class="card" style="border-color: rgba(70, 211, 255, 0.2); background: rgba(70, 211, 255, 0.04); margin-bottom: 24px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+  <span style="font-size: 0.9rem;">🔗 <strong>Refer a friend</strong> — you both get <strong>+1 credit</strong></span>
+  <div style="display: flex; gap: 8px; align-items: center;">
+    <input type="text" class="form-input" value="{{ ref_link }}" readonly style="font-size: 0.75rem; padding: 6px 10px; max-width: 260px;" onclick="this.select()" />
+    <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText('{{ ref_link }}').then(() => this.textContent='Copied!')" style="font-size: 0.75rem;">Copy</button>
+  </div>
+</div>
+{% endif %}
+
+{% if not user %}
+<div class="card" style="border-color: var(--amber); background: rgba(255, 157, 46, 0.04); margin-bottom: 24px; text-align: center; padding: 20px;">
+  <p style="font-size: 0.95rem;">
+    👋 <strong>See something you like?</strong>
+    <a href="/signup" style="color: var(--amber);">Join Relay</a> with your .edu email to request a session.
+  </p>
+</div>
+{% endif %}
+
 <div class="flex items-center gap-2" style="margin-bottom: 24px; flex-wrap: wrap;">
   <form method="GET" action="/browse" class="flex items-center gap-2" style="flex: 1;">
     <input type="text" name="q" class="form-input" placeholder="Search skills..." value="{{ query or '' }}" style="max-width: 300px;" />
+    {% if categories|length > 1 %}
     <select name="category" class="form-select" style="max-width: 180px;" onchange="this.form.submit()">
       <option value="">All categories</option>
       {% for cat in categories %}
         <option value="{{ cat }}" {{ 'selected' if selected_category == cat }}>{{ cat|capitalize }}</option>
       {% endfor %}
     </select>
+    {% endif %}
     <button type="submit" class="btn btn-sm btn-secondary">Search</button>
     {% if query or selected_category %}
       <a href="/browse" class="btn btn-sm btn-outline">Clear</a>
@@ -25,16 +47,22 @@
     {% for s in skills %}
       <div class="card">
         <div class="flex justify-between items-center" style="margin-bottom: 8px;">
-          <span class="tag tag-{{ s.category.value }}">{{ s.category.value }}</span>
-          <span class="credit-badge" style="font-size: 0.75rem;">taught by {{ s.user.full_name.split()[0] }}</span>
+          {% set cat_name = s.category.value if s.category is not string else s.category %}
+          <span class="tag tag-{{ cat_name }}">{{ cat_name }}</span>
+          <span class="credit-badge" style="font-size: 0.75rem;">by {{ s.user.full_name.split()[0] }}</span>
         </div>
         <h3 style="margin-bottom: 4px;">{{ s.name }}</h3>
         {% if s.description %}
           <p class="muted" style="font-size: 0.9rem; margin-bottom: 12px;">{{ s.description[:120] }}{% if s.description|length > 120 %}...{% endif %}</p>
         {% endif %}
         <div class="flex items-center gap-2" style="margin-top: 12px;">
-          <a href="/request-session/{{ s.id }}" class="btn btn-sm btn-primary">Request session</a>
-          <a href="/profile/{{ s.user_id }}" class="btn btn-sm btn-secondary">View profile</a>
+          {% if user %}
+            <a href="/request-session/{{ s.id }}" class="btn btn-sm btn-primary">Request session</a>
+            <a href="/profile/{{ s.user_id }}" class="btn btn-sm btn-secondary">View profile</a>
+          {% else %}
+            <a href="/signup" class="btn btn-sm btn-primary">Sign up to request</a>
+            <a href="/profile/{{ s.user_id }}" class="btn btn-sm btn-secondary">View profile</a>
+          {% endif %}
         </div>
       </div>
     {% endfor %}
@@ -46,6 +74,11 @@
       <p class="muted">Try a different search or <a href="/browse" style="color: var(--amber);">browse all skills</a>.</p>
     {% else %}
       <p class="muted">No one has listed skills yet. Be the first!</p>
+      {% if user %}
+        <a href="/dashboard" class="btn btn-primary" style="margin-top: 16px;">Add your skills</a>
+      {% else %}
+        <a href="/signup" class="btn btn-primary" style="margin-top: 16px;">Join Relay</a>
+      {% endif %}
     {% endif %}
   </div>
 {% endif %}

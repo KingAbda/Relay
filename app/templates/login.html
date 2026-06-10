@@ -9,6 +9,7 @@
   {% endif %}
 
   <form method="POST" action="/login">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <div class="form-group">
       <label>Email</label>
       <input type="email" name="email" class="form-input" placeholder="ar1234@nyu.edu" required />

@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
+{% block head %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
 {% block content %}
 <div class="flex justify-between items-center" style="margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
   <div>
@@ -13,6 +16,12 @@
     </div>
   </div>
 </div>
+
+{% if not user.email_verified %}
+  <div class="card" style="border-color: var(--amber); background: rgba(255, 157, 46, 0.04); margin-bottom: 24px;">
+    <p style="font-size: 0.9rem;">📧 Verify your email to unlock full access. <a href="/verify-email" style="color: var(--amber);">Resend verification</a></p>
+  </div>
+{% endif %}
 
 {% if pending_requests %}
 <div class="card" style="border-color: rgba(255, 157, 46, 0.3); background: rgba(255, 157, 46, 0.04); margin-bottom: 24px;">
@@ -41,8 +50,9 @@
     {% if my_skills %}
       {% for s in my_skills %}
         <div class="flex items-center gap-2" style="margin-bottom: 6px;">
-          <span class="tag tag-{{ s.category }}">{{ s.category }}</span>
+          <span class="tag tag-{{ s.category.value if s.category is not string else s.category }}">{{ s.category.value if s.category is not string else s.category }}</span>
           <span>{{ s.name }}</span>
+          <a href="/remove-skill/{{ s.id }}" class="btn btn-sm btn-secondary" style="font-size: 0.7rem; padding: 2px 8px; margin-left: auto;">✕</a>
         </div>
       {% endfor %}
     {% else %}
@@ -50,6 +60,7 @@
     {% endif %}
 
     <form id="add-skill-form" method="POST" action="/add-skill" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--panel-line);">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <div class="form-group">
         <input type="text" name="name" class="form-input" placeholder="e.g. Guitar, Python" required />
       </div>
@@ -73,7 +84,7 @@
     {% if my_wants %}
       {% for w in my_wants %}
         <div class="flex items-center gap-2" style="margin-bottom: 6px;">
-          <span class="tag tag-{{ w.category }}">{{ w.category }}</span>
+          <span class="tag tag-{{ w.category.value if w.category is not string else w.category }}">{{ w.category.value if w.category is not string else w.category }}</span>
           <span>{{ w.name }}</span>
         </div>
       {% endfor %}
@@ -100,8 +111,8 @@
                 <td>
                   {% if s.status == 'completed' %}
                     <span style="color: var(--green);">✓ Done</span>
-                  {% elif s.status == 'accepted' %}
-                    <span style="color: var(--cyan);">Accepted</span>
+                  {% elif s.status == 'confirmed' or s.status == 'accepted' %}
+                    <span style="color: var(--cyan);">Confirmed</span>
                   {% elif s.status == 'requested' %}
                     <span style="color: var(--amber);">Pending</span>
                   {% elif s.status == 'cancelled' %}
@@ -110,12 +121,16 @@
                 </td>
                 <td class="muted" style="font-size: 0.85rem;">{{ s.created_at|time_ago }}</td>
                 <td>
-                  {% if s.role == 'teacher' and s.status == 'accepted' %}
-                    <a href="/complete-session/{{ s.id }}" class="btn btn-sm btn-primary" style="background: var(--green); font-size: 0.75rem;">Complete</a>
-                  {% elif s.role == 'learner' and s.status == 'accepted' %}
-                    <a href="/complete-session/{{ s.id }}" class="btn btn-sm btn-primary" style="background: var(--green); font-size: 0.75rem;">Complete</a>
+                  {% if s.status == 'completed' and not s.my_review %}
+                    <a href="/review-session/{{ s.id }}" class="btn btn-sm btn-primary" style="font-size: 0.7rem; padding: 2px 8px;">⭐ Review</a>
+                  {% elif s.status == 'completed' and s.my_review %}
+                    <span class="muted" style="font-size: 0.7rem;">{{ s.my_review.rating|stars }}</span>
+                  {% elif s.role == 'teacher' and s.status in ('confirmed', 'accepted') %}
+                    <a href="/complete-session/{{ s.id }}" class="btn btn-sm btn-primary" style="background: var(--green); font-size: 0.7rem;">Complete</a>
+                  {% elif s.role == 'learner' and s.status in ('confirmed', 'accepted') %}
+                    <a href="/complete-session/{{ s.id }}" class="btn btn-sm btn-primary" style="background: var(--green); font-size: 0.7rem;">Complete</a>
                   {% elif s.status == 'requested' and s.role == 'learner' %}
-                    <a href="/cancel-session/{{ s.id }}" class="btn btn-sm btn-secondary" style="font-size: 0.75rem;">Cancel</a>
+                    <a href="/cancel-session/{{ s.id }}" class="btn btn-sm btn-secondary" style="font-size: 0.7rem;">Cancel</a>
                   {% endif %}
                 </td>
               </tr>
@@ -139,7 +154,7 @@
           <tbody>
             {% for t in transactions %}
               <tr>
-                <td style="text-transform: capitalize; font-size: 0.85rem;">{{ t.type }}</td>
+                <td style="text-transform: capitalize; font-size: 0.85rem;">{{ t.type.value if t.type is not string else t.type }}</td>
                 <td style="color: {{ 'var(--green)' if t.amount > 0 else 'var(--red)' }}; font-weight: 600;">
                   {{ '+' if t.amount > 0 }}{{ t.amount|int }}
                 </td>

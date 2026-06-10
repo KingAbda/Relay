@@ -1,43 +1,143 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<div style="text-align: center; padding: 60px 0 40px;">
-  <h1 style="font-size: 3.5rem; margin-bottom: 16px;">
-    Trade skills, <span style="color: var(--amber);">not money</span>.
+<!-- Hero -->
+<div style="text-align: center; padding: 80px 0 60px;">
+  <div class="eyebrow" style="font-family: var(--display); letter-spacing: .26em; text-transform: uppercase; font-size: 12px; color: var(--cyan); margin-bottom: 22px;">
+    {% if pilot_vertical %}Now piloting <strong>{{ pilot_vertical_name }}</strong> at NYU{% else %}Now seeding at NYU{% endif %}
+  </div>
+  <h1 style="font-family: var(--display); font-weight: 700; line-height: .96; font-size: clamp(52px, 11vw, 128px); letter-spacing: -.01em;">
+    <span style="background: linear-gradient(180deg, #fff, var(--amber-soft)); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 30px rgba(255,157,46,.35));">RELAY</span>
   </h1>
-  <p style="font-size: 1.2rem; color: var(--muted); max-width: 600px; margin: 0 auto 40px;">
-    A campus network where students teach what they know and learn what they want — paid in time credits, not cash.
+  <div style="font-family: var(--display); font-weight: 500; font-size: clamp(17px, 2.4vw, 24px); color: var(--ink); margin-top: 18px;">
+    A more formal way to learn from each other.
+  </div>
+  <p style="max-width: 560px; margin: 20px auto 0; color: var(--muted); font-size: 17px;">
+    Teach what you know. Learn what you want. Paid in time credits — not cash.
+    Relay is a campus network of students trading talent, not invoices.
   </p>
-  <div class="flex" style="justify-content: center; gap: 16px;">
+  <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 40px;">
     {% if user %}
       <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
       <a href="/browse" class="btn btn-secondary">Browse Skills</a>
     {% else %}
-      <a href="/signup" class="btn btn-primary">Join Relay</a>
-      <a href="/login" class="btn btn-secondary">Log in</a>
+      <a href="/signup" class="btn btn-primary">Join the waitlist</a>
+      <a href="/browse" class="btn btn-ghost" style="color: var(--ink); border: 1px solid var(--panel-line); background: var(--panel); text-decoration: none; padding: 16px 30px; border-radius: 999px; font-family: var(--display); font-weight: 600; font-size: 14px; letter-spacing: .05em; text-transform: uppercase; transition: .25s;">Browse skills</a>
     {% endif %}
   </div>
-</div>
-
-<div style="text-align: center; margin-bottom: 60px;">
-  <div style="display: inline-flex; gap: 32px; flex-wrap: wrap; justify-content: center;">
-    <div class="stat">
-      <div class="stat-value">70%</div>
-      <div class="stat-label">Have a skill they want to be compensated for</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">85%</div>
-      <div class="stat-label">Want to learn but can't afford classes</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">75%</div>
-      <div class="stat-label">Match rate between teachers and learners</div>
-    </div>
+  <div style="display: inline-block; margin-top: 34px; font-size: 13px; color: var(--muted); border: 1px solid var(--panel-line); border-radius: 999px; padding: 8px 16px; background: var(--panel);">
+    <b style="color: var(--amber);">30 minutes = 1 credit.</b> &nbsp;Earn by teaching, spend by learning.
   </div>
 </div>
 
-<div style="text-align: center; margin-top: 60px;">
-  <p class="muted" style="margin-bottom: 8px;">Currently piloting at NYU</p>
-  <p style="font-size: 0.85rem; color: var(--muted);">30 minutes = 1 credit. Verified through .edu. Coming to a campus near you.</p>
+<!-- Baton divider -->
+<div style="position: relative; height: 2px; margin: 0 auto; max-width: 520px; background: linear-gradient(90deg, transparent, var(--panel-line), transparent);">
+  <i style="position: absolute; top: -3px; left: 0; width: 64px; height: 8px; border-radius: 8px; background: linear-gradient(90deg, var(--cyan), var(--amber)); box-shadow: 0 0 18px 2px rgba(70,211,255,.5); animation: run 5s ease-in-out infinite;"></i>
 </div>
+
+<!-- Problem / Stats -->
+<section style="padding: 84px 0;">
+  <div style="font-family: var(--display); letter-spacing: .22em; text-transform: uppercase; font-size: 12px; color: var(--cyan); margin-bottom: 14px;">The problem</div>
+  <h2 style="font-family: var(--display); font-weight: 700; font-size: clamp(30px, 5vw, 48px); line-height: 1.05;">Favor culture isn't fair culture.</h2>
+  <p style="color: var(--muted); font-size: 17px; max-width: 600px; margin-top: 16px;">
+    Students are rich in skills and short on cash. So talent gets traded as guilt-driven favors — or not at all.
+  </p>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 48px;">
+    <div style="background: var(--panel); border: 1px solid var(--panel-line); border-radius: 18px; padding: 30px 22px; text-align: center;">
+      <div style="font-family: var(--display); font-weight: 700; font-size: clamp(40px, 7vw, 64px); background: linear-gradient(180deg, #fff, var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1;">70%</div>
+      <p style="color: var(--muted); font-size: 14px; margin-top: 12px;">have a skill they'd want to be compensated for — but aren't getting paid.</p>
+    </div>
+    <div style="background: var(--panel); border: 1px solid var(--panel-line); border-radius: 18px; padding: 30px 22px; text-align: center;">
+      <div style="font-family: var(--display); font-weight: 700; font-size: clamp(40px, 7vw, 64px); background: linear-gradient(180deg, #fff, var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1;">85%</div>
+      <p style="color: var(--muted); font-size: 14px; margin-top: 12px;">want to learn a new skill but can't afford structured classes.</p>
+    </div>
+    <div style="background: var(--panel); border: 1px solid var(--panel-line); border-radius: 18px; padding: 30px 22px; text-align: center;">
+      <div style="font-family: var(--display); font-weight: 700; font-size: clamp(40px, 7vw, 64px); background: linear-gradient(180deg, #fff, var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1;">75%</div>
+      <p style="color: var(--muted); font-size: 14px; margin-top: 12px;">overlap between what students can teach and what they want to learn.</p>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section style="padding: 84px 0;" id="how">
+  <div style="font-family: var(--display); letter-spacing: .22em; text-transform: uppercase; font-size: 12px; color: var(--cyan); margin-bottom: 14px;">How it works</div>
+  <h2 style="font-family: var(--display); font-weight: 700; font-size: clamp(30px, 5vw, 48px); line-height: 1.05;">The relay race.</h2>
+  <p style="color: var(--muted); font-size: 17px; max-width: 600px; margin-top: 16px;">A simple loop: you teach, you earn, you spend, you learn.</p>
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 48px;">
+    <div style="background: var(--panel); border: 1px solid var(--panel-line); border-radius: 18px; padding: 28px; position: relative; overflow: hidden; transition: .3s;">
+      <div style="font-family: var(--display); font-weight: 700; font-size: 14px; color: var(--amber); letter-spacing: .1em;">01</div>
+      <h3 style="font-family: var(--display); font-weight: 600; font-size: 20px; margin: 10px 0 8px;">Every 30 min = 1 credit</h3>
+      <p style="color: var(--muted); font-size: 15px;">Time-based value keeps the exchange even, whatever the skill.</p>
+    </div>
+    <div style="background: var(--panel); border: 1px solid var(--panel-line); border-radius: 18px; padding: 28px; position: relative; overflow: hidden; transition: .3s;">
+      <div style="font-family: var(--display); font-weight: 700; font-size: 14px; color: var(--amber); letter-spacing: .1em;">02</div>
+      <h3 style="font-family: var(--display); font-weight: 600; font-size: 20px; margin: 10px 0 8px;">Earn by teaching</h3>
+      <p style="color: var(--muted); font-size: 15px;">Share what you're good at and stack credits.</p>
+    </div>
+    <div style="background: var(--panel); border: 1px solid var(--panel-line); border-radius: 18px; padding: 28px; position: relative; overflow: hidden; transition: .3s;">
+      <div style="font-family: var(--display); font-weight: 700; font-size: 14px; color: var(--amber); letter-spacing: .1em;">03</div>
+      <h3 style="font-family: var(--display); font-weight: 600; font-size: 20px; margin: 10px 0 8px;">Spend by learning</h3>
+      <p style="color: var(--muted); font-size: 15px;">Use credits to learn something new from another student.</p>
+    </div>
+    <div style="background: var(--panel); border: 1px solid var(--panel-line); border-radius: 18px; padding: 28px; position: relative; overflow: hidden; transition: .3s;">
+      <div style="font-family: var(--display); font-weight: 700; font-size: 14px; color: var(--amber); letter-spacing: .1em;">04</div>
+      <h3 style="font-family: var(--display); font-weight: 600; font-size: 20px; margin: 10px 0 8px;">Verified by .edu</h3>
+      <p style="color: var(--muted); font-size: 15px;">Campus email keeps it students-only — safe, trusted, and real.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="padding: 84px 0;" id="faq">
+  <div style="font-family: var(--display); letter-spacing: .22em; text-transform: uppercase; font-size: 12px; color: var(--cyan); margin-bottom: 14px;">Questions</div>
+  <h2 style="font-family: var(--display); font-weight: 700; font-size: clamp(30px, 5vw, 48px); line-height: 1.05; margin-bottom: 32px;">The honest answers.</h2>
+  <div style="max-width: 760px; display: grid; gap: 12px;">
+    <details style="background: var(--panel); border: 1px solid var(--panel-line); border-radius: 14px; padding: 0 22px; transition: .25s;">
+      <summary style="font-family: var(--display); font-weight: 600; font-size: 16px; cursor: pointer; list-style: none; padding: 18px 0; display: flex; justify-content: space-between; align-items: center;">Is Relay free? <span style="color: var(--amber); font-size: 24px;">+</span></summary>
+      <p style="color: var(--muted); font-size: 15px; padding: 0 0 20px;">Yes. Joining is free — you earn credits by teaching and spend them to learn. No cash changes hands between peers.</p>
+    </details>
+    <details style="background: var(--panel); border: 1px solid var(--panel-line); border-radius: 14px; padding: 0 22px;">
+      <summary style="font-family: var(--display); font-weight: 600; font-size: 16px; cursor: pointer; list-style: none; padding: 18px 0; display: flex; justify-content: space-between; align-items: center;">What if I only want to learn? <span style="color: var(--amber); font-size: 24px;">+</span></summary>
+      <p style="color: var(--muted); font-size: 15px; padding: 0 0 20px;">New members start with a few free credits to get going. But Relay works best when everyone shares something.</p>
+    </details>
+    <details style="background: var(--panel); border: 1px solid var(--panel-line); border-radius: 14px; padding: 0 22px;">
+      <summary style="font-family: var(--display); font-weight: 600; font-size: 16px; cursor: pointer; list-style: none; padding: 18px 0; display: flex; justify-content: space-between; align-items: center;">Is the teacher any good? <span style="color: var(--amber); font-size: 24px;">+</span></summary>
+      <p style="color: var(--muted); font-size: 15px; padding: 0 0 20px;">Everyone is a verified student. You rate each session afterward — the best teachers rise to the top.</p>
+    </details>
+    <details style="background: var(--panel); border: 1px solid var(--panel-line); border-radius: 14px; padding: 0 22px;">
+      <summary style="font-family: var(--display); font-weight: 600; font-size: 16px; cursor: pointer; list-style: none; padding: 18px 0; display: flex; justify-content: space-between; align-items: center;">Who can join right now? <span style="color: var(--amber); font-size: 24px;">+</span></summary>
+      <p style="color: var(--muted); font-size: 15px; padding: 0 0 20px;">We're starting with NYU students this fall. Add your email to be in the first cohort.</p>
+    </details>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="padding: 84px 0;" id="join">
+  <div style="text-align: center; border: 1px solid var(--panel-line); border-radius: 28px; padding: 64px 28px; background: radial-gradient(70% 120% at 50% 0%, rgba(255,157,46,.12), transparent 60%), var(--panel);">
+    <div style="font-family: var(--display); letter-spacing: .22em; text-transform: uppercase; font-size: 12px; color: var(--cyan); margin-bottom: 14px;">Built for students. Powered by collaboration.</div>
+    <h2 style="font-family: var(--display); font-weight: 700; font-size: clamp(32px, 6vw, 56px); line-height: 1.05;">Get in on the first cohort.</h2>
+    <p style="color: var(--muted); font-size: 17px; max-width: 560px; margin: 16px auto 0;">
+      We're opening Relay to a small group of NYU students first. Sign up and we'll reach out when it goes live.
+    </p>
+    <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 34px;">
+      {% if user %}
+        <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+      {% else %}
+        <a href="/signup" class="btn btn-primary">Claim your spot</a>
+      {% endif %}
+    </div>
+    <div style="display: inline-block; margin-top: 26px; font-size: 13px; color: var(--muted); border: 1px solid var(--panel-line); border-radius: 999px; padding: 8px 16px; background: var(--panel);">
+      First sign-ups get <b style="color: var(--amber);">free starter credits.</b>
+    </div>
+  </div>
+</section>
+
+<style>
+  @keyframes run { 0%,100%{left:0} 50%{left:calc(100% - 64px)} }
+  @media(max-width:720px) {
+    section { padding: 62px 0; }
+    div[style*="grid-template-columns: repeat(3"] { grid-template-columns: 1fr !important; }
+    div[style*="grid-template-columns: repeat(2"] { grid-template-columns: 1fr !important; }
+  }
+</style>
 {% endblock %}

@@ -8,16 +8,27 @@
     List one skill you can teach and one skill you want to learn to get started.
   </p>
 
+  {% if pilot_vertical %}
+  <div class="card" style="border-color: var(--cyan); background: rgba(70, 211, 255, 0.04); margin-bottom: 24px; text-align: center;">
+    <p style="font-size: 0.9rem;">
+      🏋️ <strong>Relay is piloting {{ pilot_vertical_name }} right now.</strong><br>
+      <span class="muted">List any fitness, wellness, or lifestyle skill to join the first cohort.</span>
+    </p>
+  </div>
+  {% endif %}
+
   {% if error %}
     <div class="form-error" style="margin-bottom: 16px;">{{ error }}</div>
   {% endif %}
 
   <form method="POST" action="/onboarding">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
     <div class="card" style="margin-bottom: 24px;">
       <h3 style="margin-bottom: 16px;">🎓 What can you teach?</h3>
       <div class="form-group">
         <label>Skill name</label>
-        <input type="text" name="teach_name" class="form-input" placeholder="e.g. Guitar, Python, Spanish" required />
+        <input type="text" name="teach_name" class="form-input" placeholder="e.g. Weight training, Yoga, Meal prep" required />
       </div>
       <div class="form-group">
         <label>Category</label>
@@ -38,7 +49,7 @@
       <h3 style="margin-bottom: 16px;">📖 What do you want to learn?</h3>
       <div class="form-group">
         <label>Skill name</label>
-        <input type="text" name="learn_name" class="form-input" placeholder="e.g. Web design, Video editing" required />
+        <input type="text" name="learn_name" class="form-input" placeholder="e.g. Boxing, Nutrition planning" required />
       </div>
       <div class="form-group">
         <label>Category</label>
