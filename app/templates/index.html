@@ -54,20 +54,72 @@
   </div>
 </section>
 
+<section class="section" id="pricing" style="border-top: 1px solid var(--border-light);">
+  <div class="container section-center">
+    <div class="section-label reveal">Simple pricing</div>
+    <h2 class="section-title reveal reveal-delay-1">Your first {{ free_credits }} credits are free.</h2>
+    <p class="section-sub reveal reveal-delay-2">After that, pick a plan that fits how much you want to learn.</p>
+  </div>
+  <div class="container" style="margin-top:40px;">
+    <div class="grid-3" style="align-items: stretch;">
+      <div class="card step-card reveal reveal-delay-1" style="display:flex;flex-direction:column;">
+        <div class="step-num" style="margin-bottom:12px;">Free</div>
+        <h3 style="font-size:32px;margin:4px 0;color:var(--ink);">$0</h3>
+        <p class="muted" style="font-size:13px;">Forever. No trial tricks.</p>
+        <ul style="list-style:none;padding:0;margin:20px 0;flex:1;display:flex;flex-direction:column;gap:10px;">
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span>{{ free_credits }} credits to start</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Earn credits by teaching</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Up to {{ free_max_skills }} active skill listings</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Browse &amp; request sessions</span></li>
+        </ul>
+        <a href="/signup" class="btn btn-secondary" style="text-align:center;">Get Started</a>
+      </div>
+      <div class="card step-card reveal reveal-delay-2" style="display:flex;flex-direction:column;border:2px solid var(--primary);position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--primary);color:white;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:600;">Most popular</div>
+        <div class="step-num" style="margin-bottom:12px;color:var(--primary);">Starter</div>
+        <h3 style="font-size:32px;margin:4px 0;color:var(--ink);">${{ starter_price }}<span style="font-size:14px;color:var(--muted);">/month</span></h3>
+        <p class="muted" style="font-size:13px;">For regular learners and teachers.</p>
+        <ul style="list-style:none;padding:0;margin:20px 0;flex:1;display:flex;flex-direction:column;gap:10px;">
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span><strong>{{ starter_credits }}</strong> credits every month</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Up to <strong>{{ starter_max_skills }}</strong> active listings</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Priority session matching</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Skill verification badge</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Everything in Free</span></li>
+        </ul>
+        <a href="/signup" class="btn btn-primary" style="text-align:center;">Start Free →</a>
+      </div>
+      <div class="card step-card reveal reveal-delay-3" style="display:flex;flex-direction:column;">
+        <div class="step-num" style="margin-bottom:12px;">Pro</div>
+        <h3 style="font-size:32px;margin:4px 0;color:var(--ink);">${{ pro_price }}<span style="font-size:14px;color:var(--muted);">/month</span></h3>
+        <p class="muted" style="font-size:13px;">For power users and super-teachers.</p>
+        <ul style="list-style:none;padding:0;margin:20px 0;flex:1;display:flex;flex-direction:column;gap:10px;">
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span><strong>Unlimited</strong> credits every month</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span><strong>Unlimited</strong> active listings</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Verified badge + priority matching</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Session analytics dashboard</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Everything in Starter</span></li>
+          <li style="display:flex;align-items:center;gap:8px;">✅ <span><strong>${{ pro_price_annual }}/year</strong> (${{ (pro_price_annual / 12)|round(1) }}/mo)</span></li>
+        </ul>
+        <a href="/signup" class="btn btn-secondary" style="text-align:center;">Go Pro</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="section" id="faq">
   <div class="container" style="max-width:760px;">
     <div class="section-label reveal">Questions</div>
     <h2 class="section-title reveal reveal-delay-1" style="margin-bottom:32px;">The honest answers.</h2>
     <div style="display:grid;gap:12px;">
-      <details class="faq-item reveal reveal-delay-1"><summary>Is Relay free? <span class="faq-plus">+</span></summary><p class="faq-answer">Yes. Joining is free &mdash; you earn credits by teaching and spend them to learn. No cash changes hands between peers.</p></details>
-      <details class="faq-item reveal reveal-delay-2"><summary>What if I only want to learn? <span class="faq-plus">+</span></summary><p class="faq-answer">New members start with a few free credits to get going. But Relay works best when everyone shares something.</p></details>
+      <details class="faq-item reveal reveal-delay-1"><summary>Is Relay free? <span class="faq-plus">+</span></summary><p class="faq-answer">Yes — everyone starts with <strong>{{ free_credits }} free credits</strong> to try it out. You earn more by teaching, so active users never need to pay. For heavier use, see our pricing above.</p></details>
+      <details class="faq-item reveal reveal-delay-2"><summary>What if I only want to learn? <span class="faq-plus">+</span></summary><p class="faq-answer">New members start with {{ free_credits }} free credits to get going. After that, you can buy a <strong>Starter (${{ starter_price }}/mo)</strong> or <strong>Pro (${{ pro_price }}/mo)</strong> plan for recurring credits — or teach a skill to earn credits for free.</p></details>
       <details class="faq-item reveal reveal-delay-3"><summary>Is the teacher any good? <span class="faq-plus">+</span></summary><p class="faq-answer">Everyone is a verified student. You rate each session afterward &mdash; the best teachers rise to the top.</p></details>
       <details class="faq-item reveal reveal-delay-4"><summary>Who can join right now? <span class="faq-plus">+</span></summary><p class="faq-answer">We're starting with NYU students this fall. Add your email to be in the first cohort.</p></details>
       <details class="faq-item reveal reveal-delay-1"><summary>What about YouTube or AI? Why pay for skills? <span class="faq-plus">+</span></summary><p class="faq-answer">Tutorials can't look at your code in real time, correct your guitar fingering, or tell you your squat form is off. Relay is about <strong>live, personalized feedback</strong> from a real person — something AI and video can't replace.</p></details>
       <details class="faq-item reveal reveal-delay-2"><summary>What stops me from hoarding 100 credits? <span class="faq-plus">+</span></summary><p class="faq-answer">Nothing — but credits only have value when you spend them. If everyone hoards, no one learns. Credits expire after 6 months of inactivity to keep the system flowing.</p></details>
       <details class="faq-item reveal reveal-delay-3"><summary>What if the teacher doesn't show up? <span class="faq-plus">+</span></summary><p class="faq-answer">You get your credit back immediately. Teachers with repeated no-shows lose their ability to offer skills until they complete a session. Reviews are public, so good teachers rise.</p></details>
       <details class="faq-item reveal reveal-delay-4"><summary>How is a 30-min guitar lesson worth the same as Python? <span class="faq-plus">+</span></summary><p class="faq-answer">Time is the currency. A beginner teaching basic chords and an advanced coder debugging your script both give 30 minutes of focused attention. Skill level shows in the teacher's <strong>proficiency rating</strong> — pick someone whose level matches what you need.</p></details>
-      <details class="faq-item reveal reveal-delay-1"><summary>Does Relay cost money? <span class="faq-plus">+</span></summary><p class="faq-answer">Joining is free. Credit exchanges between peers are free. For heavy users, a <strong>$4.99/month membership</strong> unlocks unlimited sessions and priority scheduling. Your first 3 credits are always on us.</p></details>
+      <details class="faq-item reveal reveal-delay-1"><summary>Does Relay cost money? <span class="faq-plus">+</span></summary><p class="faq-answer">Joining is free. Credit exchanges between peers are free. For heavier use, <strong>Starter (${{ starter_price }}/mo)</strong> gives you {{ starter_credits }} monthly credits and priority scheduling. The <strong>Pro (${{ pro_price }}/mo)</strong> plan unlocks unlimited sessions. Your first {{ free_credits }} credits are always on us.</p></details>
     </div>
   </div>
 </section>
@@ -116,7 +168,7 @@
     <div class="cta-card reveal">
       <div class="cta-label">Built for students. Powered by collaboration.</div>
       <h2 class="cta-title">Ready to trade skills?</h2>
-      <p class="cta-sub">{% if variant == 'b' %}Start learning today. Your first 3 credits are free — no membership needed until your 10th session.{% else %}Join the waitlist and be the first to know when Relay launches at your campus. Your first 3 credits are on us.{% endif %}</p>
+      <p class="cta-sub">{% if variant == 'b' %}Start learning today. Your first {{ free_credits }} credits are free — no membership needed until you run out.{% else %}Join the waitlist and be the first to know when Relay launches at your campus. Your first {{ free_credits }} credits are on us.{% endif %}</p>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px;position:relative;z-index:1;">{% if user %}<a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>{% else %}<a href="/signup" class="btn btn-primary">Get early access</a>{% endif %}</div>
       <div style="font-size:13px;color:#64748B;position:relative;z-index:1;">First sign-ups get <b style="color:var(--cta);">free starter credits.</b></div>
     </div>

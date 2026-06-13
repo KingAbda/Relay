@@ -64,11 +64,26 @@ PILOT_VERTICAL_NAME = {
     "all": "All Categories",
 }.get(PILOT_VERTICAL, PILOT_VERTICAL.capitalize())
 
+# ── Pricing Tiers ────────────────────────────────────
+FREE_CREDITS = 2  # Credits new users start with (was 3)
+FREE_MAX_SKILLS = 2  # Max active skill listings on free tier (was unlimited)
+STARTER_PRICE = 14.99  # Monthly
+STARTER_CREDITS = 5  # Monthly credits on Starter
+STARTER_MAX_SKILLS = 3
+PRO_PRICE = 29.99  # Monthly
+PRO_PRICE_ANNUAL = 249  # Yearly ($20.75/mo)
+
 # ── Import models after db init ────────────────────────
 from app.models import (
     User, UserSkill, UserWant, CreditAccount, CreditTransaction,
     Session, SessionReview, SkillCategory, SessionStatus, TransactionType,
 )
+
+def get_user(user_id):
+    return db.session.get(User, user_id)
+
+def get_user_by_email(email):
+    return User.query.filter(User.email == email).first()
 
 # ── Auto-seed demo data (defined before use) ──────────
 def _auto_seed_demo_data():
@@ -109,7 +124,7 @@ def _auto_seed_demo_data():
         )
         db.session.add(user)
         db.session.flush()
-        db.session.add(CreditAccount(user_id=user.id, balance=5.0))
+        db.session.add(CreditAccount(user_id=user.id, balance=FREE_CREDITS))
         import random
         assigned = random.sample(demo_skills_pool, 5)
         for sk_name, sk_cat, sk_desc, sk_prof in assigned:
@@ -159,12 +174,6 @@ def validate_password(password):
     if not re.search(r"[0-9]", password):
         errors.append("Password must contain at least one number.")
     return errors
-
-def get_user(user_id):
-    return db.session.get(User, user_id)
-
-def get_user_by_email(email):
-    return User.query.filter(User.email == email).first()
 
 def current_user():
     user_id = request.cookies.get("user_id")
@@ -240,6 +249,9 @@ def inject_globals():
         "site_name": SITE_NAME, "contact_email": CONTACT_EMAIL,
         "pilot_vertical": PILOT_VERTICAL, "pilot_vertical_name": PILOT_VERTICAL_NAME,
         "csrf_token": lambda: generate_csrf(),
+        "free_credits": FREE_CREDITS, "free_max_skills": FREE_MAX_SKILLS,
+        "starter_price": STARTER_PRICE, "starter_credits": STARTER_CREDITS, "starter_max_skills": STARTER_MAX_SKILLS,
+        "pro_price": PRO_PRICE, "pro_price_annual": PRO_PRICE_ANNUAL,
     }
 
 def jinja_capitalize(s):
@@ -395,9 +407,9 @@ def signup():
     )
     db.session.add(user)
     db.session.flush()
-    credit = CreditAccount(user_id=user.id, balance=3.0)
+    credit = CreditAccount(user_id=user.id, balance=FREE_CREDITS)
     db.session.add(credit)
-    add_credit_transaction(user.id, 3.0, TransactionType.BONUS, "3 free credits to start!")
+    add_credit_transaction(user.id, FREE_CREDITS, TransactionType.BONUS, f"{FREE_CREDITS} free credits to start!")
     if referrer:
         add_credit_transaction(referrer.id, 1.0, TransactionType.REFERRAL, f"You referred {full_name}!", related_user_id=user.id)
         add_credit_transaction(user.id, 1.0, TransactionType.REFERRAL, f"You joined through {referrer.full_name}!", related_user_id=referrer.id)
@@ -407,7 +419,7 @@ def signup():
     send_email(user.email, "Verify your Relay account",
         f"Hi {user.full_name.split()[0]},\n\n"
         f"Welcome to Relay! Click this link to verify your .edu email:\n{verify_link}\n\n"
-        f"Your first 3 credits are waiting.\n\n- Relay Team")
+        f"Your first {FREE_CREDITS} credits are waiting.\n\n- Relay Team")
     resp = make_response(redirect(url_for("onboarding")))
     resp.set_cookie("user_id", user.id, httponly=True, samesite="Lax", max_age=60*60*24*30)
     return resp
