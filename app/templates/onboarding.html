@@ -9,10 +9,10 @@
   </p>
 
   {% if pilot_vertical %}
-  <div class="card" style="border-color: var(--cyan); background: rgba(70, 211, 255, 0.04); margin-bottom: 24px; text-align: center;">
+  <div class="card" style="border-color: var(--primary); background: var(--primary-bg); margin-bottom: 24px; text-align: center;">
     <p style="font-size: 0.9rem;">
-      🏋️ <strong>Relay is piloting {{ pilot_vertical_name }} right now.</strong><br>
-      <span class="muted">List any fitness, wellness, or lifestyle skill to join the first cohort.</span>
+      🚀 <strong>Relay is piloting {{ pilot_vertical_name }}.</strong><br>
+      <span class="muted">{% if pilot_vertical == 'all' %}Pick any skill category — or add a demo set to get started fast.{% else %}List any fitness, wellness, or lifestyle skill to join the first cohort.{% endif %}</span>
     </p>
   </div>
   {% endif %}
@@ -66,7 +66,7 @@
       </div>
     </div>
 
-    <div class="card" style="background: rgba(255, 157, 46, 0.06); border-color: rgba(255, 157, 46, 0.2); margin-bottom: 24px;">
+    <div class="card" style="background: var(--primary-bg); border-color: var(--primary); margin-bottom: 24px;">
       <p style="font-size: 0.9rem;">
         <strong>⚡ Why both?</strong> When everyone contributes, credits flow.
         You'll earn credits by teaching and spend them learning —

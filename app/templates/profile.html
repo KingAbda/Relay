@@ -11,7 +11,7 @@
   </div>
   <div style="text-align: right;">
     {% if avg_rating %}
-      <div style="font-family: var(--display); font-size: 1.6rem; color: var(--amber);">{{ avg_rating }} ⭐</div>
+      <div style="font-family: var(--display); font-size: 1.6rem; color: var(--cta);">{{ avg_rating }} ⭐</div>
       <div class="stat-label">average rating</div>
     {% endif %}
     {% if completed_count is defined %}
@@ -69,7 +69,7 @@
     <div style="padding: 12px 0; border-bottom: 1px solid var(--panel-line);">
       <div class="flex items-center gap-2" style="margin-bottom: 4px;">
         <strong style="font-size: 0.9rem;">{{ r.reviewer_name }}</strong>
-        <span style="color: var(--amber); font-size: 0.9rem;">{{ r.rating|stars }}</span>
+        <span style="color: var(--cta); font-size: 0.9rem;">{{ r.rating|stars }}</span>
         <span class="muted" style="font-size: 0.75rem;">{{ r.created_at|time_ago }}</span>
       </div>
       {% if r.review %}

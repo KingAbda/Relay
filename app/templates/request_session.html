@@ -1,39 +1,54 @@
 {% extends "base.html" %}
 {% block title %}Request Session{% endblock %}
+{% block head %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
 {% block content %}
 <div style="max-width: 520px; margin: 0 auto;">
-  <a href="/browse" style="color: var(--muted); font-size: 0.9rem; text-decoration: none;">&larr; Back to browse</a>
-
-  <h1 style="margin: 16px 0 8px;">Request a session</h1>
-  <p style="color: var(--muted); margin-bottom: 24px;">
-    Learn <strong style="color: var(--ink);">{{ skill.name }}</strong> from {{ skill.user.full_name }}
-  </p>
+  <h1 style="margin-bottom: 8px;">Request a session</h1>
+  <p class="muted" style="margin-bottom: 24px;">Learn <strong>{{ skill.name }}</strong> from <strong>{{ skill.user.full_name }}</strong></p>
 
   {% if skill.description %}
-    <div class="card" style="margin-bottom: 24px;">
-      <p>{{ skill.description }}</p>
+    <div class="card" style="margin-bottom: 24px; padding: 16px;">
+      <span class="tag tag-{{ skill.category.value if skill.category is not string else skill.category }}" style="margin-bottom: 8px;">{{ skill.category.value if skill.category is not string else skill.category }}</span>
+      <p class="muted" style="font-size: 0.9rem; margin-top: 8px;">{{ skill.description }}</p>
+      <div class="flex items-center gap-2" style="margin-top: 8px;">
+        <span class="proficiency">{% for i in range(skill.proficiency or 3) %}<span class="prof-dot filled"></span>{% endfor %}{% for i in range(5 - (skill.proficiency or 3)) %}<span class="prof-dot"></span>{% endfor %}</span>
+        <span class="muted text-sm">proficiency</span>
+      </div>
     </div>
   {% endif %}
 
   {% if error %}
-    <div class="form-error" style="margin-bottom: 16px; padding: 12px; background: rgba(248, 113, 113, 0.08); border-radius: var(--radius-sm);">{{ error }}</div>
+    <div class="form-error" style="margin-bottom: 16px;">{{ error }}</div>
   {% endif %}
 
   <form method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-    <div class="form-group">
-      <label>Notes for the teacher (optional)</label>
-      <textarea name="notes" class="form-textarea" placeholder="What do you want to learn? Your current level? Any specific goals?" style="min-height: 100px;"></textarea>
+
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="form-group">
+        <label>📅 When do you want to meet?</label>
+        <input type="datetime-local" name="scheduled_at" class="form-input" required
+               min="{{ now }}" />
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>📝 Notes for {{ skill.user.full_name.split()[0] }}</label>
+        <textarea name="notes" class="form-textarea" placeholder="What specifically do you want to learn? Any prep needed?"></textarea>
+      </div>
     </div>
 
-    <div class="card" style="background: rgba(255, 157, 46, 0.06); border-color: rgba(255, 157, 46, 0.2); margin-bottom: 24px;">
-      <p style="font-size: 0.9rem;">
-        <strong>⚡ 30 min = 1 credit</strong><br />
-        <span class="muted">When you request a session, 1 credit is reserved. After the session, the teacher earns the credit.</span>
+    <div class="card" style="background: var(--primary-bg); border-color: var(--primary); margin-bottom: 24px; padding: 16px;">
+      <p style="font-size: 0.85rem;">
+        <strong>💳 1 credit will be held</strong> when you request. It's released to
+        <strong>{{ skill.user.full_name.split()[0] }}</strong> after the session is completed.
+        No-show? Cancel before the session to get your credit back.
       </p>
     </div>
 
-    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Request session (1 credit)</button>
+    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+      Request session — 1 credit
+    </button>
   </form>
 </div>
 {% endblock %}

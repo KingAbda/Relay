@@ -55,11 +55,12 @@ limiter = Limiter(
 # ── Configuration Constants ────────────────────────────
 SITE_NAME = "Relay"
 CONTACT_EMAIL = os.environ.get("RELAY_CONTACT_EMAIL", "hello@joinrelay.co")
-PILOT_VERTICAL = os.environ.get("RELAY_PILOT_VERTICAL", "lifestyle")
+PILOT_VERTICAL = os.environ.get("RELAY_PILOT_VERTICAL", "all")
 PILOT_VERTICAL_NAME = {
     "lifestyle": "Fitness & Wellness",
     "creative": "Creative",
     "finance": "Finance & Career",
+    "all": "All Categories",
 }.get(PILOT_VERTICAL, PILOT_VERTICAL.capitalize())
 
 # ── Import models after db init ────────────────────────
@@ -135,13 +136,15 @@ def add_credit_transaction(user_id, amount, tx_type, description="", related_use
     return tx
 
 def get_pilot_categories():
-    return [PILOT_VERTICAL] if PILOT_VERTICAL else [c.value for c in SkillCategory]
+    if PILOT_VERTICAL and PILOT_VERTICAL != "all":
+        return [PILOT_VERTICAL]
+    return [c.value for c in SkillCategory]
 
 def get_available_skills_query():
     query = UserSkill.query.join(User).filter(
         User.onboarded == True, UserSkill.is_active == True,
     )
-    if PILOT_VERTICAL:
+    if PILOT_VERTICAL and PILOT_VERTICAL != "all":
         query = query.filter(UserSkill.category == PILOT_VERTICAL)
     return query
 
@@ -211,6 +214,43 @@ def add_security_headers(response):
     return response
 
 # ══════════════════════════════════════════════════════════
+#  ROUTES: SEED DATA (for cold-start demo)
+# ══════════════════════════════════════════════════════════
+
+@app.route("/seed-demo")
+def seed_demo():
+    """Seed sample skills so the browse page isn't empty."""
+    user = require_user()
+    if not user:
+        return redirect(url_for("login"))
+    existing = UserSkill.query.filter(UserSkill.user_id == user.id).count()
+    if existing >= 3:
+        return redirect(url_for("browse"))
+    demo_skills = [
+        ("Python for Beginners", "technical", "Learn variables, loops, and functions in 30 min. No experience needed."),
+        ("Weight Training 101", "lifestyle", "Proper form for squats, deadlifts, bench press. Bring gym clothes."),
+        ("Guitar Chords", "creative", "Open chords and strumming patterns. I'll have a guitar ready."),
+        ("Budgeting & Finance", "finance", "Build a student budget, understand credit scores, start investing small."),
+        ("Spanish Conversation", "languages", "Practice everyday conversation. Intermediate level welcome."),
+        ("Resume Review", "academic", "I've helped 20+ classmates land internships. Let's fix your resume."),
+        ("Public Speaking", "social", "Overcome stage fright. Practice pitches and presentations in a safe space."),
+        ("Basic Web Dev", "technical", "HTML/CSS — build your first personal site in 30 minutes."),
+        ("Meal Prep & Nutrition", "lifestyle", "Healthy meals under $50/week. I'll show you my system."),
+        ("Music Production", "creative", "Beat-making in GarageBand. From idea to export in one session."),
+    ]
+    added = 0
+    for name, cat, desc in demo_skills:
+        if cat not in get_pilot_categories():
+            continue
+        exists = UserSkill.query.filter_by(user_id=user.id, name=name, is_active=True).first()
+        if not exists:
+            db.session.add(UserSkill(user_id=user.id, name=name, category=cat, description=desc, proficiency=4))
+            added += 1
+    if added:
+        db.session.commit()
+    return redirect(url_for("browse"))
+
+# ══════════════════════════════════════════════════════════
 #  ROUTES: AUTH
 # ══════════════════════════════════════════════════════════
 
@@ -222,7 +262,6 @@ def home():
     return render_template("index.html", user=user, total_users=total_users, total_sessions=total_sessions)
 
 @app.route("/signup", methods=["GET", "POST"])
-@limiter.limit("10 per hour")
 def signup():
     if request.method == "GET":
         return render_template("signup.html", user=None, error=None, ref=request.args.get("ref", ""))
@@ -362,7 +401,7 @@ def dashboard():
             "id": s.id, "skill_name": s.skill_name,
             "status": s.status.value if hasattr(s.status, 'value') else s.status,
             "other_name": other_name, "role": "teacher" if s.teacher_id == user.id else "learner",
-            "created_at": s.created_at, "notes": s.notes,
+            "created_at": s.created_at, "notes": s.notes, "scheduled_at": s.scheduled_at,
             "my_review": my_review, "teacher_rating": round(teacher_rating, 1) if teacher_rating else None,
         })
 
@@ -404,7 +443,8 @@ def browse():
     if is_limited:
         query = query.limit(6)
     skills = query.all()
-    return render_template("browse.html", user=user, skills=skills, categories=get_pilot_categories(), selected_category=category, query=q)
+    ref_link = url_for("signup", ref=user.id, _external=True) if user else None
+    return render_template("browse.html", user=user, skills=skills, categories=get_pilot_categories(), selected_category=category, query=q, ref_link=ref_link)
 
 # ══════════════════════════════════════════════════════════
 #  ROUTES: SESSIONS
@@ -419,14 +459,21 @@ def request_session(skill_id):
     if not skill:
         abort(404)
     if skill.user_id == user.id:
-        return render_template("request_session.html", user=user, skill=skill, error="You can't request a session from yourself!")
+        return render_template("request_session.html", user=user, skill=skill, error="You can't request a session from yourself!", now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
     if request.method == "GET":
-        return render_template("request_session.html", user=user, skill=skill, error=None)
+        return render_template("request_session.html", user=user, skill=skill, error=None, now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
     notes = sanitize(request.form.get("notes", ""), 500)
+    scheduled_raw = request.form.get("scheduled_at", "")
+    scheduled_at = None
+    if scheduled_raw:
+        try:
+            scheduled_at = datetime.fromisoformat(scheduled_raw)
+        except (ValueError, TypeError):
+            pass
     credit = CreditAccount.query.filter(CreditAccount.user_id == user.id).first()
     if not credit or credit.balance < 1.0:
-        return render_template("request_session.html", user=user, skill=skill, error="Not enough credits.")
-    session = Session(teacher_id=skill.user_id, learner_id=user.id, skill_name=skill.name, notes=notes)
+        return render_template("request_session.html", user=user, skill=skill, error="Not enough credits.", now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
+    session = Session(teacher_id=skill.user_id, learner_id=user.id, skill_name=skill.name, notes=notes, scheduled_at=scheduled_at)
     db.session.add(session)
     add_credit_transaction(user.id, -1.0, TransactionType.SPEND, f"Hold: {skill.name}", related_user_id=skill.user_id)
     db.session.commit()

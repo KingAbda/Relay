@@ -1,12 +1,15 @@
-{% extends "base.html" %}
+# Write Relay index.html
+import re
+
+html = r"""{% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
 <div class="hero">
   <div class="hero-inner container">
     <div class="hero-text reveal">
-      <div class="hero-badge">{% if pilot_vertical and pilot_vertical != 'all' %}Now piloting <strong>{{ pilot_vertical_name }}</strong> at NYU{% else %}🚀 Now piloting <strong>all skill categories</strong> at NYU{% endif %}</div>
-      <h1 class="hero-title">The gym membership<br><span class="grad-text">for your skills.</span></h1>
-      <p class="hero-sub">Teach anything for 30 minutes, earn a credit, spend it to learn anything else. No cash, just campus community.</p>
+      <div class="hero-badge">{% if pilot_vertical %}Now piloting <strong>{{ pilot_vertical_name }}</strong> at NYU{% else %}Now piloting at NYU{% endif %}</div>
+      <h1 class="hero-title">Trade skills.<br><span class="grad-text">Not invoices.</span></h1>
+      <p class="hero-sub">A campus network where students share their talents and learn from each other. Paid in time credits, not cash.</p>
       <div class="hero-actions">
         {% if user %}
           <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
@@ -63,11 +66,6 @@
       <details class="faq-item reveal reveal-delay-2"><summary>What if I only want to learn? <span class="faq-plus">+</span></summary><p class="faq-answer">New members start with a few free credits to get going. But Relay works best when everyone shares something.</p></details>
       <details class="faq-item reveal reveal-delay-3"><summary>Is the teacher any good? <span class="faq-plus">+</span></summary><p class="faq-answer">Everyone is a verified student. You rate each session afterward &mdash; the best teachers rise to the top.</p></details>
       <details class="faq-item reveal reveal-delay-4"><summary>Who can join right now? <span class="faq-plus">+</span></summary><p class="faq-answer">We're starting with NYU students this fall. Add your email to be in the first cohort.</p></details>
-      <details class="faq-item reveal reveal-delay-1"><summary>What about YouTube or AI? Why pay for skills? <span class="faq-plus">+</span></summary><p class="faq-answer">Tutorials can't look at your code in real time, correct your guitar fingering, or tell you your squat form is off. Relay is about <strong>live, personalized feedback</strong> from a real person — something AI and video can't replace.</p></details>
-      <details class="faq-item reveal reveal-delay-2"><summary>What stops me from hoarding 100 credits? <span class="faq-plus">+</span></summary><p class="faq-answer">Nothing — but credits only have value when you spend them. If everyone hoards, no one learns. Credits expire after 6 months of inactivity to keep the system flowing.</p></details>
-      <details class="faq-item reveal reveal-delay-3"><summary>What if the teacher doesn't show up? <span class="faq-plus">+</span></summary><p class="faq-answer">You get your credit back immediately. Teachers with repeated no-shows lose their ability to offer skills until they complete a session. Reviews are public, so good teachers rise.</p></details>
-      <details class="faq-item reveal reveal-delay-4"><summary>How is a 30-min guitar lesson worth the same as Python? <span class="faq-plus">+</span></summary><p class="faq-answer">Time is the currency. A beginner teaching basic chords and an advanced coder debugging your script both give 30 minutes of focused attention. Skill level shows in the teacher's <strong>proficiency rating</strong> — pick someone whose level matches what you need.</p></details>
-      <details class="faq-item reveal reveal-delay-1"><summary>Does Relay cost money? <span class="faq-plus">+</span></summary><p class="faq-answer">Joining is free. Credit exchanges between peers are free. For heavy users, a <strong>$4.99/month membership</strong> unlocks unlimited sessions and priority scheduling. Your first 3 credits are always on us.</p></details>
     </div>
   </div>
 </section>
@@ -87,3 +85,9 @@
 <style>@media(max-width:900px){.grid-4{grid-template-columns:1fr 1fr!important}}@media(max-width:720px){section{padding:60px 0!important}.stat-grid{grid-template-columns:1fr!important}.grid-4{grid-template-columns:1fr!important}}</style>
 <script>(function(){var r=document.querySelectorAll('.reveal');if(!r.length)return;function c(){var h=window.innerHeight;r.forEach(function(e){if(e.classList.contains('visible'))return;var b=e.getBoundingClientRect();if(b.top<h-60)e.classList.add('visible')})}window.addEventListener('scroll',c);window.addEventListener('resize',c);c()})();</script>
 {% endblock %}
+"""
+
+path = r'C:\Users\ATouray\relay-local\app\templates\index.html'
+with open(path, 'w') as f:
+    f.write(html)
+print(f'Written {len(html)} bytes to {path}')

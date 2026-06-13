@@ -62,6 +62,9 @@ class User(db.Model):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     last_active: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
+    # Referral system
+    referred_by: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=True)
+
     skills_taught = relationship("UserSkill", back_populates="user",
                                   foreign_keys="UserSkill.user_id")
     credit_balance = relationship("CreditAccount", back_populates="user",
@@ -114,6 +117,7 @@ class CreditTransaction(db.Model):
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     type: Mapped[TransactionType] = mapped_column(SAEnum(TransactionType), nullable=False)
     description: Mapped[str] = mapped_column(String, default="")
+    related_user_id: Mapped[str] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 

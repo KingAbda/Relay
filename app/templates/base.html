@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Relay{% endblock %} — Relay</title>
-  <meta name="description" content="Relay — Trade skills, not money. A campus network where students teach what they know and learn what they want." />
+  <meta name="description" content="Relay — The gym membership for skills. Teach for 30 minutes, learn anything for free. Campus skill exchange." />
   {% block head %}{% endblock %}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   <script>
     // Light/Dark mode toggle - respects system preference + saves to localStorage
@@ -26,6 +26,20 @@
       html.setAttribute('data-theme', next);
       localStorage.setItem('relay-theme', next);
     }
+    // Show correct toggle icon on load
+    document.addEventListener('DOMContentLoaded', function() {
+      var theme = document.documentElement.getAttribute('data-theme');
+      var sun = document.querySelector('.toggle-sun');
+      var moon = document.querySelector('.toggle-moon');
+      if (sun && moon) {
+        sun.style.display = theme === 'dark' ? 'inline' : 'none';
+        moon.style.display = theme === 'light' ? 'inline' : 'none';
+      }
+    });
+    function toggleMobileNav() {
+      var links = document.getElementById('navLinks');
+      if (links) links.classList.toggle('responsive');
+    }
   </script>
 </head>
 <body>
@@ -34,10 +48,10 @@
     <nav>
       <div class="container">
         <a href="/" class="logo">
-          <span class="dot"></span>
-          RELAY<small>.co</small>
+          <span class="logo-icon">R</span>
+          Relay<small></small>
         </a>
-        <div class="nav-links">
+        <div class="nav-links" id="navLinks">
           <a href="/about">About</a>
           {% if user %}
             <a href="/dashboard">Dashboard</a>
@@ -50,9 +64,12 @@
           {% else %}
             <a href="/browse">Browse</a>
             <a href="/login">Log in</a>
-            <a href="/signup" class="btn btn-primary btn-sm">Join</a>
+            <a href="/signup" class="nav-join">Join Free</a>
           {% endif %}
-          <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">⟳</button>
+          <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="toggle-sun">☀️</span><span class="toggle-moon">🌙</span>
+          </button>
+          <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
         </div>
       </div>
     </nav>

@@ -6,8 +6,8 @@
 
 <!-- Referral banner for logged-in users -->
 {% if user and ref_link %}
-<div class="card" style="border-color: rgba(70, 211, 255, 0.2); background: rgba(70, 211, 255, 0.04); margin-bottom: 24px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-  <span style="font-size: 0.9rem;">🔗 <strong>Refer a friend</strong> — you both get <strong>+1 credit</strong></span>
+<div class="card" style="border-color: var(--primary-bg); background: var(--primary-bg); margin-bottom: 24px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+  <span style="font-size: 0.9rem;">🔗 <strong>Share & earn</strong> — you both get <strong>+1 credit</strong></span>
   <div style="display: flex; gap: 8px; align-items: center;">
     <input type="text" class="form-input" value="{{ ref_link }}" readonly style="font-size: 0.75rem; padding: 6px 10px; max-width: 260px;" onclick="this.select()" />
     <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText('{{ ref_link }}').then(() => this.textContent='Copied!')" style="font-size: 0.75rem;">Copy</button>
@@ -16,10 +16,10 @@
 {% endif %}
 
 {% if not user %}
-<div class="card" style="border-color: var(--amber); background: rgba(255, 157, 46, 0.04); margin-bottom: 24px; text-align: center; padding: 20px;">
+<div class="card" style="border-color: var(--primary-bg); background: var(--primary-bg); margin-bottom: 24px; text-align: center; padding: 20px;">
   <p style="font-size: 0.95rem;">
     👋 <strong>See something you like?</strong>
-    <a href="/signup" style="color: var(--amber);">Join Relay</a> with your .edu email to request a session.
+    <a href="/signup" style="color: var(--cta); font-weight: 600;">Join Relay</a> with your .edu email to request a session.
   </p>
 </div>
 {% endif %}
@@ -71,11 +71,14 @@
   <div class="card" style="text-align: center; padding: 40px;">
     <p style="font-size: 1.1rem; margin-bottom: 8px;">No skills found</p>
     {% if query or selected_category %}
-      <p class="muted">Try a different search or <a href="/browse" style="color: var(--amber);">browse all skills</a>.</p>
+      <p class="muted">Try a different search or <a href="/browse" style="color: var(--primary);">browse all skills</a>.</p>
     {% else %}
-      <p class="muted">No one has listed skills yet. Be the first!</p>
+      <p class="muted">The marketplace is empty — be the first to add skills!</p>
       {% if user %}
-        <a href="/dashboard" class="btn btn-primary" style="margin-top: 16px;">Add your skills</a>
+        <div class="flex items-center gap-2" style="justify-content: center; margin-top: 16px; flex-wrap: wrap;">
+          <a href="/dashboard" class="btn btn-primary">Add your skills</a>
+          <a href="/seed-demo" class="btn btn-secondary">✨ Add demo skills</a>
+        </div>
       {% else %}
         <a href="/signup" class="btn btn-primary" style="margin-top: 16px;">Join Relay</a>
       {% endif %}
