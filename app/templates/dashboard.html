@@ -138,6 +138,11 @@
                   {% endif %}
                 </td>
                 <td>
+                  {% if s.meet_link and s.status in ('confirmed', 'accepted') %}
+                    <a href="{{ s.meet_link }}" target="_blank" class="btn btn-sm btn-outline" style="font-size: 0.7rem;">🎥 Join</a>
+                  {% endif %}
+                </td>
+                <td>
                   {% if s.status == 'completed' and not s.my_review %}
                     <a href="/review-session/{{ s.id }}" class="btn btn-sm btn-primary" style="font-size: 0.7rem; padding: 2px 8px;">⭐ Review</a>
                   {% elif s.status == 'completed' and s.my_review %}

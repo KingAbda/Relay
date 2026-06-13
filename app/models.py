@@ -134,6 +134,7 @@ class Session(db.Model):
     notes: Mapped[str] = mapped_column(Text, default="")
     scheduled_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    meet_link: Mapped[str] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 

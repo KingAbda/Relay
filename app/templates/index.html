@@ -72,12 +72,51 @@
   </div>
 </section>
 
+{% if trending %}
+<section class="section">
+  <div class="container section-center">
+    <div class="section-label reveal">🔥 Trending now</div>
+    <h2 class="section-title reveal reveal-delay-1">Most-booked skills.</h2>
+    <p class="section-sub reveal reveal-delay-2">The skills NYU students are exchanging right now.</p>
+  </div>
+  <div class="container" style="margin-top: 32px;">
+    <div class="grid-4">
+      {% for t in trending %}
+        <div class="card step-card reveal reveal-delay-{{ loop.index }}">
+          <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+            <span class="tag tag-{{ t.category }}">{{ t.category }}</span>
+            <span class="muted" style="font-size: 0.75rem; margin-left: auto;">{{ t.count }} booked</span>
+          </div>
+          <h3 class="step-title" style="margin-top: 4px;">{{ t.name }}</h3>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if not user %}
+<section class="section" style="padding: 60px 0;">
+  <div class="container" style="max-width: 500px; text-align: center;">
+    <div class="section-label reveal">Don't have a .edu email?</div>
+    <h2 class="section-title reveal reveal-delay-1" style="font-size: 28px;">Get notified when Relay comes to your school.</h2>
+    <form method="POST" action="/waitlist" class="reveal reveal-delay-2" style="display: flex; gap: 8px; margin-top: 20px; justify-content: center;">
+      <input type="email" name="email" class="form-input" placeholder="your@email.com" required style="max-width: 280px;" />
+      <button type="submit" class="btn btn-primary btn-sm">Notify me</button>
+    </form>
+    {% if waitlist_error %}
+      <p class="muted text-sm" style="margin-top: 8px; color: var(--red);">{{ waitlist_error }}</p>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
 <section class="cta-section">
   <div class="container">
     <div class="cta-card reveal">
       <div class="cta-label">Built for students. Powered by collaboration.</div>
       <h2 class="cta-title">Ready to trade skills?</h2>
-      <p class="cta-sub">Join the waitlist and be the first to know when Relay launches at your campus. Your first 3 credits are on us.</p>
+      <p class="cta-sub">{% if variant == 'b' %}Start learning today. Your first 3 credits are free — no membership needed until your 10th session.{% else %}Join the waitlist and be the first to know when Relay launches at your campus. Your first 3 credits are on us.{% endif %}</p>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px;position:relative;z-index:1;">{% if user %}<a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>{% else %}<a href="/signup" class="btn btn-primary">Get early access</a>{% endif %}</div>
       <div style="font-size:13px;color:#64748B;position:relative;z-index:1;">First sign-ups get <b style="color:var(--cta);">free starter credits.</b></div>
     </div>

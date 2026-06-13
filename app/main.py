@@ -5,6 +5,7 @@ import os
 import re
 import uuid
 import secrets
+import hashlib
 from datetime import datetime, timedelta
 
 import bleach
@@ -69,9 +70,74 @@ from app.models import (
     Session, SessionReview, SkillCategory, SessionStatus, TransactionType,
 )
 
+# ── Auto-seed demo data (defined before use) ──────────
+def _auto_seed_demo_data():
+    """Auto-creates demo users & skills so the marketplace isn't empty on first launch."""
+    if os.environ.get("RELAY_ENV") == "production":
+        return  # never seed in production
+    if User.query.count() > 1:
+        return  # already has real users
+    from werkzeug.security import generate_password_hash
+    demo_accounts = [
+        ("Alex Rivera", "alex@nyu.edu", "Pass1234"),
+        ("Jordan Kim", "jordan@nyu.edu", "Pass1234"),
+        ("Sam Patel", "sam@nyu.edu", "Pass1234"),
+    ]
+    demo_skills_pool = [
+        ("Python for Beginners", "technical", "Learn variables, loops, and functions in 30 min. No experience needed.", 3),
+        ("Weight Training 101", "lifestyle", "Proper form for squats, deadlifts, bench press. Bring gym clothes.", 4),
+        ("Guitar Chords & Strumming", "creative", "Open chords and strumming patterns. I'll have a guitar ready.", 3),
+        ("Budgeting for Students", "finance", "Build a student budget, understand credit scores, start investing small.", 4),
+        ("Spanish Conversation", "languages", "Practice everyday conversation. Intermediate level welcome.", 3),
+        ("Resume & Cover Letter Review", "academic", "I've helped 20+ classmates land internships. Let's fix your resume.", 5),
+        ("Public Speaking 101", "social", "Overcome stage fright. Practice pitches in a safe space.", 3),
+        ("HTML/CSS Basics", "technical", "Build your first personal site in 30 minutes. No coding experience needed.", 3),
+        ("Meal Prep & Nutrition", "lifestyle", "Healthy meals under $50/week. I'll show you my system.", 4),
+        ("Music Production (GarageBand)", "creative", "Beat-making from idea to export in one session.", 3),
+        ("Calculus Tutoring", "academic", "Up to Calc II. Bring your problem set.", 4),
+        ("Yoga & Flexibility", "lifestyle", "30 min flow for beginners. Bring a mat.", 3),
+        ("Investing 101", "finance", "Stocks, ETFs, and Roth IRAs explained simply.", 3),
+        ("Japanese Basics", "languages", "Hiragana, katakana, and simple phrases.", 3),
+        ("Photoshop/Canva Design", "creative", "Social media graphics, flyers, and basic photo editing.", 4),
+    ]
+    for email, name, pw in demo_accounts:
+        if get_user_by_email(email):
+            continue
+        user = User(
+            email=email, password_hash=generate_password_hash(pw),
+            full_name=name, email_verified=True, onboarded=True,
+        )
+        db.session.add(user)
+        db.session.flush()
+        db.session.add(CreditAccount(user_id=user.id, balance=5.0))
+        import random
+        assigned = random.sample(demo_skills_pool, 5)
+        for sk_name, sk_cat, sk_desc, sk_prof in assigned:
+            db.session.add(UserSkill(
+                user_id=user.id, name=sk_name, category=sk_cat,
+                description=sk_desc, proficiency=sk_prof,
+            ))
+        want = random.choice(demo_skills_pool)
+        db.session.add(UserWant(
+            user_id=user.id, name=want[0], category=want[1],
+            description=f"I want to learn {want[0]}",
+        ))
+    if User.query.count() > 1:
+        db.session.commit()
+        print(f"🌟 Seeded {User.query.count()} demo users with skills for the marketplace.")
+
 # ── Initialize DB tables ──────────────────────────────
 with app.app_context():
     db.create_all()
+    _auto_seed_demo_data()
+
+# ── Gravatar helper ─────────────────────────────────
+def gravatar_url(email, size=80):
+    """Return Gravatar URL for an email address."""
+    if not email:
+        return ""
+    hash = hashlib.md5(email.strip().lower().encode()).hexdigest()
+    return f"https://www.gravatar.com/avatar/{hash}?s={size}&d=identicon&r=g"
 
 # ══════════════════════════════════════════════════════════
 #  HELPERS
@@ -148,7 +214,25 @@ def get_available_skills_query():
         query = query.filter(UserSkill.category == PILOT_VERTICAL)
     return query
 
-# ── Template context ──────────────────────────────────
+# ── Email helper (console in dev, SendGrid in prod) ───
+def send_email(to, subject, body):
+    """Print to console in dev. In production, uses SendGrid."""
+    print(f"\n{'='*50}")
+    print(f"📧 TO: {to}")
+    print(f"   SUBJECT: {subject}")
+    print(f"{'='*50}")
+    print(body)
+    print(f"{'='*50}\n")
+    try:
+        # In production, try SendGrid
+        if os.environ.get("RELAY_ENV") == "production" and os.environ.get("SENDGRID_API_KEY"):
+            import sendgrid
+            from sendgrid.helpers.mail import Mail
+            sg = sendgrid.SendGridAPIClient(api_key=os.environ["SENDGRID_API_KEY"])
+            msg = Mail(from_email="noreply@joinrelay.co", to_emails=to, subject=subject, plain_text_content=body)
+            sg.send(msg)
+    except Exception as e:
+        print(f"⚠️ Email send failed (non-fatal): {e}")
 
 @app.context_processor
 def inject_globals():
@@ -173,11 +257,18 @@ def jinja_time_ago(dt):
 def jinja_stars(rating):
     return ("★" * rating + "☆" * (5 - rating)) if rating else ""
 
+def jinja_gravatar(email, size=80):
+    return gravatar_url(email, size)
+
+def jinja_avatar_url(email, size=80):
+    return gravatar_url(email, size)
+
 app.jinja_env.filters["capitalize"] = jinja_capitalize
 app.jinja_env.filters["time_ago"] = jinja_time_ago
 app.jinja_env.filters["stars"] = jinja_stars
 app.jinja_env.globals["SkillCategory"] = SkillCategory
 app.jinja_env.globals["SessionStatus"] = SessionStatus
+app.jinja_env.globals["gravatar_url"] = jinja_gravatar
 
 # ── Error handlers ─────────────────────────────────────
 
@@ -259,7 +350,22 @@ def home():
     user = current_user()
     total_users = User.query.count()
     total_sessions = Session.query.filter(Session.status == SessionStatus.COMPLETED.value).count()
-    return render_template("index.html", user=user, total_users=total_users, total_sessions=total_sessions)
+    # Trending skills — most-booked skills from completed sessions
+    trending = db.session.query(
+        UserSkill.name, UserSkill.category,
+        db.func.count(Session.id).label("count")
+    ).join(Session, Session.skill_name == UserSkill.name).filter(
+        Session.status == SessionStatus.COMPLETED.value
+    ).group_by(UserSkill.name).order_by(db.func.count(Session.id).desc()).limit(4).all()
+    if not trending:
+        # Fallback: show skills from demo users
+        demo_skills = UserSkill.query.filter(UserSkill.is_active == True).order_by(UserSkill.proficiency.desc()).limit(4).all()
+        trending = [{"name": s.name, "category": s.category.value if hasattr(s.category, 'value') else s.category, "count": s.proficiency or 0} for s in demo_skills]
+    else:
+        trending = [{"name": r[0], "category": r[1].value if hasattr(r[1], 'value') else r[1], "count": r[2]} for r in trending]
+    # A/B test variant
+    variant = request.args.get("variant", "a")
+    return render_template("index.html", user=user, total_users=total_users, total_sessions=total_sessions, trending=trending, variant=variant)
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -296,6 +402,12 @@ def signup():
         add_credit_transaction(referrer.id, 1.0, TransactionType.REFERRAL, f"You referred {full_name}!", related_user_id=user.id)
         add_credit_transaction(user.id, 1.0, TransactionType.REFERRAL, f"You joined through {referrer.full_name}!", related_user_id=referrer.id)
     db.session.commit()
+    # Send verification email
+    verify_link = url_for("verify_email", token=user.verification_token, _external=True)
+    send_email(user.email, "Verify your Relay account",
+        f"Hi {user.full_name.split()[0]},\n\n"
+        f"Welcome to Relay! Click this link to verify your .edu email:\n{verify_link}\n\n"
+        f"Your first 3 credits are waiting.\n\n- Relay Team")
     resp = make_response(redirect(url_for("onboarding")))
     resp.set_cookie("user_id", user.id, httponly=True, samesite="Lax", max_age=60*60*24*30)
     return resp
@@ -402,6 +514,7 @@ def dashboard():
             "status": s.status.value if hasattr(s.status, 'value') else s.status,
             "other_name": other_name, "role": "teacher" if s.teacher_id == user.id else "learner",
             "created_at": s.created_at, "notes": s.notes, "scheduled_at": s.scheduled_at,
+            "meet_link": getattr(s, 'meet_link', None),
             "my_review": my_review, "teacher_rating": round(teacher_rating, 1) if teacher_rating else None,
         })
 
@@ -417,10 +530,6 @@ def dashboard():
     return render_template("dashboard.html", user=user, my_skills=my_skills, my_wants=my_wants,
                            credit=credit, sessions=enriched_sessions, pending_requests=enriched_pending,
                            transactions=transactions, ref_link=ref_link, categories=get_pilot_categories())
-
-# ══════════════════════════════════════════════════════════
-#  ROUTES: BROWSE
-# ══════════════════════════════════════════════════════════
 
 @app.route("/browse")
 def browse():
@@ -443,8 +552,51 @@ def browse():
     if is_limited:
         query = query.limit(6)
     skills = query.all()
+    # Enrich with session counts per teacher
+    enriched_skills = []
+    for s in skills:
+        teacher_completed = Session.query.filter(
+            Session.teacher_id == s.user_id,
+            Session.status == SessionStatus.COMPLETED.value
+        ).count()
+        enriched_skills.append({
+            "id": s.id, "name": s.name, "category": s.category,
+            "description": s.description, "proficiency": s.proficiency,
+            "user_id": s.user_id, "user_name": s.user.full_name,
+            "user_email": s.user.email,
+            "session_count": teacher_completed,
+        })
     ref_link = url_for("signup", ref=user.id, _external=True) if user else None
-    return render_template("browse.html", user=user, skills=skills, categories=get_pilot_categories(), selected_category=category, query=q, ref_link=ref_link)
+    return render_template("browse.html", user=user, skills=enriched_skills, categories=get_pilot_categories(), selected_category=category, query=q, ref_link=ref_link)
+
+# ══════════════════════════════════════════════════════════
+#  ROUTES: WAITLIST
+# ══════════════════════════════════════════════════════════
+
+@app.route("/waitlist", methods=["POST"])
+def waitlist():
+    """Capture non-.edu emails for waitlist."""
+    email = sanitize(request.form.get("email", "")).strip().lower()
+    if not email or "@" not in email:
+        return redirect(url_for("home"))
+    import json, os
+    wl_path = os.path.join(os.path.dirname(__file__), "..", "instance", "waitlist.json")
+    try:
+        waitlist_data = []
+        if os.path.exists(wl_path):
+            with open(wl_path) as f:
+                waitlist_data = json.load(f)
+        if email not in [w["email"] for w in waitlist_data]:
+            waitlist_data.append({"email": email, "signed_up": datetime.utcnow().isoformat()})
+            with open(wl_path, "w") as f:
+                json.dump(waitlist_data, f, indent=2)
+            send_email(email, "You're on the Relay waitlist!",
+                f"Thanks for joining the Relay waitlist!\n\n"
+                f"We'll let you know when Relay comes to your campus.\n\n"
+                f"In the meantime, tell your friends: every referral = +1 credit at launch.\n\n- Relay Team")
+    except Exception as e:
+        print(f"⚠️ Waitlist save error: {e}")
+    return redirect(url_for("home"))
 
 # ══════════════════════════════════════════════════════════
 #  ROUTES: SESSIONS
@@ -487,6 +639,9 @@ def accept_session(session_id):
     if not session or session.teacher_id != user.id or session.status != SessionStatus.REQUESTED:
         abort(404)
     session.status = SessionStatus.CONFIRMED
+    # Auto-generate a Google Meet link
+    meet_id = secrets.token_urlsafe(8)
+    session.meet_link = f"https://meet.google.com/{meet_id}"
     db.session.commit()
     return redirect(url_for("dashboard"))
 

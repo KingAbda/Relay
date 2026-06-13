@@ -38,6 +38,32 @@
       </div>
     </div>
 
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>🔄 Recurring?</label>
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="radio" name="recurring" value="once" checked onchange="document.getElementById('recurring-count').style.display='none'" />
+            <span style="font-size: 0.9rem;">One-time session</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="radio" name="recurring" value="weekly" onchange="document.getElementById('recurring-count').style.display='flex'" />
+            <span style="font-size: 0.9rem;">Weekly</span>
+          </label>
+        </div>
+        <div id="recurring-count" style="display: none; margin-top: 8px; align-items: center; gap: 8px;">
+          <span class="muted text-sm">for</span>
+          <select name="recurring_weeks" class="form-select" style="max-width: 80px;">
+            <option value="2">2</option>
+            <option value="4" selected>4</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+          </select>
+          <span class="muted text-sm">weeks</span>
+        </div>
+      </div>
+    </div>
+
     <div class="card" style="background: var(--primary-bg); border-color: var(--primary); margin-bottom: 24px; padding: 16px;">
       <p style="font-size: 0.85rem;">
         <strong>💳 1 credit will be held</strong> when you request. It's released to

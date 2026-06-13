@@ -2,10 +2,12 @@
 {% block title %}Profile{% endblock %}
 {% block content %}
 <div class="flex justify-between items-center" style="margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
-  <div>
-    <h1>{{ profile_user.full_name }}</h1>
-    <p class="muted">{{ profile_user.email }}</p>
-    {% if profile_user.bio %}
+  <div class="flex items-center gap-3">
+    <img src="{{ gravatar_url(profile_user.email, 64) }}" alt="" style="width: 56px; height: 56px; border-radius: 50%;" />
+    <div>
+      <h1>{{ profile_user.full_name }}</h1>
+      <p class="muted">{{ profile_user.email }}</p>
+      {% if profile_user.bio %}
       <p style="margin-top: 8px;">{{ profile_user.bio }}</p>
     {% endif %}
   </div>
