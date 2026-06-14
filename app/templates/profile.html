@@ -13,7 +13,7 @@
   </div>
   <div style="text-align: right;">
     {% if avg_rating %}
-      <div style="font-family: var(--display); font-size: 1.6rem; color: var(--cta);">{{ avg_rating }} ⭐</div>
+      <div style="font-family: var(--display); font-size: 1.6rem; color: var(--orange);">{{ avg_rating }} ★</div>
       <div class="stat-label">average rating</div>
     {% endif %}
     {% if completed_count is defined %}
@@ -28,7 +28,7 @@
 
 <div class="grid-2" style="margin-bottom: 32px;">
   <div class="card">
-    <h3 class="mb-2">🎓 Teaches</h3>
+    <h3 class="mb-2">Teaches</h3>
     {% if skills %}
       {% for s in skills %}
         <div class="flex items-center gap-2" style="margin-bottom: 8px;">
@@ -49,7 +49,7 @@
   </div>
 
   <div class="card">
-    <h3 class="mb-2">📖 Wants to learn</h3>
+    <h3 class="mb-2">Wants to learn</h3>
     {% if wants %}
       {% for w in wants %}
         <div class="flex items-center gap-2" style="margin-bottom: 8px;">
@@ -66,7 +66,7 @@
 
 {% if recent_reviews %}
 <div class="card">
-  <h3 class="mb-2">📝 Recent reviews</h3>
+  <h3 class="mb-2">Recent reviews</h3>
   {% for r in recent_reviews %}
     <div style="padding: 12px 0; border-bottom: 1px solid var(--panel-line);">
       <div class="flex items-center gap-2" style="margin-bottom: 4px;">

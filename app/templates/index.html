@@ -1,180 +1,240 @@
 {% extends "base.html" %}
-{% block title %}Home{% endblock %}
+{% block title %}Campus skill swap{% endblock %}
+{% block page_id %}home{% endblock %}
 {% block content %}
-<div class="hero">
-  <div class="hero-inner container">
-    <div class="hero-text reveal">
-      <div class="hero-badge">{% if pilot_vertical and pilot_vertical != 'all' %}Now piloting <strong>{{ pilot_vertical_name }}</strong> at NYU{% else %}🚀 Now piloting <strong>all skill categories</strong> at NYU{% endif %}</div>
-      <h1 class="hero-title">The gym membership<br><span class="grad-text">for your skills.</span></h1>
-      <p class="hero-sub">Teach anything for 30 minutes, earn a credit, spend it to learn anything else. No cash, just campus community.</p>
-      <div class="hero-actions">
-        {% if user %}
-          <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
-          <a href="/browse" class="btn btn-secondary">Browse Skills</a>
-        {% else %}
-          <a href="/signup" class="btn btn-primary">Join the waitlist</a>
-          <a href="/browse" class="btn btn-secondary">Browse skills</a>
-        {% endif %}
-      </div>
-      <div class="hero-check"><div class="hero-check-icon"><span>&#10003;</span></div><span class="hero-check-text">30 min = 1 credit. Earn by teaching, spend by learning.</span></div>
+<section class="hero campus-hero">
+  <div class="container hero-stage">
+    <p class="eyebrow" data-reveal>NYU pilot · 30 minutes = 1 credit</p>
+    <h1 class="hero-kinetic" data-reveal="0.05" aria-label="Teach what you know, learn what you need">
+      <span class="kx-lead">Teach</span>
+      <span class="kx-swap" data-swap aria-hidden="true" data-words="Guitar,Python,Figma,Lifting,Essays">Guitar</span>
+      <span class="kx-lead">Learn</span>
+      <span class="kx-swap" data-swap aria-hidden="true" data-words="Spanish,Design,Piano,Budgeting,French">Spanish</span>
+    </h1>
+    <p class="hero-sub" data-reveal="0.12">A campus skill swap where students trade live 30-minute lessons using time credits — not cash. Teach what you know, learn what you need.</p>
+    <div class="hero-actions" data-reveal="0.18">
+      {% if user %}
+        <a href="/dashboard" class="btn btn-primary" data-magnetic data-magnetic-strength="0.3">Open dashboard <span class="arrow">→</span></a>
+        <a href="#pricing" class="btn btn-secondary" data-magnetic data-magnetic-strength="0.3">See pricing</a>
+      {% else %}
+        <a href="/signup" class="btn btn-primary" data-magnetic data-magnetic-strength="0.3">Join the pilot <span class="arrow">→</span></a>
+        <a href="#how" class="btn btn-secondary" data-magnetic data-magnetic-strength="0.3">How it works</a>
+      {% endif %}
     </div>
-    <div class="hero-visual reveal reveal-delay-2">
-      <div class="hero-ring"></div><div class="hero-ring"></div><div class="hero-ring"></div>
-      <div class="hero-emblem"><span>R</span></div>
-      <div class="hero-geo hero-geo-1"></div><div class="hero-geo hero-geo-2"></div><div class="hero-geo hero-geo-3"></div>
+    <div class="trust-row" data-reveal="0.24">
+      <span>.edu verified</span>
+      <span>No cash between peers</span>
+      <span>Starter credits included</span>
     </div>
   </div>
-</div>
+</section>
 
-<section class="section">
+<section class="marquee-strip skill-marquee" aria-label="Common skills on Relay">
+  <div class="marquee-fade" aria-hidden="true"></div>
+  <div class="marquee-track">
+    {% set marquee_skills = [
+      'debug my code', 'resume review', 'fix my squat form', 'budgeting', 'learn guitar',
+      'Spanish conversation', 'Canva flyer help', 'Figma basics', 'Python homework',
+      'public speaking reps', 'GarageBand beats', 'meal prep', 'calculus tutoring',
+      'LinkedIn cleanup', 'photo editing', 'Japanese basics', 'investing 101',
+      'presentation design', 'essay outline', 'HTML/CSS starter'
+    ] %}
+    <div class="marquee-group">
+      {% for skill in marquee_skills %}<span>{{ skill }}</span>{% endfor %}
+    </div>
+    <div class="marquee-group" aria-hidden="true">
+      {% for skill in marquee_skills %}<span>{{ skill }}</span>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section credit-section" id="how">
   <div class="container section-center">
-    <div class="section-label reveal">The problem</div>
-    <h2 class="section-title reveal reveal-delay-1">Favor culture isn't fair culture.</h2>
+    <p class="eyebrow" data-reveal>How credits work</p>
+    <h2 class="section-title" data-split>Time is the currency.</h2>
+    <p class="section-sub" data-reveal="0.05">Every exchange is simple enough to explain in one sentence: teach for 30 minutes, earn a credit, spend it on another 30-minute lesson.</p>
   </div>
-  <div class="container stat-grid" style="margin-top:40px;">
-    <div class="card stat-card reveal reveal-delay-1"><div class="stat-value">70%</div><p class="stat-label">of students have a skill to teach but no one to share it with</p></div>
-    <div class="card stat-card reveal reveal-delay-2"><div class="stat-value">85%</div><p class="stat-label">want to learn something but can't find a mentor on campus</p></div>
-    <div class="card stat-card reveal reveal-delay-3"><div class="stat-value">75%</div><p class="stat-label">prefer skill trades over cash for peer-to-peer learning</p></div>
-  </div>
-</section>
-
-<section class="section" id="how">
-  <div class="container section-center">
-    <div class="section-label reveal">How it works</div>
-    <h2 class="section-title reveal reveal-delay-1">The relay race.</h2>
-    <p class="section-sub reveal reveal-delay-2">A simple loop: you teach, you earn, you spend, you learn.</p>
-  </div>
-  <div class="container" style="margin-top:40px;">
-    <div class="grid-4">
-      <div class="card step-card reveal reveal-delay-1"><div class="step-num">1</div><h3 class="step-title">Every 30 min = 1 credit</h3><p class="step-desc">Your time is standardized. A session is one unit, no matter the skill.</p></div>
-      <div class="card step-card reveal reveal-delay-2"><div class="step-num">2</div><h3 class="step-title">Earn by teaching</h3><p class="step-desc">Every session you lead adds credits to your account.</p></div>
-      <div class="card step-card reveal reveal-delay-3"><div class="step-num">3</div><h3 class="step-title">Spend by learning</h3><p class="step-desc">Use credits to book sessions with anyone on the network.</p></div>
-      <div class="card step-card reveal reveal-delay-4"><div class="step-num">4</div><h3 class="step-title">Verified by .edu</h3><p class="step-desc">Only university students with a valid .edu email can join.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="pricing" style="border-top: 1px solid var(--border-light);">
-  <div class="container section-center">
-    <div class="section-label reveal">Simple pricing</div>
-    <h2 class="section-title reveal reveal-delay-1">Your first {{ free_credits }} credits are free.</h2>
-    <p class="section-sub reveal reveal-delay-2">After that, pick a plan that fits how much you want to learn.</p>
-  </div>
-  <div class="container" style="margin-top:40px;">
-    <div class="grid-3" style="align-items: stretch;">
-      <div class="card step-card reveal reveal-delay-1" style="display:flex;flex-direction:column;">
-        <div class="step-num" style="margin-bottom:12px;">Free</div>
-        <h3 style="font-size:32px;margin:4px 0;color:var(--ink);">$0</h3>
-        <p class="muted" style="font-size:13px;">Forever. No trial tricks.</p>
-        <ul style="list-style:none;padding:0;margin:20px 0;flex:1;display:flex;flex-direction:column;gap:10px;">
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span>{{ free_credits }} credits to start</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Earn credits by teaching</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Up to {{ free_max_skills }} active skill listings</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Browse &amp; request sessions</span></li>
-        </ul>
-        <a href="/signup" class="btn btn-secondary" style="text-align:center;">Get Started</a>
+  <div class="container credit-loop" data-loop>
+    <div class="loop-row">
+      <div class="loop-step"><b>1</b><h3>Teach 30 min</h3><p>Share something you already know.</p></div>
+      <div class="loop-arrow" data-loop-arrow aria-hidden="true">
+        <svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path class="la-shaft" d="M3 12 H45" pathLength="1" />
+          <path class="la-head" d="M39 6 L48 12 L39 18" pathLength="1" />
+        </svg>
       </div>
-      <div class="card step-card reveal reveal-delay-2" style="display:flex;flex-direction:column;border:2px solid var(--primary);position:relative;">
-        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--primary);color:white;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:600;">Most popular</div>
-        <div class="step-num" style="margin-bottom:12px;color:var(--primary);">Starter</div>
-        <h3 style="font-size:32px;margin:4px 0;color:var(--ink);">${{ starter_price }}<span style="font-size:14px;color:var(--muted);">/month</span></h3>
-        <p class="muted" style="font-size:13px;">For regular learners and teachers.</p>
-        <ul style="list-style:none;padding:0;margin:20px 0;flex:1;display:flex;flex-direction:column;gap:10px;">
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span><strong>{{ starter_credits }}</strong> credits every month</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Up to <strong>{{ starter_max_skills }}</strong> active listings</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Priority session matching</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Skill verification badge</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Everything in Free</span></li>
-        </ul>
-        <a href="/signup" class="btn btn-primary" style="text-align:center;">Start Free →</a>
+      <div class="loop-step"><b>2</b><h3>Earn 1 credit</h3><p>Your balance updates after the session.</p></div>
+      <div class="loop-arrow" data-loop-arrow aria-hidden="true">
+        <svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path class="la-shaft" d="M3 12 H45" pathLength="1" />
+          <path class="la-head" d="M39 6 L48 12 L39 18" pathLength="1" />
+        </svg>
       </div>
-      <div class="card step-card reveal reveal-delay-3" style="display:flex;flex-direction:column;">
-        <div class="step-num" style="margin-bottom:12px;">Pro</div>
-        <h3 style="font-size:32px;margin:4px 0;color:var(--ink);">${{ pro_price }}<span style="font-size:14px;color:var(--muted);">/month</span></h3>
-        <p class="muted" style="font-size:13px;">For power users and super-teachers.</p>
-        <ul style="list-style:none;padding:0;margin:20px 0;flex:1;display:flex;flex-direction:column;gap:10px;">
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span><strong>Unlimited</strong> credits every month</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span><strong>Unlimited</strong> active listings</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Verified badge + priority matching</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Session analytics dashboard</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span>Everything in Starter</span></li>
-          <li style="display:flex;align-items:center;gap:8px;">✅ <span><strong>$249/year</strong> ($20.75/mo)</span></li>
-        </ul>
-        <a href="/signup" class="btn btn-secondary" style="text-align:center;">Go Pro</a>
+      <div class="loop-step"><b>3</b><h3>Learn 30 min</h3><p>Spend it to learn from another student.</p></div>
+    </div>
+    <svg class="loop-wrap" data-loop-wrap aria-hidden="true"></svg>
+  </div>
+</section>
+
+<section class="section research-section">
+  <div class="container split-heading">
+    <div>
+      <p class="eyebrow" data-reveal>Campus field notes</p>
+      <h2 class="section-title" data-split>The demand is already there.</h2>
+    </div>
+    <p class="section-sub" data-reveal="0.05">Relay turns informal favor culture into a trusted student-to-student exchange with structure, reputation, and clear rules.</p>
+  </div>
+  <div class="container stat-grid field-notes gauge-notes" data-reveal-stagger>
+    <div class="stat-card gauge-card" style="--gauge-value:70; --gauge-delay:.05s;">
+      <span class="stat-index">01</span>
+      <div class="gauge-wrap" role="img" aria-label="70 percent of students have a skill to teach">
+        <svg class="gauge-svg" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="gauge-track" cx="60" cy="60" r="44" pathLength="100" />
+          <circle class="gauge-progress" cx="60" cy="60" r="44" pathLength="100" />
+        </svg>
+        <div class="gauge-center"><strong data-count="70">0</strong><span>%</span></div>
       </div>
+      <p>of students have a skill to teach but no obvious way to share it.</p>
+    </div>
+    <div class="stat-card gauge-card" style="--gauge-value:85; --gauge-delay:.18s;">
+      <span class="stat-index">02</span>
+      <div class="gauge-wrap" role="img" aria-label="85 percent want to learn something but cannot always afford paid help">
+        <svg class="gauge-svg" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="gauge-track" cx="60" cy="60" r="44" pathLength="100" />
+          <circle class="gauge-progress" cx="60" cy="60" r="44" pathLength="100" />
+        </svg>
+        <div class="gauge-center"><strong data-count="85">0</strong><span>%</span></div>
+      </div>
+      <p>want to learn something but cannot always afford paid help.</p>
+    </div>
+    <div class="stat-card gauge-card" style="--gauge-value:75; --gauge-delay:.31s;">
+      <span class="stat-index">03</span>
+      <div class="gauge-wrap" role="img" aria-label="75 percent showed overlap between what students can teach and want to learn">
+        <svg class="gauge-svg" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="gauge-track" cx="60" cy="60" r="44" pathLength="100" />
+          <circle class="gauge-progress" cx="60" cy="60" r="44" pathLength="100" />
+        </svg>
+        <div class="gauge-center"><strong data-count="75">0</strong><span>%</span></div>
+      </div>
+      <p>showed overlap between what students can teach and want to learn.</p>
     </div>
   </div>
 </section>
 
-<section class="section" id="faq">
-  <div class="container" style="max-width:760px;">
-    <div class="section-label reveal">Questions</div>
-    <h2 class="section-title reveal reveal-delay-1" style="margin-bottom:32px;">The honest answers.</h2>
-    <div style="display:grid;gap:12px;">
-      <details class="faq-item reveal reveal-delay-1"><summary>Is Relay free? <span class="faq-plus">+</span></summary><p class="faq-answer">Yes — everyone starts with <strong>{{ free_credits }} free credits</strong> to try it out. You earn more by teaching, so active users never need to pay. For heavier use, see our pricing above.</p></details>
-      <details class="faq-item reveal reveal-delay-2"><summary>What if I only want to learn? <span class="faq-plus">+</span></summary><p class="faq-answer">New members start with {{ free_credits }} free credits to get going. After that, you can buy a <strong>Starter (${{ starter_price }}/mo)</strong> or <strong>Pro (${{ pro_price }}/mo)</strong> plan for recurring credits — or teach a skill to earn credits for free.</p></details>
-      <details class="faq-item reveal reveal-delay-3"><summary>Is the teacher any good? <span class="faq-plus">+</span></summary><p class="faq-answer">Everyone is a verified student. You rate each session afterward &mdash; the best teachers rise to the top.</p></details>
-      <details class="faq-item reveal reveal-delay-4"><summary>Who can join right now? <span class="faq-plus">+</span></summary><p class="faq-answer">We're starting with NYU students this fall. Add your email to be in the first cohort.</p></details>
-      <details class="faq-item reveal reveal-delay-1"><summary>What about YouTube or AI? Why pay for skills? <span class="faq-plus">+</span></summary><p class="faq-answer">Tutorials can't look at your code in real time, correct your guitar fingering, or tell you your squat form is off. Relay is about <strong>live, personalized feedback</strong> from a real person — something AI and video can't replace.</p></details>
-      <details class="faq-item reveal reveal-delay-2"><summary>What stops me from hoarding 100 credits? <span class="faq-plus">+</span></summary><p class="faq-answer">Nothing — but credits only have value when you spend them. If everyone hoards, no one learns. Credits expire after 6 months of inactivity to keep the system flowing.</p></details>
-      <details class="faq-item reveal reveal-delay-3"><summary>What if the teacher doesn't show up? <span class="faq-plus">+</span></summary><p class="faq-answer">You get your credit back immediately. Teachers with repeated no-shows lose their ability to offer skills until they complete a session. Reviews are public, so good teachers rise.</p></details>
-      <details class="faq-item reveal reveal-delay-4"><summary>How is a 30-min guitar lesson worth the same as Python? <span class="faq-plus">+</span></summary><p class="faq-answer">Time is the currency. A beginner teaching basic chords and an advanced coder debugging your script both give 30 minutes of focused attention. Skill level shows in the teacher's <strong>proficiency rating</strong> — pick someone whose level matches what you need.</p></details>
-      <details class="faq-item reveal reveal-delay-1"><summary>Does Relay cost money? <span class="faq-plus">+</span></summary><p class="faq-answer">Joining is free. Credit exchanges between peers are free. For heavier use, <strong>Starter (${{ starter_price }}/mo)</strong> gives you {{ starter_credits }} monthly credits and priority scheduling. The <strong>Pro (${{ pro_price }}/mo)</strong> plan unlocks unlimited sessions. Your first {{ free_credits }} credits are always on us.</p></details>
+<section class="section pricing-section" id="pricing">
+  <div class="container split-heading pricing-heading">
+    <div>
+      <p class="eyebrow" data-reveal>Simple pricing</p>
+      <h2 class="section-title" data-split>Start free. Upgrade only if Relay becomes a habit.</h2>
     </div>
+    <p class="section-sub" data-reveal="0.05">Everyone gets starter credits to try the exchange. Paid plans are for students who want predictable monthly learning credits, not one-off tutoring fees.</p>
+  </div>
+  <div class="container pricing-grid" data-reveal-stagger>
+    <article class="pricing-card pricing-free">
+      <div class="pricing-top">
+        <span class="plan-kicker">Try Relay</span>
+        <h3>Free</h3>
+        <p>For new students testing the skill board.</p>
+      </div>
+      <div class="price-line"><strong>$0</strong><span>to join</span></div>
+      <ul>
+        <li><span>✓</span> 2 starter credits included</li>
+        <li><span>✓</span> List what you can teach</li>
+        <li><span>✓</span> Earn more credits by teaching</li>
+      </ul>
+      <a href="/signup" class="btn btn-secondary">Get started</a>
+    </article>
+    <article class="pricing-card pricing-featured">
+      <div class="popular-pill">Most useful</div>
+      <div class="pricing-top">
+        <span class="plan-kicker">Regular learner</span>
+        <h3>Starter</h3>
+        <p>For students who want a few guaranteed sessions every month.</p>
+      </div>
+      <div class="price-line"><strong>$4.99</strong><span>/ month</span></div>
+      <ul>
+        <li><span>✓</span> 5 credits every month</li>
+        <li><span>✓</span> Priority scheduling nudges</li>
+        <li><span>✓</span> Keep earning free credits by teaching</li>
+      </ul>
+      <a href="/signup" class="btn btn-primary">Start free →</a>
+    </article>
+    <article class="pricing-card pricing-pro">
+      <div class="pricing-top">
+        <span class="plan-kicker">Power user</span>
+        <h3>Pro</h3>
+        <p>For students who are constantly teaching, booking, and building reputation.</p>
+      </div>
+      <div class="price-line"><strong>$9.99</strong><span>/ month</span></div>
+      <ul>
+        <li><span>✓</span> Unlimited monthly credits</li>
+        <li><span>✓</span> Unlimited active listings</li>
+        <li><span>✓</span> Verified badge + priority matching</li>
+      </ul>
+      <a href="/signup" class="btn btn-secondary">Go Pro</a>
+    </article>
   </div>
 </section>
 
-{% if trending %}
-<section class="section">
-  <div class="container section-center">
-    <div class="section-label reveal">🔥 Trending now</div>
-    <h2 class="section-title reveal reveal-delay-1">Most-booked skills.</h2>
-    <p class="section-sub reveal reveal-delay-2">The skills NYU students are exchanging right now.</p>
-  </div>
-  <div class="container" style="margin-top: 32px;">
-    <div class="grid-4">
-      {% for t in trending %}
-        <div class="card step-card reveal reveal-delay-{{ loop.index }}">
-          <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-            <span class="tag tag-{{ t.category }}">{{ t.category }}</span>
-            <span class="muted" style="font-size: 0.75rem; margin-left: auto;">{{ t.count }} booked</span>
-          </div>
-          <h3 class="step-title" style="margin-top: 4px;">{{ t.name }}</h3>
-        </div>
-      {% endfor %}
+<section class="section faq-section" id="faq">
+  <div class="container faq-shell">
+    <div class="faq-intro">
+      <p class="eyebrow" data-reveal>Honest answers</p>
+      <h2 class="section-title" data-split>The questions students ask first.</h2>
+    </div>
+    <div class="faq-list relay-accordion pricing-accordion" data-reveal-stagger>
+      <details class="faq-item">
+        <summary><span class="faq-number">1</span><span class="faq-question">Is Relay free?</span></summary>
+        <div class="faq-content"><p>Joining is free. Students trade credits for sessions, so no cash changes hands between peers.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary><span class="faq-number">2</span><span class="faq-question">What if I only want to learn?</span></summary>
+        <div class="faq-content"><p>You can start with free credits, then either teach to earn more or use a paid plan if you want predictable monthly credits.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary><span class="faq-number">3</span><span class="faq-question">How do credits work?</span></summary>
+        <div class="faq-content"><p>Teach one 30-minute session to earn one credit. Spend one credit to book a 30-minute session with another student.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary><span class="faq-number">4</span><span class="faq-question">What can I teach?</span></summary>
+        <div class="faq-content"><p>Anything useful to another student: debugging, resume feedback, Canva flyers, lifting form, budgeting, languages, music, or class prep.</p></div>
+      </details>
+      <details class="faq-item" open>
+        <summary><span class="faq-number">5</span><span class="faq-question">How do I know the teacher is good?</span></summary>
+        <div class="faq-content"><p>Profiles show completed sessions, reviews, and what the student says they can teach. No-shows and bad sessions hurt trust quickly.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary><span class="faq-number">6</span><span class="faq-question">Why not YouTube or AI?</span></summary>
+        <div class="faq-content"><p>Relay is for live feedback: someone watching your form, debugging your actual code, reacting to your draft, or practicing with you in real time.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary><span class="faq-number">7</span><span class="faq-question">Who can join right now?</span></summary>
+        <div class="faq-content"><p>The redesign is focused on the NYU pilot. Students can join the first cohort with a .edu email.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary><span class="faq-number">8</span><span class="faq-question">What happens if someone flakes?</span></summary>
+        <div class="faq-content"><p>You get your credit back. Repeated no-shows lose trust and make it harder to keep offering sessions.</p></div>
+      </details>
     </div>
   </div>
 </section>
-{% endif %}
 
 {% if not user %}
-<section class="section" style="padding: 60px 0;">
-  <div class="container" style="max-width: 500px; text-align: center;">
-    <div class="section-label reveal">Don't have a .edu email?</div>
-    <h2 class="section-title reveal reveal-delay-1" style="font-size: 28px;">Get notified when Relay comes to your school.</h2>
-    <form method="POST" action="/waitlist" class="reveal reveal-delay-2" style="display: flex; gap: 8px; margin-top: 20px; justify-content: center;">
-      <input type="email" name="email" class="form-input" placeholder="your@email.com" required style="max-width: 280px;" />
-      <button type="submit" class="btn btn-primary btn-sm">Notify me</button>
+<section class="cta-section">
+  <div class="container cta-card" data-reveal>
+    <p class="eyebrow">First NYU cohort</p>
+    <h2>Put your skill on the board.</h2>
+    <p>Join the pilot, list what you can teach, and get starter credits to learn from another student.</p>
+    <form method="POST" action="/waitlist" class="waitlist-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <input type="email" name="email" class="form-input" placeholder="your@email.com" required />
+      <button type="submit" class="btn btn-primary" data-magnetic data-magnetic-strength="0.3">Notify me</button>
     </form>
-    {% if waitlist_error %}
-      <p class="muted text-sm" style="margin-top: 8px; color: var(--red);">{{ waitlist_error }}</p>
-    {% endif %}
+    {% if waitlist_error %}<p class="form-error">{{ waitlist_error }}</p>{% endif %}
   </div>
 </section>
+{% else %}
+<section class="cta-section"><div class="container cta-card"><p class="eyebrow">Welcome back</p><h2>Ready for your next exchange?</h2><a href="/dashboard" class="btn btn-primary">Go to Dashboard</a></div></section>
 {% endif %}
 
-<section class="cta-section">
-  <div class="container">
-    <div class="cta-card reveal">
-      <div class="cta-label">Built for students. Powered by collaboration.</div>
-      <h2 class="cta-title">Ready to trade skills?</h2>
-      <p class="cta-sub">{% if variant == 'b' %}Start learning today. Your first {{ free_credits }} credits are free — no membership needed until you run out.{% else %}Join the waitlist and be the first to know when Relay launches at your campus. Your first {{ free_credits }} credits are on us.{% endif %}</p>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px;position:relative;z-index:1;">{% if user %}<a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>{% else %}<a href="/signup" class="btn btn-primary">Get early access</a>{% endif %}</div>
-      <div style="font-size:13px;color:#64748B;position:relative;z-index:1;">First sign-ups get <b style="color:var(--cta);">free starter credits.</b></div>
-    </div>
-  </div>
-</section>
-
-<style>@media(max-width:900px){.grid-4{grid-template-columns:1fr 1fr!important}}@media(max-width:720px){section{padding:60px 0!important}.stat-grid{grid-template-columns:1fr!important}.grid-4{grid-template-columns:1fr!important}}</style>
-<script>(function(){var r=document.querySelectorAll('.reveal');if(!r.length)return;function c(){var h=window.innerHeight;r.forEach(function(e){if(e.classList.contains('visible'))return;var b=e.getBoundingClientRect();if(b.top<h-60)e.classList.add('visible')})}window.addEventListener('scroll',c);window.addEventListener('resize',c);c()})();</script>
 {% endblock %}

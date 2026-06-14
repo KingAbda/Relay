@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Privacy Policy{% endblock %}
 {% block content %}
-<div style="max-width: 720px; margin: 0 auto;">
-  <h1>Privacy Policy</h1>
-  <p class="muted" style="margin-bottom: 32px;">Last updated: June 8, 2026</p>
+<div class="legal-shell">
+  <p class="eyebrow" data-reveal>Legal</p>
+  <h1 class="legal-title" data-reveal="0.04">Privacy Policy</h1>
+  <p class="muted legal-updated">Last updated: June 8, 2026</p>
 
   <div class="card" style="margin-bottom: 20px;">
     <h3>What we collect</h3>
@@ -58,9 +59,9 @@
     </p>
   </div>
 
-  <div class="card" style="background: var(--primary-bg); border-color: var(--primary);">
-    <p style="font-size: 0.9rem;">
-      <strong>⚖️ Your rights.</strong> You can request a copy of your data, correct inaccuracies,
+  <div class="card legal-callout">
+    <p>
+      <strong>Your rights.</strong> You can request a copy of your data, correct inaccuracies,
       or delete your account at any time. Relay is a student project and we take your privacy seriously.
     </p>
   </div>

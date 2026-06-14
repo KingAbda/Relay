@@ -2,12 +2,7 @@
 {% block title %}Error {{ code }}{% endblock %}
 {% block content %}
 <div style="text-align: center; padding: 80px 0;">
-  <div style="font-size: 5rem; margin-bottom: 16px; opacity: 0.5;">
-    {% if code == 404 %}🔍
-    {% elif code == 429 %}⏳
-    {% else %}⚠️{% endif %}
-  </div>
-  <h1>{{ code }}</h1>
+  <div style="font-family: var(--display); font-size: clamp(88px, 16vw, 168px); line-height: 1; letter-spacing: -.04em; color: var(--blue); margin-bottom: 8px;">{{ code }}</div>
   <p class="muted" style="font-size: 1.1rem; margin-bottom: 32px;">{{ message }}</p>
   <a href="/" class="btn btn-primary">Go home</a>
 </div>

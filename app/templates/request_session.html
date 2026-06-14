@@ -28,19 +28,19 @@
 
     <div class="card" style="margin-bottom: 24px;">
       <div class="form-group">
-        <label>📅 When do you want to meet?</label>
+        <label>When do you want to meet?</label>
         <input type="datetime-local" name="scheduled_at" class="form-input" required
                min="{{ now }}" />
       </div>
       <div class="form-group" style="margin-bottom: 0;">
-        <label>📝 Notes for {{ skill.user.full_name.split()[0] }}</label>
+        <label>Notes for {{ skill.user.full_name.split()[0] }}</label>
         <textarea name="notes" class="form-textarea" placeholder="What specifically do you want to learn? Any prep needed?"></textarea>
       </div>
     </div>
 
     <div class="card" style="margin-bottom: 24px;">
       <div class="form-group" style="margin-bottom: 0;">
-        <label>🔄 Recurring?</label>
+        <label>Recurring?</label>
         <div style="display: flex; gap: 16px; align-items: center;">
           <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
             <input type="radio" name="recurring" value="once" checked onchange="document.getElementById('recurring-count').style.display='none'" />
@@ -66,7 +66,7 @@
 
     <div class="card" style="background: var(--primary-bg); border-color: var(--primary); margin-bottom: 24px; padding: 16px;">
       <p style="font-size: 0.85rem;">
-        <strong>💳 1 credit will be held</strong> when you request. It's released to
+        <strong>1 credit will be held</strong> when you request. It's released to
         <strong>{{ skill.user.full_name.split()[0] }}</strong> after the session is completed.
         No-show? Cancel before the session to get your credit back.
       </p>

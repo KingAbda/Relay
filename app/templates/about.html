@@ -1,81 +1,54 @@
 {% extends "base.html" %}
 {% block title %}About{% endblock %}
 {% block content %}
-<div style="max-width: 720px; margin: 0 auto;">
-  <div style="text-align: center; margin-bottom: 48px;">
-    <div style="font-family: var(--display); letter-spacing: .26em; text-transform: uppercase; font-size: 12px; color: var(--purple); margin-bottom: 16px;">About Relay</div>
-    <h1 style="font-size: clamp(36px, 6vw, 56px); line-height: 1.05;">
-      Trading <span class="amber">skills</span>, not <span class="muted">money</span>.
-    </h1>
-    <p style="color: var(--muted); font-size: 18px; margin-top: 16px; max-width: 560px; margin-left: auto; margin-right: auto;">
-      A peer-to-peer skill exchange built by students who got tired of doing free labor.
-    </p>
-  </div>
+<section class="section about-section">
+  <div class="container">
+    <div class="about-head">
+      <p class="eyebrow" data-reveal>About Relay</p>
+      <h1 class="section-title" data-split>Trading skills, not money.</h1>
+      <p class="section-sub" data-reveal="0.05">A peer-to-peer skill exchange built by students, for students — so learning something new never depends on what you can afford.</p>
+    </div>
 
-  <div class="grid-2" style="margin-bottom: 48px;">
-    <div class="card" style="border-color: var(--primary-bg);">
-      <h3 style="margin-bottom: 8px;">💡 The Idea</h3>
-      <p class="muted" style="font-size: 0.9rem;">
-        What if there was a structured way for students to trade skills — no cash, just time?
-        That's Relay. 30 minutes of teaching = 1 credit. Spend credits to learn anything.
-        Verified through your .edu email.
-      </p>
+    <div class="grid-2 about-grid" data-reveal-stagger>
+      <article class="card about-card">
+        <span class="about-kicker">The idea</span>
+        <h3>A structured way to trade what you know</h3>
+        <p class="muted">No cash, just time. Thirty minutes of teaching earns one credit; spend credits to learn anything on the platform. Everyone is verified through their <strong>.edu</strong> email.</p>
+      </article>
+      <article class="card about-card">
+        <span class="about-kicker">The data</span>
+        <h3>The demand is already there</h3>
+        <p class="muted">Across 300+ student interviews: <strong>70%</strong> have a skill they'd want compensation for, <strong>85%</strong> want to learn but can't always afford it, and <strong>75%</strong> showed a supply-and-demand match.</p>
+      </article>
+      <article class="card about-card">
+        <span class="about-kicker">The mission</span>
+        <h3>Turn campus favor culture into fair culture</h3>
+        <p class="muted">Every student has something to teach and something to learn. Relay connects them directly — without the awkwardness of putting a price on your knowledge.</p>
+      </article>
+      <article class="card about-card">
+        <span class="about-kicker">The vision</span>
+        <h3>Start at NYU, expand campus by campus</h3>
+        <p class="muted">A world where any student can access any skill they want to learn — paid forward through teaching, not paid for in cash.</p>
+      </article>
     </div>
-    <div class="card" style="border-color: rgba(139,92,246,.2);">
-      <h3 style="margin-bottom: 8px;">📊 The Data</h3>
-      <p class="muted" style="font-size: 0.9rem;">
-        300+ student interviews confirmed: 70% have a skill they want compensation for,
-        85% want to learn but can't afford it, 75% supply-demand match rate.
-      </p>
-    </div>
-    <div class="card" style="border-color: var(--primary-bg);">
-      <h3 style="margin-bottom: 8px;">🎯 The Mission</h3>
-      <p class="muted" style="font-size: 0.9rem;">
-        Turn campus favor culture into fair culture. Every student has something to teach
-        and something to learn. Relay connects them without the awkwardness of pricing
-        your knowledge.
-      </p>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom: 8px;">🔥 The Vision</h3>
-      <p class="muted" style="font-size: 0.9rem;">
-        Start at NYU, expand campus by campus. A world where every student has access
-        to any skill they want to learn — paid forward, not paid for.
-      </p>
-    </div>
-  </div>
 
-  <!-- Founder Section -->
-  <div class="card" style="border-color: var(--panel-line); margin-bottom: 48px;">
-    <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
-      <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--cta), var(--primary)); display: flex; align-items: center; justify-content: center; font-family: var(--display); font-weight: 700; font-size: 28px; color: #FFFFFF; flex-shrink: 0;">
-        AT
+    <article class="card founder-card" data-reveal>
+      <div class="founder-avatar">AT</div>
+      <div class="founder-body">
+        <h3>Abdurrahman Touray <span class="founder-role">— Founder</span></h3>
+        <p class="muted">First-generation Gambian American, NYU 2026 (HEOP Scholar). Relay started in Abu Dhabi — a friend taught me music production, and I helped him start going to the gym. No money changed hands. That moment sparked a question: <em>what if there were a system for this?</em></p>
+        <p class="muted">After 300+ student interviews and a 50-person pilot, Relay is built for students who want to learn without breaking the bank and teach without being undervalued.</p>
+        <a href="mailto:hello@joinrelay.co" class="btn btn-secondary" data-magnetic data-magnetic-strength="0.3">hello@joinrelay.co</a>
       </div>
-      <div style="flex: 1; min-width: 200px;">
-        <h3>Abdurrahman Touray <span style="font-weight: 400; font-size: 0.85rem; color: var(--muted);">— Founder</span></h3>
-        <p class="muted" style="font-size: 0.9rem; margin-top: 8px;">
-          First-generation Gambian American, NYU 2026 (HEOP Scholar). Relay started in Abu Dhabi
-          — a friend taught me music production, I helped him start going to the gym. No money changed hands.
-          That moment sparked a question: <em>what if there was a system for this?</em>
-        </p>
-        <p class="muted" style="font-size: 0.9rem; margin-top: 8px;">
-          After 300+ student interviews and a 50-person pilot, Relay is built for students who
-          want to learn without breaking the bank and teach without being undervalued.
-        </p>
-        <div style="margin-top: 12px;">
-          <a href="mailto:hello@joinrelay.co" class="btn btn-sm btn-outline">hello@joinrelay.co</a>
-        </div>
-      </div>
-    </div>
-  </div>
+    </article>
 
-  <!-- Campus Ambassadors placeholder -->
-  <div class="card" style="text-align: center; border-style: dashed;">
-    <p class="muted" style="font-size: 0.9rem;">
-      🌟 <strong>Campus Ambassadors coming soon.</strong><br>
-      Want to represent Relay at your school?
-    </p>
-    <a href="mailto:hello@joinrelay.co?subject=Campus Ambassador" class="btn btn-sm btn-outline" style="margin-top: 12px;">Get in touch</a>
+    <article class="card about-ambassadors" data-reveal>
+      <div>
+        <strong>Campus ambassadors — coming soon.</strong>
+        <p class="muted">Want to represent Relay at your school?</p>
+      </div>
+      <a href="mailto:hello@joinrelay.co?subject=Campus Ambassador" class="btn btn-secondary">Get in touch</a>
+    </article>
   </div>
-</div>
+</section>
 {% endblock %}

@@ -1,92 +1,121 @@
-1|{% extends "base.html" %}
-2|{% block title %}Browse Skills{% endblock %}
-3|{% block content %}
-4|<h1 style="margin-bottom: 8px;">Browse skills</h1>
-5|<p class="muted" style="margin-bottom: 24px;">Find someone to teach you something new.</p>
-6|
-7|<!-- Referral banner for logged-in users -->
-8|{% if user and ref_link %}
-9|<div class="card" style="border-color: var(--primary-bg); background: var(--primary-bg); margin-bottom: 24px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-10|  <span style="font-size: 0.9rem;">🔗 <strong>Share & earn</strong> — you both get <strong>+1 credit</strong></span>
-11|  <div style="display: flex; gap: 8px; align-items: center;">
-12|    <input type="text" class="form-input" value="{{ ref_link }}" readonly style="font-size: 0.75rem; padding: 6px 10px; max-width: 260px;" onclick="this.select()" />
-13|    <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText('{{ ref_link }}').then(() => this.textContent='Copied!')" style="font-size: 0.75rem;">Copy</button>
-14|  </div>
-15|</div>
-16|{% endif %}
-17|
-18|{% if not user %}
-19|<div class="card" style="border-color: var(--primary-bg); background: var(--primary-bg); margin-bottom: 24px; text-align: center; padding: 20px;">
-20|  <p style="font-size: 0.95rem;">
-21|    👋 <strong>See something you like?</strong>
-22|    <a href="/signup" style="color: var(--cta); font-weight: 600;">Join Relay</a> with your .edu email to request a session.
-23|  </p>
-24|</div>
-25|{% endif %}
-26|
-27|<div class="flex items-center gap-2" style="margin-bottom: 24px; flex-wrap: wrap;">
-28|  <form method="GET" action="/browse" class="flex items-center gap-2" style="flex: 1;">
-29|    <input type="text" name="q" class="form-input" placeholder="Search skills..." value="{{ query or '' }}" style="max-width: 300px;" />
-30|    {% if categories|length > 1 %}
-31|    <select name="category" class="form-select" style="max-width: 180px;" onchange="this.form.submit()">
-32|      <option value="">All categories</option>
-33|      {% for cat in categories %}
-34|        <option value="{{ cat }}" {{ 'selected' if selected_category == cat }}>{{ cat|capitalize }}</option>
-35|      {% endfor %}
-36|    </select>
-37|    {% endif %}
-38|    <button type="submit" class="btn btn-sm btn-secondary">Search</button>
-39|    {% if query or selected_category %}
-40|      <a href="/browse" class="btn btn-sm btn-outline">Clear</a>
-41|    {% endif %}
-42|  </form>
-43|</div>
-44|
-45|{% if skills %}
-46|  <div class="grid-2">
-47|    {% for s in skills %}
-      <div class="card">
-        <div class="flex items-center gap-2" style="margin-bottom: 8px;">
-          <img src="{{ gravatar_url(s.user_email, 32) }}" alt="" style="width: 28px; height: 28px; border-radius: 50%;" />
-          <span class="muted" style="font-size: 0.8rem;">{{ s.user_name.split()[0] }}</span>
-          {% if s.session_count > 0 %}
-            <span class="tag tag-{{ s.category.value if s.category is not string else s.category }}" style="margin-left: auto;">{{ s.session_count }} session{{ 's' if s.session_count != 1 }}</span>
-          {% else %}
-            <span class="tag tag-{{ s.category.value if s.category is not string else s.category }}" style="margin-left: auto;">{{ s.category.value if s.category is not string else s.category }}</span>
-          {% endif %}
-        </div>
-        <h3 style="margin-bottom: 4px;">{{ s.name }}</h3>
-        {% if s.description %}
-          <p class="muted" style="font-size: 0.9rem; margin-bottom: 12px;">{{ s.description[:120] }}{% if s.description|length > 120 %}...{% endif %}</p>
-        {% endif %}
-        <div class="flex items-center gap-2" style="margin-top: 12px;">
-          {% if user %}
-            <a href="/request-session/{{ s.id }}" class="btn btn-sm btn-primary">Request session</a>
-            <a href="/profile/{{ s.user_id }}" class="btn btn-sm btn-secondary">View profile</a>
-          {% else %}
-            <a href="/signup" class="btn btn-sm btn-primary">Sign up to request</a>
-            <a href="/profile/{{ s.user_id }}" class="btn btn-sm btn-secondary">View profile</a>
-          {% endif %}
-        </div>
-      </div>
-    {% endfor %}
+{% extends "base.html" %}
+{% block title %}Browse Skills{% endblock %}
+{% block page_id %}browse{% endblock %}
+{% block content %}
+<section class="browse-hero">
+  <div class="container browse-hero-grid">
+    <div>
+      <p class="eyebrow" data-reveal>Browse the board</p>
+      <h1 data-split>Find a student who can help.</h1>
+      <p class="browse-sub" data-reveal="0.05">A tidy preview of the skills students are offering this week. These demo listings keep the pilot board full while the first cohort signs up.</p>
+    </div>
+    <div class="browse-stats" aria-label="Browse stats" data-reveal-stagger>
+      <div><strong data-count="{{ browse_stats.skills if browse_stats else skills|length }}">0</strong><span>skills listed</span></div>
+      <div><strong data-count="{{ browse_stats.students if browse_stats else 18 }}">0</strong><span>students active</span></div>
+      <div><strong data-count="{{ browse_stats.credits if browse_stats else 42 }}">0</strong><span>credits moving</span></div>
+    </div>
   </div>
-{% else %}
-  <div class="card" style="text-align: center; padding: 40px;">
-    <p style="font-size: 1.1rem; margin-bottom: 8px;">No skills found</p>
-    {% if query or selected_category %}
-      <p class="muted">Try a different search or <a href="/browse" style="color: var(--primary);">browse all skills</a>.</p>
-    {% else %}
-      <p class="muted">The marketplace is empty — be the first to add skills!</p>
-      {% if user %}
-        <div class="flex items-center gap-2" style="justify-content: center; margin-top: 16px; flex-wrap: wrap;">
-          <a href="/dashboard" class="btn btn-primary">Add your skills</a>
-          <a href="/seed-demo" class="btn btn-secondary">✨ Add demo skills</a>
+</section>
+
+<section class="browse-controls-section">
+  <div class="container">
+    {% if user and ref_link %}
+    <div class="browse-referral">
+      <div><strong>Share Relay</strong><span>You both get +1 credit when a friend joins.</span></div>
+      <div class="ref-copy">
+        <input type="text" class="form-input" value="{{ ref_link }}" readonly onclick="this.select()" />
+        <button class="btn btn-primary" onclick="navigator.clipboard.writeText('{{ ref_link }}').then(() => this.textContent='Copied')">Copy</button>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if not user %}
+    <div class="browse-join-note">
+      <span>See something useful?</span>
+      <p>Join with your .edu email to request a session. For now, these listings are demo-ready so the board feels alive.</p>
+      <a href="/signup">Join the pilot →</a>
+    </div>
+    {% endif %}
+
+    <form method="GET" action="/browse" class="browse-filters">
+      <label class="search-wrap">
+        <span>Search skills</span>
+        <input type="text" name="q" class="form-input" placeholder="Try Python, resume, guitar…" value="{{ query or '' }}" />
+      </label>
+      <label class="category-wrap">
+        <span>Category</span>
+        <select name="category" class="form-select" onchange="this.form.submit()">
+          <option value="">All categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}" {{ 'selected' if selected_category == cat }}>{{ cat|capitalize }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit" class="btn btn-primary">Search</button>
+      {% if query or selected_category %}<a href="/browse" class="btn btn-secondary">Clear</a>{% endif %}
+    </form>
+  </div>
+</section>
+
+<section class="browse-results-section">
+  <div class="container">
+    <div class="browse-section-head">
+      <div>
+        <p class="eyebrow">Available this week</p>
+        <h2>{{ skills|length }} skill{{ 's' if skills|length != 1 }} on the board</h2>
+      </div>
+      <p>Each card shows the student, format, location, and credit cost so the page feels like a real exchange board instead of a messy list.</p>
+    </div>
+
+    {% if skills %}
+    <div class="skill-market-grid" data-reveal-stagger>
+      {% for s in skills %}
+      <article class="market-card market-{{ s.accent or s.category }}">
+        <div class="market-card-top">
+          <div class="teacher-badge">{{ s.user_name[:1] }}</div>
+          <div>
+            <strong>{{ s.user_name }}</strong>
+            <span>{{ s.campus or 'NYU' }} · {{ s.time or '30 min' }}</span>
+          </div>
+          {% if s.demo %}<em>demo</em>{% endif %}
         </div>
+        <div class="market-card-body">
+          <span class="market-category">{{ s.category|capitalize }}</span>
+          <h3>{{ s.name }}</h3>
+          <p>{{ s.description }}</p>
+        </div>
+        <div class="market-meta">
+          <span>{{ s.session_count }} session{{ 's' if s.session_count != 1 }}</span>
+          <span>{{ s.proficiency }}/5 proficiency</span>
+          <span>1 credit</span>
+        </div>
+        <div class="market-actions">
+          {% if s.demo %}
+            <a href="/signup" class="btn btn-primary">Join to request</a>
+            <button class="btn btn-secondary" type="button" disabled>Preview card</button>
+          {% elif user %}
+            <a href="/request-session/{{ s.id }}" class="btn btn-primary">Request session</a>
+            <a href="/profile/{{ s.user_id }}" class="btn btn-secondary">View profile</a>
+          {% else %}
+            <a href="/signup" class="btn btn-primary">Sign up to request</a>
+            <a href="/profile/{{ s.user_id }}" class="btn btn-secondary">View profile</a>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-board card">
+      <h3>No skills found</h3>
+      {% if query or selected_category %}
+        <p>Try a different search or browse all skills.</p>
+        <a href="/browse" class="btn btn-primary">Browse all skills</a>
       {% else %}
-        <a href="/signup" class="btn btn-primary" style="margin-top: 16px;">Join Relay</a>
+        <p>The marketplace is empty — be the first to add skills.</p>
+        <a href="/signup" class="btn btn-primary">Join Relay</a>
       {% endif %}
+    </div>
     {% endif %}
   </div>
-{% endif %}
+</section>
 {% endblock %}

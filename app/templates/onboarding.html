@@ -11,7 +11,7 @@
   {% if pilot_vertical %}
   <div class="card" style="border-color: var(--primary); background: var(--primary-bg); margin-bottom: 24px; text-align: center;">
     <p style="font-size: 0.9rem;">
-      🚀 <strong>Relay is piloting {{ pilot_vertical_name }}.</strong><br>
+      <strong>Relay is piloting {{ pilot_vertical_name }}.</strong><br>
       <span class="muted">{% if pilot_vertical == 'all' %}Pick any skill category — or add a demo set to get started fast.{% else %}List any fitness, wellness, or lifestyle skill to join the first cohort.{% endif %}</span>
     </p>
   </div>
@@ -25,7 +25,7 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
     <div class="card" style="margin-bottom: 24px;">
-      <h3 style="margin-bottom: 16px;">🎓 What can you teach?</h3>
+      <h3 style="margin-bottom: 16px;">What can you teach?</h3>
       <div class="form-group">
         <label>Skill name</label>
         <input type="text" name="teach_name" class="form-input" placeholder="e.g. Weight training, Yoga, Meal prep" required />
@@ -46,7 +46,7 @@
     </div>
 
     <div class="card" style="margin-bottom: 24px;">
-      <h3 style="margin-bottom: 16px;">📖 What do you want to learn?</h3>
+      <h3 style="margin-bottom: 16px;">What do you want to learn?</h3>
       <div class="form-group">
         <label>Skill name</label>
         <input type="text" name="learn_name" class="form-input" placeholder="e.g. Boxing, Nutrition planning" required />
@@ -68,7 +68,7 @@
 
     <div class="card" style="background: var(--primary-bg); border-color: var(--primary); margin-bottom: 24px;">
       <p style="font-size: 0.9rem;">
-        <strong>⚡ Why both?</strong> When everyone contributes, credits flow.
+        <strong>Why both?</strong> When everyone contributes, credits flow.
         You'll earn credits by teaching and spend them learning —
         that's how the Relay race works.
       </p>

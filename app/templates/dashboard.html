@@ -6,7 +6,7 @@
 {% block content %}
 <div class="flex justify-between items-center" style="margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
   <div>
-    <h1>Welcome, {{ user.full_name.split()[0] }} 👋</h1>
+    <h1>Welcome, {{ user.full_name.split()[0] }}</h1>
     <p class="muted" style="margin-top: 4px;">Here's your Relay activity.</p>
   </div>
   <div class="card" style="margin-bottom: 32px;">
@@ -18,22 +18,22 @@
       </div>
     </div>
     {% if credit and credit.balance >= 5 %}
-      <p class="muted text-sm">💰 You're sitting on <strong>{{ credit.balance|int }}</strong> credits. Teach to earn more, or spend them to learn something new!</p>
+      <p class="muted text-sm">You're sitting on <strong>{{ credit.balance|int }}</strong> credits. Teach to earn more, or spend them to learn something new.</p>
     {% elif credit and credit.balance == 0 %}
-      <p class="muted text-sm">⚡ 0 credits. <a href="/browse" style="color: var(--cta);">Teach a session</a> to earn your first ones.</p>
+      <p class="muted text-sm">0 credits. <a href="/browse" style="color: var(--blue);">Teach a session</a> to earn your first ones.</p>
     {% endif %}
   </div>
 </div>
 
 {% if not user.email_verified %}
   <div class="card" style="border-color: var(--primary); background: var(--primary-bg); margin-bottom: 24px;">
-    <p style="font-size: 0.9rem;">📧 Verify your email to unlock full access. <a href="/verify-email" style="color: var(--cta);">Resend verification</a></p>
+    <p style="font-size: 0.9rem;">Verify your email to unlock full access. <a href="/verify-email" style="color: var(--blue);">Resend verification</a></p>
   </div>
 {% endif %}
 
 {% if pending_requests %}
 <div class="card" style="border-color: var(--cta); background: rgba(249,115,22,0.04); margin-bottom: 24px;">
-  <h3 style="margin-bottom: 12px;">📩 Pending session requests</h3>
+  <h3 style="margin-bottom: 12px;">Pending session requests</h3>
   {% for s in pending_requests %}
     <div class="flex justify-between items-center" style="padding: 8px 0; border-bottom: 1px solid var(--panel-line);">
       <div>
@@ -41,7 +41,7 @@
         {% if s.notes %}<p class="muted" style="font-size: 0.85rem;">{{ s.notes[:100] }}</p>{% endif %}
       </div>
       <div class="flex items-center gap-2">
-        <a href="/accept-session/{{ s.id }}" class="btn btn-sm btn-blue">✅ Accept</a>
+        <a href="/accept-session/{{ s.id }}" class="btn btn-sm btn-blue">Accept</a>
         <a href="/cancel-session/{{ s.id }}" class="btn btn-sm btn-secondary">✕ Decline</a>
       </div>
     </div>
@@ -52,7 +52,7 @@
 <div class="grid-2" style="margin-bottom: 32px;">
   <div class="card">
     <div class="flex justify-between items-center mb-2">
-      <h3>🎓 Skills you teach</h3>
+      <h3>Skills you teach</h3>
       <button class="btn btn-sm btn-outline" onclick="document.getElementById('add-skill-form').style.display='block'">+ Add</button>
     </div>
     {% if my_skills %}
@@ -66,7 +66,7 @@
       {% endfor %}
     {% else %}
       <p class="muted" style="font-size: 0.9rem;">No skills listed yet.</p>
-      <a href="/seed-demo" class="btn btn-sm btn-outline" style="margin-top: 8px;">✨ Add demo skills</a>
+      <a href="/seed-demo" class="btn btn-sm btn-outline" style="margin-top: 8px;">Add demo skills</a>
     {% endif %}
 
     <form id="add-skill-form" method="POST" action="/add-skill" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--panel-line);">
@@ -90,7 +90,7 @@
   </div>
 
   <div class="card">
-    <h3 class="mb-2">📖 Skills you want to learn</h3>
+    <h3 class="mb-2">Skills you want to learn</h3>
     {% if my_wants %}
       {% for w in my_wants %}
         <div class="flex items-center gap-2" style="margin-bottom: 6px;">
@@ -106,7 +106,7 @@
 
 <div class="grid-2" style="margin-bottom: 32px;">
   <div class="card">
-    <h3 class="mb-2">📅 Sessions</h3>
+    <h3 class="mb-2">Sessions</h3>
     {% if sessions %}
       <div class="table-wrap">
         <table>
@@ -139,12 +139,12 @@
                 </td>
                 <td>
                   {% if s.meet_link and s.status in ('confirmed', 'accepted') %}
-                    <a href="{{ s.meet_link }}" target="_blank" class="btn btn-sm btn-outline" style="font-size: 0.7rem;">🎥 Join</a>
+                    <a href="{{ s.meet_link }}" target="_blank" class="btn btn-sm btn-outline" style="font-size: 0.7rem;">Join call</a>
                   {% endif %}
                 </td>
                 <td>
                   {% if s.status == 'completed' and not s.my_review %}
-                    <a href="/review-session/{{ s.id }}" class="btn btn-sm btn-primary" style="font-size: 0.7rem; padding: 2px 8px;">⭐ Review</a>
+                    <a href="/review-session/{{ s.id }}" class="btn btn-sm btn-primary" style="font-size: 0.7rem; padding: 2px 8px;">Review</a>
                   {% elif s.status == 'completed' and s.my_review %}
                     <span class="muted" style="font-size: 0.7rem;">{{ s.my_review.rating|stars }}</span>
                   {% elif s.role == 'teacher' and s.status in ('confirmed', 'accepted') %}
@@ -166,7 +166,7 @@
   </div>
 
   <div class="card">
-    <h3 class="mb-2">💰 Credit history</h3>
+    <h3 class="mb-2">Credit history</h3>
     {% if transactions %}
       <div class="table-wrap">
         <table>
@@ -194,13 +194,13 @@
 
 {% if ref_link %}
 <div class="card" style="border-color: var(--primary-bg); margin-bottom: 24px;">
-  <h3 class="mb-2">🔗 Share & earn credits</h3>
+  <h3 class="mb-2">Share &amp; earn credits</h3>
   <p class="muted" style="margin-bottom: 12px;">Share this link. You both get <strong>+1 credit</strong> when they join! Relay works best when your friends are here too.</p>
   <div class="flex items-center gap-2">
     <input type="text" class="form-input" value="{{ ref_link }}" readonly style="flex: 1; font-size: 0.85rem;" onclick="this.select()" />
     <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText('{{ ref_link }}').then(() => this.textContent='Copied!').catch(() => {})">Copy</button>
-    <a href="https://twitter.com/intent/tweet?text=Join%20me%20on%20Relay%20—%20the%20gym%20membership%20for%20skills!%20Teach%20anything%20for%2030%20min%2C%20learn%20anything%20free.%20{{ ref_link|urlencode }}" target="_blank" class="btn btn-sm btn-secondary" style="font-size: 0.75rem;">🐦 Share</a>
-    <button class="btn btn-sm btn-secondary" style="font-size: 0.75rem;" onclick="if(navigator.share){navigator.share({title:'Join Relay',text:'Teach for 30 min, learn anything free.',url:'{{ ref_link }}'})}">📱 Share</button>
+    <a href="https://twitter.com/intent/tweet?text=Join%20me%20on%20Relay%20—%20the%20gym%20membership%20for%20skills!%20Teach%20anything%20for%2030%20min%2C%20learn%20anything%20free.%20{{ ref_link|urlencode }}" target="_blank" class="btn btn-sm btn-secondary" style="font-size: 0.75rem;">Share on X</a>
+    <button class="btn btn-sm btn-secondary" style="font-size: 0.75rem;" onclick="if(navigator.share){navigator.share({title:'Join Relay',text:'Teach for 30 min, learn anything free.',url:'{{ ref_link }}'})}">Share</button>
   </div>
 </div>
 {% endif %}

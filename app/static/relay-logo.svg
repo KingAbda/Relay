@@ -1,21 +1,14 @@
-<!-- Relay SVG Logo - Simple baton/lightning bolt + text mark -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 48" width="180" height="48">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="238 42 245 88" role="img" aria-labelledby="relayLogoTitle">
+  <title id="relayLogoTitle">Relay</title>
   <defs>
-    <linearGradient id="relay-logo-grad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#FF9D2E"/>
-      <stop offset="50%" stop-color="#8B5CF6"/>
-      <stop offset="100%" stop-color="#46D3FF"/>
-    </linearGradient>
+    <style>
+      .relay-blue { fill: none; stroke: #0d47c7; stroke-width: 7.5; stroke-linecap: round; stroke-linejoin: round; }
+      .relay-fill { fill: #0d47c7; }
+      .relay-text { fill: #0d47c7; font-family: Inter, Avenir Next, Helvetica Neue, Arial, sans-serif; font-size: 62px; font-weight: 400; letter-spacing: -2px; }
+    </style>
   </defs>
-  <!-- Baton/arrow mark -->
-  <g transform="translate(0, 4)">
-    <rect x="2" y="8" width="28" height="6" rx="3" fill="url(#relay-logo-grad)"/>
-    <polygon points="30,4 30,18 42,11" fill="#FF9D2E"/>
-    <circle cx="8" cy="11" r="4" fill="#0A0A0F" stroke="#FF9D2E" stroke-width="1.5"/>
-    <circle cx="20" cy="11" r="4" fill="#0A0A0F" stroke="#8B5CF6" stroke-width="1.5"/>
-    <circle cx="32" cy="11" r="4" fill="#0A0A0F" stroke="#46D3FF" stroke-width="1.5"/>
-  </g>
-  <!-- Text -->
-  <text x="52" y="32" font-family="'Chakra Petch',system-ui,sans-serif" font-weight="700" font-size="26" letter-spacing="3" fill="currentColor">RELAY</text>
-  <text x="160" y="32" font-family="'Chakra Petch',system-ui,sans-serif" font-weight="500" font-size="10" letter-spacing="1" fill="#8B5CF6">.co</text>
+  <circle class="relay-fill" cx="258.5" cy="56.8" r="8.9"/>
+  <circle class="relay-fill" cx="300.3" cy="56.8" r="8.9"/>
+  <path class="relay-blue" d="M244.5 91.5 C244.5 80.5 254 75 262 78.5 C269.5 81.8 270.8 91.4 279.3 91.4 C287.8 91.4 289.4 81.8 296.8 78.5 C305 74.8 314.8 81.3 315.1 92 C315.6 108.4 301.3 120.7 279.7 120.7 C258 120.7 244.5 108.3 244.5 91.5 Z"/>
+  <text class="relay-text" x="339" y="112">Relay</text>
 </svg>
