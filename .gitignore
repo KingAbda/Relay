@@ -5,3 +5,6 @@ instance/
 .env
 venv/
 .venv/
+
+# Local agent settings
+.claude/
