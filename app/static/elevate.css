@@ -353,18 +353,18 @@ a:focus-visible,button:focus-visible,summary:focus-visible,
 .legal-shell { max-width: 760px; margin: 0 auto; padding: 64px 0 80px; }
 
 /* ───────────────────── Light mode overrides ────────────────────── */
-body.light-mode .site-nav { background: rgba(247,241,230,0.92); border-bottom-color: rgba(216,201,168,0.8); }
-body.light-mode .site-nav.scrolled { background: rgba(247,241,230,0.95); box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
-body.light-mode .skill-marquee { background: rgba(239,231,217,0.7); }
-body.light-mode .skill-marquee .marquee-group span { background: #fff8e8; border-color: #d8c9a8; color: #6b6575; }
-body.light-mode .pricing-section { background: linear-gradient(180deg,#fff8e8 0%,#f7f1e6 100%); }
-body.light-mode .faq-section { background: linear-gradient(180deg,#efe7d9 0%,#f7f1e6 100%); }
-body.light-mode .credit-section { background: linear-gradient(135deg,#fff8e8,#f7f1e6); }
-body.light-mode .cta-card { background: linear-gradient(135deg,#7c5cfc 0%,#6240d8 100%); }
-body.light-mode .legal-callout { background: #efe7d9; }
-body.light-mode .about-card .about-kicker { color: var(--blue); background: #fff8e8; }
-body.light-mode .gauge-center { background: linear-gradient(180deg,#fff8e8 0%,var(--card) 100%); }
+body.light-mode .site-nav { background: rgba(248,250,252,0.92); border-bottom-color: rgba(226,232,240,0.8); }
+body.light-mode .site-nav.scrolled { background: rgba(248,250,252,0.95); box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+body.light-mode .skill-marquee { background: rgba(241,245,249,0.7); }
+body.light-mode .skill-marquee .marquee-group span { background: #FFF; border-color: #E2E8F0; color: #64748B; }
+body.light-mode .pricing-section { background: linear-gradient(180deg,#FFF 0%,#F8FAFC 100%); }
+body.light-mode .faq-section { background: linear-gradient(180deg,#F1F5F9 0%,#F8FAFC 100%); }
+body.light-mode .credit-section { background: linear-gradient(135deg,#F1F5F9,#F8FAFC); }
+body.light-mode .cta-card { background: linear-gradient(135deg,#2563EB 0%,#1D4ED8 100%); }
+body.light-mode .legal-callout { background: #F1F5F9; }
+body.light-mode .about-card .about-kicker { color: var(--blue); background: #FFF; }
+body.light-mode .gauge-center { background: linear-gradient(180deg,#F1F5F9 0%,var(--card) 100%); }
 body.light-mode .exchange-board { background: var(--card); }
-body.light-mode .brand-intro { background: radial-gradient(120% 120% at 50% 38%,#fff8e8 0%,#f7f1e6 55%,#efe7d9 100%); }
-body.light-mode .intro-word { color: var(--cobalt); }
-body.light-mode .cursor-glow { background: radial-gradient(circle,rgba(124,92,252,0.08),rgba(255,107,53,0.03) 40%,transparent 64%); }
+body.light-mode .brand-intro { background: radial-gradient(120% 120% at 50% 38%,#F1F5F9 0%,#F8FAFC 55%,#E2E8F0 100%); }
+body.light-mode .intro-word { color: var(--blue); }
+body.light-mode .cursor-glow { background: radial-gradient(circle,rgba(37,99,235,0.08),rgba(249,115,22,0.03) 40%,transparent 64%); }
