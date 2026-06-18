@@ -44,10 +44,17 @@
 
     <article class="card about-ambassadors" data-reveal>
       <div>
-        <strong>Campus ambassadors — coming soon.</strong>
-        <p class="muted">Want to represent Relay at your school?</p>
+        <strong>🎓 Student Ambassadors</strong>
+        <p class="muted">Represent Relay at your school! Ambassadors get <strong>bonus credits, early access to new features, and a verified badge</strong> on their profile. Help grow the community and earn rewards.</p>
       </div>
-      <a href="mailto:hello@joinrelay.co?subject=Campus Ambassador" class="btn btn-secondary">Get in touch</a>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        {% if user %}
+          <a href="/become-ambassador" class="btn btn-primary" onclick="event.preventDefault(); fetch('/become-ambassador',{method:'POST',headers:{'X-CSRFToken':document.querySelector('[name=csrf-token]')?.content||''}}).then(()=>window.location='/dashboard');">Become an ambassador →</a>
+        {% else %}
+          <a href="/signup" class="btn btn-primary">Join to apply →</a>
+        {% endif %}
+        <a href="mailto:hello@joinrelay.co?subject=Campus Ambassador" class="btn btn-secondary">Get in touch</a>
+      </div>
     </article>
   </div>
 </section>

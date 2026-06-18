@@ -1,18 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Browse Skills{% endblock %}
-{% block page_id %}browse{% endblock %}
 {% block content %}
 <section class="browse-hero">
   <div class="container browse-hero-grid">
     <div>
       <p class="eyebrow" data-reveal>Browse the board</p>
       <h1 data-split>Find a student who can help.</h1>
-      <p class="browse-sub" data-reveal="0.05">A tidy preview of the skills students are offering this week. These demo listings keep the pilot board full while the first cohort signs up.</p>
+      <p class="browse-sub" data-reveal="0.05">Browse skills being offered by other students. Request a 30-minute session and start learning.</p>
     </div>
     <div class="browse-stats" aria-label="Browse stats" data-reveal-stagger>
-      <div><strong data-count="{{ browse_stats.skills if browse_stats else skills|length }}">0</strong><span>skills listed</span></div>
-      <div><strong data-count="{{ browse_stats.students if browse_stats else 18 }}">0</strong><span>students active</span></div>
-      <div><strong data-count="{{ browse_stats.credits if browse_stats else 42 }}">0</strong><span>credits moving</span></div>
+      <div><strong>{{ total_skills or skills|length }}</strong><span>skills listed</span></div>
+      <div><strong>{{ total_users or 0 }}</strong><span>students active</span></div>
     </div>
   </div>
 </section>
@@ -26,14 +24,6 @@
         <input type="text" class="form-input" value="{{ ref_link }}" readonly onclick="this.select()" />
         <button class="btn btn-primary" onclick="navigator.clipboard.writeText('{{ ref_link }}').then(() => this.textContent='Copied')">Copy</button>
       </div>
-    </div>
-    {% endif %}
-
-    {% if not user %}
-    <div class="browse-join-note">
-      <span>See something useful?</span>
-      <p>Join with your .edu email to request a session. For now, these listings are demo-ready so the board feels alive.</p>
-      <a href="/signup">Join the pilot →</a>
     </div>
     {% endif %}
 
@@ -61,39 +51,34 @@
   <div class="container">
     <div class="browse-section-head">
       <div>
-        <p class="eyebrow">Available this week</p>
+        <p class="eyebrow">Available now</p>
         <h2>{{ skills|length }} skill{{ 's' if skills|length != 1 }} on the board</h2>
       </div>
-      <p>Each card shows the student, format, location, and credit cost so the page feels like a real exchange board instead of a messy list.</p>
     </div>
 
     {% if skills %}
     <div class="skill-market-grid" data-reveal-stagger>
       {% for s in skills %}
-      <article class="market-card market-{{ s.accent or s.category }}">
+      <article class="market-card">
         <div class="market-card-top">
-          <div class="teacher-badge">{{ s.user_name[:1] }}</div>
+          <div class="teacher-badge">{{ s.user.full_name[:1] }}</div>
           <div>
-            <strong>{{ s.user_name }}</strong>
-            <span>{{ s.campus or 'NYU' }} · {{ s.time or '30 min' }}</span>
+            <strong>{{ s.user.full_name }}</strong>
+            <span>30 min · 1 credit</span>
           </div>
-          {% if s.demo %}<em>demo</em>{% endif %}
         </div>
         <div class="market-card-body">
-          <span class="market-category">{{ s.category|capitalize }}</span>
+          <span class="market-category">{{ s.category }}</span>
           <h3>{{ s.name }}</h3>
-          <p>{{ s.description }}</p>
+          {% if s.description %}
+          <p>{{ s.description[:120] }}{% if s.description|length > 120 %}…{% endif %}</p>
+          {% endif %}
         </div>
         <div class="market-meta">
-          <span>{{ s.session_count }} session{{ 's' if s.session_count != 1 }}</span>
           <span>{{ s.proficiency }}/5 proficiency</span>
-          <span>1 credit</span>
         </div>
         <div class="market-actions">
-          {% if s.demo %}
-            <a href="/signup" class="btn btn-primary">Join to request</a>
-            <button class="btn btn-secondary" type="button" disabled>Preview card</button>
-          {% elif user %}
+          {% if user %}
             <a href="/request-session/{{ s.id }}" class="btn btn-primary">Request session</a>
             <a href="/profile/{{ s.user_id }}" class="btn btn-secondary">View profile</a>
           {% else %}
@@ -111,8 +96,7 @@
         <p>Try a different search or browse all skills.</p>
         <a href="/browse" class="btn btn-primary">Browse all skills</a>
       {% else %}
-        <p>The marketplace is empty — be the first to add skills.</p>
-        <a href="/signup" class="btn btn-primary">Join Relay</a>
+        <p>The marketplace is empty — <a href="/seed-demo" style="color: var(--primary);">add demo skills</a> to get started!</p>
       {% endif %}
     </div>
     {% endif %}

@@ -2,45 +2,111 @@
 {% block title %}Dashboard{% endblock %}
 {% block head %}
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<style>
+/* ── Dashboard layout ── */
+.dash-section { margin-bottom: 32px; }
+.dash-section h2 { font-size: 1.2rem; font-weight: 600; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
+.dash-section h2 .count { font-weight: 400; color: var(--text-muted); font-size: 0.85rem; }
+
+/* Stats bar */
+.stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 28px; }
+.stat-card { background: var(--panel-bg); border-radius: var(--radius); padding: 20px; border: 1px solid var(--panel-line); text-align: center; }
+.stat-card .stat-value { font-size: 2rem; font-weight: 700; line-height: 1.2; }
+.stat-card .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+/* Two-column card grid */
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 768px) { .card-grid { grid-template-columns: 1fr; } }
+
+/* Card content spacing */
+.card-body { padding: 20px; }
+.card-body h3 { font-size: 1rem; font-weight: 600; margin: 0 0 12px; }
+
+/* Skill items */
+.skill-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--panel-line); }
+.skill-row:last-child { border-bottom: none; }
+
+/* Pending request banner */
+.pending-banner { border: 1px solid var(--cta); background: rgba(249,115,22,0.04); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; }
+.pending-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--panel-line); }
+.pending-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+/* Verification banner */
+.verify-banner { border: 1px solid var(--primary); background: var(--primary-bg); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* Referral section */
+.ref-card { border: 1px solid var(--primary-bg); border-radius: var(--radius); padding: 20px; margin-bottom: 24px; }
+.ref-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.ref-link-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+</style>
 {% endblock %}
 {% block content %}
-<div class="flex justify-between items-center" style="margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
-  <div>
-    <h1>Welcome, {{ user.full_name.split()[0] }}</h1>
-    <p class="muted" style="margin-top: 4px;">Here's your Relay activity.</p>
+
+<!-- ═══ Welcome & Stats Bar ═══ -->
+<div class="dash-section">
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--primary);">{{ credit.balance|int if credit else 0 }}</div>
+      <div class="stat-label">credits</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ my_skills|length }}</div>
+      <div class="stat-label">skills you teach</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ my_wants|length }}</div>
+      <div class="stat-label">want to learn</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ sessions|length }}</div>
+      <div class="stat-label">sessions</div>
+    </div>
   </div>
-  <div class="card" style="margin-bottom: 32px;">
-    <div class="flex items-center gap-2" style="margin-bottom: 12px;">
-      <div class="stat-value" style="font-size: 1.6rem;">{{ credit.balance|int if credit else 0 }}</div>
-      <div class="stat-label" style="margin-top: 0;">credits</div>
-      <div style="margin-left: auto; display: flex; gap: 8px;">
-        <span class="tag tag-{{ 'lifestyle' }}">30 min = 1 cr</span>
+
+  <!-- Welcome + badges -->
+  <div class="card" style="padding: 20px 24px;">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <div>
+        <h1 style="margin: 0; font-size: 1.5rem;">Welcome, {{ user.full_name.split()[0] }}</h1>
+        <p class="muted" style="margin: 2px 0 0; font-size: 0.85rem;">Here's your Relay activity.</p>
+      </div>
+      <div style="margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap;">
+        {% if not user.edu_verified %}
+        <a href="/verify-edu" class="btn btn-sm btn-secondary">🎓 Verify student</a>
+        {% else %}
+        <span class="tag tag-academic" style="background: var(--success); color: #fff;">✓ Verified Student</span>
+        {% endif %}
+        {% if user.is_ambassador %}
+        <span class="tag tag-social" style="background: var(--cta); color: #fff;">★ Ambassador</span>
+        {% endif %}
+        <span class="tag tag-lifestyle">30 min = 1 credit</span>
       </div>
     </div>
-    {% if credit and credit.balance >= 5 %}
-      <p class="muted text-sm">You're sitting on <strong>{{ credit.balance|int }}</strong> credits. Teach to earn more, or spend them to learn something new.</p>
-    {% elif credit and credit.balance == 0 %}
-      <p class="muted text-sm">0 credits. <a href="/browse" style="color: var(--blue);">Teach a session</a> to earn your first ones.</p>
-    {% endif %}
   </div>
 </div>
 
-{% if not user.email_verified %}
-  <div class="card" style="border-color: var(--primary); background: var(--primary-bg); margin-bottom: 24px;">
-    <p style="font-size: 0.9rem;">Verify your email to unlock full access. <a href="/verify-email" style="color: var(--blue);">Resend verification</a></p>
-  </div>
+<!-- ═══ Verification Banner ═══ -->
+{% if not user.edu_verified %}
+<div class="verify-banner">
+  <span>🎓 Verify your student status to get the verified badge on your profile.</span>
+  <a href="/send-verification-code" class="btn btn-sm btn-primary" style="margin-left: auto;"
+     onclick="event.preventDefault(); fetch('/send-verification-code',{method:'POST',headers:{'X-CSRFToken':document.querySelector('[name=csrf-token]').content}}).then(r=>r.ok?alert('Code sent!'):alert('Error'));">
+    Send verification code
+  </a>
+</div>
 {% endif %}
 
+<!-- ═══ Pending Session Requests ═══ -->
 {% if pending_requests %}
-<div class="card" style="border-color: var(--cta); background: rgba(249,115,22,0.04); margin-bottom: 24px;">
-  <h3 style="margin-bottom: 12px;">Pending session requests</h3>
+<div class="pending-banner">
+  <h3 style="margin: 0 0 12px; font-size: 1rem;">📩 Pending session requests</h3>
   {% for s in pending_requests %}
-    <div class="flex justify-between items-center" style="padding: 8px 0; border-bottom: 1px solid var(--panel-line);">
+    <div class="pending-item">
       <div>
         <strong>{{ s.learner_username or 'Someone' }}</strong> wants to learn <strong>{{ s.skill_name }}</strong>
-        {% if s.notes %}<p class="muted" style="font-size: 0.85rem;">{{ s.notes[:100] }}</p>{% endif %}
+        {% if s.notes %}<p class="muted" style="font-size: 0.8rem; margin: 2px 0 0;">{{ s.notes[:100] }}</p>{% endif %}
       </div>
-      <div class="flex items-center gap-2">
+      <div style="display: flex; gap: 8px;">
         <a href="/accept-session/{{ s.id }}" class="btn btn-sm btn-blue">Accept</a>
         <a href="/cancel-session/{{ s.id }}" class="btn btn-sm btn-secondary">✕ Decline</a>
       </div>
@@ -49,163 +115,175 @@
 </div>
 {% endif %}
 
-<div class="grid-2" style="margin-bottom: 32px;">
-  <div class="card">
-    <div class="flex justify-between items-center mb-2">
-      <h3>Skills you teach</h3>
-      <button class="btn btn-sm btn-outline" onclick="document.getElementById('add-skill-form').style.display='block'">+ Add</button>
+<!-- ═══ Quick Actions ═══ -->
+<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px;">
+  <a href="/browse" class="btn btn-primary btn-sm">Browse skills</a>
+  <a href="/edit-profile" class="btn btn-secondary btn-sm">✏️ Edit profile</a>
+  <a href="/proof-video" class="btn btn-secondary btn-sm">🎬 Share proof</a>
+  {% if not user.is_ambassador %}
+  <form method="POST" action="/become-ambassador" style="display:inline;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <button type="submit" class="btn btn-secondary btn-sm">★ Become ambassador</button>
+  </form>
+  {% endif %}
+</div>
+
+<!-- ═══ Main Grid: Skills & Sessions ═══ -->
+<div class="card-grid">
+  <!-- Skills you teach -->
+  <div class="card" style="padding: 0;">
+    <div class="card-body">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>Skills you teach</h3>
+        <button class="btn btn-sm btn-outline" onclick="document.getElementById('add-skill-form').style.display='block'">+ Add</button>
+      </div>
+      {% if my_skills %}
+        {% for s in my_skills %}
+          <div class="skill-row">
+            <span class="tag tag-{{ s.category }}">{{ s.category }}</span>
+            <span style="font-weight: 500;">{{ s.name }}</span>
+            <span class="proficiency" style="margin-left: auto;">
+              {% for i in range(s.proficiency or 3) %}<span class="prof-dot filled"></span>{% endfor %}
+              {% for i in range(5 - (s.proficiency or 3)) %}<span class="prof-dot"></span>{% endfor %}
+            </span>
+            <a href="/remove-skill/{{ s.id }}" class="btn btn-sm btn-secondary" style="font-size: 0.7rem; padding: 2px 8px;">✕</a>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted" style="font-size: 0.9rem;">No skills listed yet.</p>
+        <a href="/seed-demo" class="btn btn-sm btn-outline" style="margin-top: 8px;">Add demo skills</a>
+      {% endif %}
+
+      <form id="add-skill-form" method="POST" action="/add-skill" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--panel-line);">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <div class="form-group">
+          <input type="text" name="name" class="form-input" placeholder="e.g. Guitar, Python" required />
+        </div>
+        <div class="form-group">
+          <select name="category" class="form-select" required>
+            <option value="">Category...</option>
+            {% for cat in categories %}
+              <option value="{{ cat }}">{{ cat|capitalize }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <textarea name="description" class="form-textarea" placeholder="Description (optional)"></textarea>
+        </div>
+        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+      </form>
     </div>
-    {% if my_skills %}
-      {% for s in my_skills %}
-        <div class="flex items-center gap-2" style="margin-bottom: 6px;">
-          <span class="tag tag-{{ s.category.value if s.category is not string else s.category }}">{{ s.category.value if s.category is not string else s.category }}</span>
-          <span>{{ s.name }}</span>
-          <span class="proficiency">{% for i in range(s.proficiency or 3) %}<span class="prof-dot filled"></span>{% endfor %}{% for i in range(5 - (s.proficiency or 3)) %}<span class="prof-dot"></span>{% endfor %}</span>
-          <a href="/remove-skill/{{ s.id }}" class="btn btn-sm btn-secondary" style="font-size: 0.7rem; padding: 2px 8px; margin-left: auto;">✕</a>
-        </div>
-      {% endfor %}
-    {% else %}
-      <p class="muted" style="font-size: 0.9rem;">No skills listed yet.</p>
-      <a href="/seed-demo" class="btn btn-sm btn-outline" style="margin-top: 8px;">Add demo skills</a>
-    {% endif %}
-
-    <form id="add-skill-form" method="POST" action="/add-skill" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--panel-line);">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <div class="form-group">
-        <input type="text" name="name" class="form-input" placeholder="e.g. Guitar, Python" required />
-      </div>
-      <div class="form-group">
-        <select name="category" class="form-select" required>
-          <option value="">Category...</option>
-          {% for cat in categories %}
-            <option value="{{ cat }}">{{ cat|capitalize }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group">
-        <textarea name="description" class="form-textarea" placeholder="Description (optional)"></textarea>
-      </div>
-      <button type="submit" class="btn btn-sm btn-primary">Save</button>
-    </form>
   </div>
 
-  <div class="card">
-    <h3 class="mb-2">Skills you want to learn</h3>
-    {% if my_wants %}
-      {% for w in my_wants %}
-        <div class="flex items-center gap-2" style="margin-bottom: 6px;">
-          <span class="tag tag-{{ w.category.value if w.category is not string else w.category }}">{{ w.category.value if w.category is not string else w.category }}</span>
-          <span>{{ w.name }}</span>
+  <!-- Skills you want to learn -->
+  <div class="card" style="padding: 0;">
+    <div class="card-body">
+      <h3>Skills you want to learn</h3>
+      {% if my_wants %}
+        {% for w in my_wants %}
+          <div class="skill-row">
+            <span class="tag tag-{{ w.category }}">{{ w.category }}</span>
+            <span>{{ w.name }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted" style="font-size: 0.9rem;">Nothing listed yet. Browse skills to find something to learn!</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Sessions -->
+  <div class="card" style="padding: 0;">
+    <div class="card-body">
+      <h3>Sessions</h3>
+      {% if sessions %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Skill</th><th>With</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+              {% for s in sessions %}
+                <tr>
+                  <td>{{ s.skill_name }}</td>
+                  <td class="muted">{{ s.other_name }}</td>
+                  <td>
+                    {% if s.status == 'completed' %}
+                      <span style="color: var(--success);">✓ Done</span>
+                    {% elif s.status == 'confirmed' or s.status == 'accepted' %}
+                      <span style="color: var(--primary);">Confirmed</span>
+                    {% elif s.status == 'requested' %}
+                      <span style="color: var(--cta);">Pending</span>
+                    {% elif s.status == 'cancelled' %}
+                      <span class="muted">Cancelled</span>
+                    {% endif %}
+                  </td>
+                  <td style="white-space: nowrap;">
+                    {% if s.status == 'completed' and not s.my_review %}
+                      <a href="/review-session/{{ s.id }}" class="btn btn-sm btn-primary" style="font-size: 0.7rem;">Review</a>
+                    {% elif s.role == 'teacher' and s.status in ('confirmed', 'accepted') %}
+                      <a href="/complete-session/{{ s.id }}" class="btn btn-sm btn-blue" style="font-size: 0.7rem;">Complete</a>
+                    {% elif s.role == 'learner' and s.status in ('confirmed', 'accepted') %}
+                      <a href="/complete-session/{{ s.id }}" class="btn btn-sm btn-blue" style="font-size: 0.7rem;">Complete</a>
+                    {% elif s.status == 'requested' and s.role == 'learner' %}
+                      <a href="/cancel-session/{{ s.id }}" class="btn btn-sm btn-secondary" style="font-size: 0.7rem;">Cancel</a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-      {% endfor %}
-    {% else %}
-      <p class="muted" style="font-size: 0.9rem;">Nothing listed yet.</p>
-    {% endif %}
+      {% else %}
+        <p class="muted">No sessions yet. <a href="/browse" style="color: var(--primary);">Browse skills</a> to find your first one.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Credit history -->
+  <div class="card" style="padding: 0;">
+    <div class="card-body">
+      <h3>Credit history</h3>
+      {% if transactions %}
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Type</th><th>Amount</th><th>When</th></tr></thead>
+            <tbody>
+              {% for t in transactions %}
+                <tr>
+                  <td style="text-transform: capitalize; font-size: 0.85rem;">{{ t.type }}</td>
+                  <td style="color: {{ 'var(--success)' if t.amount > 0 else 'var(--red)' }}; font-weight: 600;">
+                    {{ '+' if t.amount > 0 }}{{ t.amount|int }}
+                  </td>
+                  <td class="muted" style="font-size: 0.85rem;">{{ t.created_at|time_ago }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="muted">No transactions yet.</p>
+      {% endif %}
+    </div>
   </div>
 </div>
 
-<div class="grid-2" style="margin-bottom: 32px;">
-  <div class="card">
-    <h3 class="mb-2">Sessions</h3>
-    {% if sessions %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Skill</th><th>With</th><th>Status</th><th>Scheduled</th><th>When</th><th></th></tr>
-          </thead>
-          <tbody>
-            {% for s in sessions %}
-              <tr>
-                <td>{{ s.skill_name }}</td>
-                <td class="muted">{{ s.other_name }}</td>
-                <td>
-                  {% if s.status == 'completed' %}
-                    <span style="color: var(--success);">✓ Done</span>
-                  {% elif s.status == 'confirmed' or s.status == 'accepted' %}
-                    <span style="color: var(--primary);">Confirmed</span>
-                  {% elif s.status == 'requested' %}
-                    <span style="color: var(--cta);">Pending</span>
-                  {% elif s.status == 'cancelled' %}
-                    <span class="muted">Cancelled</span>
-                  {% endif %}
-                </td>
-                <td class="muted" style="font-size: 0.85rem;">{{ s.created_at|time_ago }}</td>
-                <td>
-                  {% if s.scheduled_at %}
-                    <span class="muted" style="font-size: 0.75rem;">{{ s.scheduled_at.strftime('%b %d, %I:%M %p') }}</span>
-                  {% else %}
-                    <span class="muted" style="font-size: 0.75rem;">TBD</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if s.meet_link and s.status in ('confirmed', 'accepted') %}
-                    <a href="{{ s.meet_link }}" target="_blank" class="btn btn-sm btn-outline" style="font-size: 0.7rem;">Join call</a>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if s.status == 'completed' and not s.my_review %}
-                    <a href="/review-session/{{ s.id }}" class="btn btn-sm btn-primary" style="font-size: 0.7rem; padding: 2px 8px;">Review</a>
-                  {% elif s.status == 'completed' and s.my_review %}
-                    <span class="muted" style="font-size: 0.7rem;">{{ s.my_review.rating|stars }}</span>
-                  {% elif s.role == 'teacher' and s.status in ('confirmed', 'accepted') %}
-                    <a href="/complete-session/{{ s.id }}" class="btn btn-sm btn-blue" style="font-size: 0.7rem;">Complete</a>
-                  {% elif s.role == 'learner' and s.status in ('confirmed', 'accepted') %}
-                    <a href="/complete-session/{{ s.id }}" class="btn btn-sm btn-blue" style="font-size: 0.7rem;">Complete</a>
-                  {% elif s.status == 'requested' and s.role == 'learner' %}
-                    <a href="/cancel-session/{{ s.id }}" class="btn btn-sm btn-secondary" style="font-size: 0.7rem;">Cancel</a>
-                  {% endif %}
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="muted">No sessions yet. <a href="/browse" style="color: var(--primary);">Browse skills</a> to find your first one.</p>
-    {% endif %}
-  </div>
-
-  <div class="card">
-    <h3 class="mb-2">Credit history</h3>
-    {% if transactions %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Type</th><th>Amount</th><th>When</th></tr>
-          </thead>
-          <tbody>
-            {% for t in transactions %}
-              <tr>
-                <td style="text-transform: capitalize; font-size: 0.85rem;">{{ t.type.value if t.type is not string else t.type }}</td>
-                <td style="color: {{ 'var(--success)' if t.amount > 0 else 'var(--red)' }}; font-weight: 600;">
-                  {{ '+' if t.amount > 0 }}{{ t.amount|int }}
-                </td>
-                <td class="muted" style="font-size: 0.85rem;">{{ t.created_at|time_ago }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="muted">No transactions yet.</p>
-    {% endif %}
-  </div>
-</div>
-
+<!-- ═══ Referral Section ═══ -->
 {% if ref_link %}
-<div class="card" style="border-color: var(--primary-bg); margin-bottom: 24px;">
-  <h3 class="mb-2">Share &amp; earn credits</h3>
-  <p class="muted" style="margin-bottom: 12px;">Share this link. You both get <strong>+1 credit</strong> when they join! Relay works best when your friends are here too.</p>
-  <div class="flex items-center gap-2">
-    <input type="text" class="form-input" value="{{ ref_link }}" readonly style="flex: 1; font-size: 0.85rem;" onclick="this.select()" />
-    <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText('{{ ref_link }}').then(() => this.textContent='Copied!').catch(() => {})">Copy</button>
-    <a href="https://twitter.com/intent/tweet?text=Join%20me%20on%20Relay%20—%20the%20gym%20membership%20for%20skills!%20Teach%20anything%20for%2030%20min%2C%20learn%20anything%20free.%20{{ ref_link|urlencode }}" target="_blank" class="btn btn-sm btn-secondary" style="font-size: 0.75rem;">Share on X</a>
-    <button class="btn btn-sm btn-secondary" style="font-size: 0.75rem;" onclick="if(navigator.share){navigator.share({title:'Join Relay',text:'Teach for 30 min, learn anything free.',url:'{{ ref_link }}'})}">Share</button>
+<div class="ref-card">
+  <div class="ref-inner">
+    <div>
+      <h3 style="margin: 0;">Share & earn credits</h3>
+      <p class="muted" style="margin: 4px 0 0; font-size: 0.85rem;">You both get <strong>+1 credit</strong> when a friend joins!</p>
+    </div>
+    <div class="ref-link-row">
+      <input type="text" class="form-input" value="{{ ref_link }}" readonly style="width: 220px; font-size: 0.8rem;" onclick="this.select()" />
+      <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText('{{ ref_link }}').then(() => this.textContent='Copied!').catch(() => {})">Copy</button>
+      <a href="https://twitter.com/intent/tweet?text=Join%20me%20on%20Relay%20—%20the%20gym%20membership%20for%20skills!%20{{ ref_link|urlencode }}" target="_blank" class="btn btn-sm btn-secondary">Share on X</a>
+      <button class="btn btn-sm btn-secondary" onclick="if(navigator.share){navigator.share({title:'Join Relay',text:'Teach for 30 min, learn anything free.',url:'{{ ref_link }}'})}">Share</button>
+    </div>
   </div>
 </div>
 {% endif %}
 
-<div style="text-align: center; margin-top: 16px;">
-  <a href="/browse" class="btn btn-primary">Browse available skills</a>
-</div>
 {% endblock %}

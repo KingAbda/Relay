@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import bleach
 from flask import (
     Flask, render_template, request, redirect, url_for,
-    make_response, abort, jsonify,
+    make_response, abort, jsonify, session,
 )
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -31,15 +31,21 @@ if not _secret_key:
     print("WARNING: Using auto-generated SECRET_KEY. Set RELAY_SECRET_KEY env var in production.")
 
 app.config["SECRET_KEY"] = _secret_key
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("RELAY_ENV") == "production"
+app.config["SESSION_PERMANENT"] = True
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", "sqlite:///relay.db"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_COOKIE_SECURE"] = os.environ.get("RELAY_ENV") == "production"
 app.config["PREFERRED_URL_SCHEME"] = "https" if os.environ.get("RELAY_ENV") == "production" else "http"
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 50
+
+# ── Cache bust version for static assets ───────────────
+import hashlib
+_CACHE_BUST = hashlib.md5(str(datetime.utcnow().timestamp()).encode()).hexdigest()[:8]
 
 # ── Plugins ────────────────────────────────────────────
 csrf = CSRFProtect(app)
@@ -68,6 +74,7 @@ PILOT_VERTICAL_NAME = {
 from app.models import (
     User, UserSkill, UserWant, CreditAccount, CreditTransaction,
     Session, SessionReview, SkillCategory, SessionStatus, TransactionType,
+    WaitlistEntry, PasswordResetToken,
 )
 
 # ── Auto-seed demo data (defined before use) ──────────
@@ -104,7 +111,7 @@ def _auto_seed_demo_data():
         if get_user_by_email(email):
             continue
         user = User(
-            email=email, password_hash=generate_password_hash(pw),
+            email=email, password_hash=generate_password_hash(pw, method='pbkdf2:sha256'),
             full_name=name, email_verified=True, onboarded=True,
         )
         db.session.add(user)
@@ -170,7 +177,7 @@ with app.app_context():
     _auto_seed_demo_data()
 
 def current_user():
-    user_id = request.cookies.get("user_id")
+    user_id = session.get("user_id")
     if user_id:
         user = get_user(user_id)
         if user:
@@ -217,25 +224,22 @@ def get_available_skills_query():
         query = query.filter(UserSkill.category == PILOT_VERTICAL)
     return query
 
-# ── Email helper (console in dev, SendGrid in prod) ───
 def send_email(to, subject, body):
-    """Print to console in dev. In production, uses SendGrid."""
-    print(f"\n{'='*50}")
-    print(f"📧 TO: {to}")
-    print(f"   SUBJECT: {subject}")
-    print(f"{'='*50}")
-    print(body)
-    print(f"{'='*50}\n")
+    '''Print to console in dev, SendGrid in prod.'''
     try:
-        # In production, try SendGrid
-        if os.environ.get("RELAY_ENV") == "production" and os.environ.get("SENDGRID_API_KEY"):
+        safe_body = body.replace('\n', ' | ') if body else ''
+        print(f'[EMAIL] To: {to} | Subj: {subject} | {safe_body[:200]}')
+    except Exception:
+        pass
+    try:
+        if os.environ.get('RELAY_ENV') == 'production' and os.environ.get('SENDGRID_API_KEY'):
             import sendgrid
             from sendgrid.helpers.mail import Mail
-            sg = sendgrid.SendGridAPIClient(api_key=os.environ["SENDGRID_API_KEY"])
-            msg = Mail(from_email="noreply@joinrelay.co", to_emails=to, subject=subject, plain_text_content=body)
+            sg = sendgrid.SendGridAPIClient(api_key=os.environ['SENDGRID_API_KEY'])
+            msg = Mail(from_email='noreply@joinrelay.co', to_emails=to, subject=subject, plain_text_content=body)
             sg.send(msg)
     except Exception as e:
-        print(f"⚠️ Email send failed (non-fatal): {e}")
+        print(f'Email send failed (non-fatal): {e}')
 
 @app.context_processor
 def inject_globals():
@@ -243,6 +247,7 @@ def inject_globals():
         "site_name": SITE_NAME, "contact_email": CONTACT_EMAIL,
         "pilot_vertical": PILOT_VERTICAL, "pilot_vertical_name": PILOT_VERTICAL_NAME,
         "csrf_token": lambda: generate_csrf(),
+        "cache_bust": _CACHE_BUST,
     }
 
 def jinja_capitalize(s):
@@ -300,7 +305,7 @@ def add_security_headers(response):
         "default-src 'self'; script-src 'self' 'unsafe-inline'; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src 'self' https://fonts.gstatic.com; "
-        "img-src 'self' data:; frame-src 'self' https://docs.google.com; "
+        "img-src 'self' data: https://www.gravatar.com https://*.gravatar.com; frame-src 'self' https://docs.google.com; "
         "connect-src 'self'"
     )
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
@@ -389,10 +394,9 @@ def signup():
         return render_template("signup.html", user=None, ref=referral_code, error=pw_errors[0])
     if not full_name or len(full_name) < 2:
         return render_template("signup.html", user=None, ref=referral_code, error="Please enter your full name.")
-
     referrer = get_user(referral_code) if referral_code else None
     user = User(
-        email=email, password_hash=generate_password_hash(password),
+        email=email, password_hash=generate_password_hash(password, method='pbkdf2:sha256'),
         full_name=full_name, referred_by=referrer.id if referrer else None,
         verification_token=secrets.token_urlsafe(32),
     )
@@ -412,7 +416,8 @@ def signup():
         f"Welcome to Relay! Click this link to verify your .edu email:\n{verify_link}\n\n"
         f"Your first 3 credits are waiting.\n\n- Relay Team")
     resp = make_response(redirect(url_for("onboarding")))
-    resp.set_cookie("user_id", user.id, httponly=True, samesite="Lax", max_age=60*60*24*30)
+    session["user_id"] = user.id
+    session.permanent = True
     return resp
 
 @app.route("/login", methods=["GET", "POST"])
@@ -432,13 +437,15 @@ def login():
     user.account_locked_until = None
     db.session.commit()
     resp = make_response(redirect(url_for("dashboard")))
-    resp.set_cookie("user_id", user.id, httponly=True, samesite="Lax", max_age=60*60*24*30)
+    session["user_id"] = user.id
+    session.permanent = True
     return resp
 
-@app.route("/logout")
+@app.route("/logout", methods=["POST"])
 def logout():
+    session.clear()
     resp = make_response(redirect(url_for("home")))
-    resp.delete_cookie("user_id")
+    resp.delete_cookie("session")
     return resp
 
 @app.route("/verify-email/<token>")
@@ -452,6 +459,49 @@ def verify_email(token):
         db.session.commit()
         return render_template("error.html", user=user, code=200, message="Email verified!")
     return render_template("error.html", user=user, code=400, message="Invalid link."), 400
+
+
+# ── Password reset flow ────────────────────────────────
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "GET":
+        return render_template("forgot_password.html", user=None, error=None, sent=False)
+    email = sanitize(request.form.get("email", "")).strip().lower()
+    user = get_user_by_email(email)
+    if user:
+        import secrets
+        token = secrets.token_urlsafe(48)
+        expires = datetime.utcnow() + timedelta(hours=1)
+        db.session.add(PasswordResetToken(user_id=user.id, token=token, expires_at=expires))
+        db.session.commit()
+        reset_link = url_for("reset_password", token=token, _external=True)
+        send_email(user.email, "Reset your Relay password",
+            f"Hi {user.full_name.split()[0]},\n\n"
+            f"Click this link to reset your password (expires in 1 hour):\n{reset_link}\n\n"
+            f"If you didn't request this, ignore this email.\n\n- Relay Team")
+    return render_template("forgot_password.html", user=None, error=None, sent=True)
+
+
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    reset = PasswordResetToken.query.filter_by(token=token, used=False).first()
+    if not reset or reset.expires_at < datetime.utcnow():
+        return render_template("error.html", user=None, code=400, message="This reset link has expired or is invalid."), 400
+    if request.method == "GET":
+        return render_template("reset_password.html", token=token, error=None)
+    password = request.form.get("password", "")
+    pw_errors = validate_password(password)
+    if pw_errors:
+        return render_template("reset_password.html", token=token, error=pw_errors[0])
+    user = get_user(reset.user_id)
+    if not user:
+        return render_template("error.html", user=None, code=404, message="User not found."), 404
+    user.password_hash = generate_password_hash(password)
+    reset.used = True
+    db.session.commit()
+    return redirect(url_for("login"))
+
 
 # ══════════════════════════════════════════════════════════
 #  ROUTES: ONBOARDING
@@ -536,7 +586,32 @@ def dashboard():
 
 @app.route("/browse")
 def browse():
-    return redirect(url_for("home"))
+    user = current_user()
+    category = request.args.get("category")
+    q = sanitize(request.args.get("q", ""))
+    query = UserSkill.query.join(User).filter(
+        User.onboarded == True, UserSkill.is_active == True,
+    )
+    if user:
+        query = query.filter(UserSkill.user_id != user.id)
+    if PILOT_VERTICAL and PILOT_VERTICAL != "all":
+        query = query.filter(UserSkill.category == PILOT_VERTICAL)
+    if category and category in get_pilot_categories():
+        query = query.filter(UserSkill.category == category)
+    if q:
+        query = query.filter(UserSkill.name.ilike(f"%{q}%"))
+    skills = query.order_by(UserSkill.created_at.desc()).all()
+    total_skills = len(skills)
+    total_users = User.query.count()
+    if not user:
+        return render_template("browse.html", user=None, skills=skills[:8],
+                               categories=get_pilot_categories(), selected_category=category, query=q,
+                               total_skills=min(total_skills, 8), total_users=total_users, ref_link=None,
+                               preview_mode=True)
+    ref_link = url_for("signup", ref=user.id, _external=True)
+    return render_template("browse.html", user=user, skills=skills,
+                           categories=get_pilot_categories(), selected_category=category, query=q,
+                           total_skills=total_skills, total_users=total_users, ref_link=ref_link)
 
 # ══════════════════════════════════════════════════════════
 #  ROUTES: WAITLIST
@@ -548,23 +623,15 @@ def waitlist():
     email = sanitize(request.form.get("email", "")).strip().lower()
     if not email or "@" not in email:
         return redirect(url_for("home"))
-    import json, os
-    wl_path = os.path.join(os.path.dirname(__file__), "..", "instance", "waitlist.json")
-    try:
-        waitlist_data = []
-        if os.path.exists(wl_path):
-            with open(wl_path) as f:
-                waitlist_data = json.load(f)
-        if email not in [w["email"] for w in waitlist_data]:
-            waitlist_data.append({"email": email, "signed_up": datetime.utcnow().isoformat()})
-            with open(wl_path, "w") as f:
-                json.dump(waitlist_data, f, indent=2)
-            send_email(email, "You're on the Relay waitlist!",
-                f"Thanks for joining the Relay waitlist!\n\n"
-                f"We'll let you know when Relay comes to your campus.\n\n"
-                f"In the meantime, tell your friends: every referral = +1 credit at launch.\n\n- Relay Team")
-    except Exception as e:
-        print(f"⚠️ Waitlist save error: {e}")
+    existing = WaitlistEntry.query.filter(WaitlistEntry.email == email).first()
+    if not existing:
+        entry = WaitlistEntry(email=email)
+        db.session.add(entry)
+        db.session.commit()
+        send_email(email, "You're on the Relay waitlist!",
+            f"Thanks for joining the Relay waitlist!\n\n"
+            f"We'll let you know when Relay comes to your campus.\n\n"
+            f"In the meantime, tell your friends: every referral = +1 credit at launch.\n\n- Relay Team")
     return redirect(url_for("home"))
 
 # ══════════════════════════════════════════════════════════
@@ -625,6 +692,13 @@ def complete_session(session_id):
         return redirect(url_for("dashboard"))
     session.status = SessionStatus.COMPLETED
     session.completed_at = datetime.utcnow()
+    # Track completed sessions for good-student badging
+    teacher = get_user(session.teacher_id)
+    learner = get_user(session.learner_id)
+    if teacher:
+        teacher.completed_sessions_count = (teacher.completed_sessions_count or 0) + 1
+    if learner:
+        learner.completed_sessions_count = (learner.completed_sessions_count or 0) + 1
     add_credit_transaction(session.teacher_id, 1.0, TransactionType.EARN, f"Taught {session.skill_name}", related_user_id=session.learner_id)
     db.session.commit()
     return redirect(url_for("dashboard"))
@@ -672,6 +746,89 @@ def review_session(session_id):
     db.session.commit()
     return redirect(url_for("dashboard"))
 
+
+@app.route("/edit-profile", methods=["GET", "POST"])
+def edit_profile():
+    user = require_user()
+    if not user:
+        return redirect(url_for("login"))
+    if request.method == "GET":
+        return render_template("edit_profile.html", user=user, error=None)
+    user.full_name = sanitize(request.form.get("full_name", ""))
+    user.bio = sanitize(request.form.get("bio", ""), 500)
+    user.school = sanitize(request.form.get("school", ""))
+    user.major = sanitize(request.form.get("major", ""))
+    user.graduation_year = sanitize(request.form.get("graduation_year", ""))
+    profile_photo = request.form.get("profile_photo", "").strip()
+    if profile_photo:
+        user.profile_photo = profile_photo
+    db.session.commit()
+    return redirect(url_for("view_profile", user_id=user.id))
+
+# ── Add send verification code route ──
+import random
+
+@app.route("/send-verification-code", methods=["POST"])
+def send_verification_code():
+    user = require_user()
+    if not user:
+        return redirect(url_for("login"))
+    code = str(random.randint(100000, 999999))
+    user.verification_code = code
+    user.verification_code_sent_at = datetime.utcnow()
+    body = f"Your Relay .edu verification code is: {code}\n\nEnter this code on the verification page to confirm your student status.\n\n- Relay Team"
+    send_email(user.email, "Your Relay verification code", body)
+    db.session.commit()
+    return render_template("verify_edu.html", user=user, error=None, message="Verification code sent to your email!")
+
+@app.route("/verify-edu", methods=["GET", "POST"])
+def verify_edu():
+    user = require_user()
+    if not user:
+        return redirect(url_for("login"))
+    if request.method == "GET":
+        return render_template("verify_edu.html", user=user, error=None, message=None)
+    code = sanitize(request.form.get("code", ""))
+    if user.verification_code and user.verification_code == code:
+        user.edu_verified = True
+        user.verification_code = None
+        db.session.commit()
+        return redirect(url_for("dashboard"))
+    return render_template("verify_edu.html", user=user, error="Invalid code. Try again.", message=None)
+
+# ── Add proof video route ──
+@app.route("/proof-video", methods=["GET", "POST"])
+def proof_video():
+    user = require_user()
+    if not user:
+        return redirect(url_for("login"))
+    if request.method == "GET":
+        return render_template("proof_video.html", user=user, error=None)
+    url = sanitize(request.form.get("video_url", ""))
+    if url and ("youtube.com" in url or "youtu.be" in url or "vimeo.com" in url or url.startswith("http")):
+        user.has_proof_video = True
+        user.proof_video_url = url
+        # Give content credits for uploading proof
+        user.content_credit_balance = (user.content_credit_balance or 0) + 1
+        add_credit_transaction(user.id, 1.0, TransactionType.BONUS, "Bonus credit for sharing proof of skill!")
+        db.session.commit()
+        return redirect(url_for("dashboard"))
+    return render_template("proof_video.html", user=user, error="Please provide a valid video URL (YouTube, Vimeo, etc.)")
+
+# ── Student ambassador signup ──
+@app.route("/become-ambassador", methods=["POST"])
+def become_ambassador():
+    user = require_user()
+    if not user:
+        return redirect(url_for("login"))
+    user.is_ambassador = True
+    add_credit_transaction(user.id, 2.0, TransactionType.BONUS, "Welcome to the Relay Student Ambassador program!")
+    db.session.commit()
+    return redirect(url_for("dashboard"))
+
+# ══════════════════════════════════════════════════════════
+#  ROUTES: ABOUT, LEGAL & HEALTH (before profile/param routes)
+
 # ══════════════════════════════════════════════════════════
 #  ROUTES: ABOUT, LEGAL & HEALTH (before profile/param routes)
 # ══════════════════════════════════════════════════════════
@@ -687,6 +844,11 @@ def privacy():
 @app.route("/terms")
 def terms():
     return render_template("terms.html", user=current_user())
+
+@app.route("/safety")
+def safety():
+    return render_template("safety.html", user=current_user())
+
 
 @app.route("/health")
 def health():

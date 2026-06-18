@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile{% endblock %}
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+  <h1 style="margin-bottom: 8px;">Edit Profile</h1>
+  <p class="muted" style="margin-bottom: 32px;">Update your info so others know who you are.</p>
+
+  {% if error %}
+    <div class="form-error" style="margin-bottom: 16px;">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="/edit-profile">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+    <div class="card" style="margin-bottom: 20px;">
+      <h3 style="margin-bottom: 16px;">Basic Info</h3>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="full_name" class="form-input" value="{{ user.full_name }}" required />
+      </div>
+      <div class="form-group">
+        <label>Bio / About You</label>
+        <textarea name="bio" class="form-textarea" rows="4" placeholder="Tell people about yourself, your skills, and what you're passionate about.">{{ user.bio or '' }}</textarea>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>Profile Photo URL</label>
+        <input type="text" name="profile_photo" class="form-input" value="{{ user.profile_photo or '' }}" placeholder="https://example.com/photo.jpg" />
+        <span class="muted" style="font-size: 0.8rem;">Paste a link to your photo (Gravatar, Instagram, etc.)</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 20px;">
+      <h3 style="margin-bottom: 16px;">School Info</h3>
+      <div class="form-group">
+        <label>School / University</label>
+        <input type="text" name="school" class="form-input" value="{{ user.school or '' }}" placeholder="e.g. NYU" />
+      </div>
+      <div class="form-group">
+        <label>Major / Field of Study</label>
+        <input type="text" name="major" class="form-input" value="{{ user.major or '' }}" placeholder="e.g. Business & Technology" />
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>Graduation Year</label>
+        <input type="text" name="graduation_year" class="form-input" value="{{ user.graduation_year or '' }}" placeholder="e.g. 2026" />
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Save Profile</button>
+  </form>
+
+  <div style="text-align: center; margin-top: 16px;">
+    <a href="/profile/{{ user.id }}" class="btn btn-secondary">Cancel</a>
+  </div>
+</div>
+{% endblock %}

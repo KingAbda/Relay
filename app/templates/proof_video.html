@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Share Your Skill Proof{% endblock %}
+{% block content %}
+<div style="max-width: 560px; margin: 0 auto;">
+  <div class="card" style="padding: 40px;">
+    <h1 style="margin-bottom: 8px;">🎬 Share Your Skill Proof</h1>
+    <p class="muted" style="margin-bottom: 24px;">
+      Upload a short video showing your skill in action. Get <strong>+1 free credit</strong> 
+      for sharing proof! Your video helps other students see your teaching style.
+    </p>
+
+    {% if error %}
+      <div class="form-error" style="margin-bottom: 16px;">{{ error }}</div>
+    {% endif %}
+
+    {% if user.has_proof_video %}
+    <div style="padding: 20px; background: rgba(34,197,94,0.08); border-radius: var(--radius-sm); margin-bottom: 20px;">
+      <p style="color: var(--success); font-weight: 600;">✅ You've shared a proof video!</p>
+      {% if user.proof_video_url %}
+      <a href="{{ user.proof_video_url }}" target="_blank" class="btn btn-sm btn-secondary" style="margin-top: 8px;">View your video</a>
+      {% endif %}
+      <p class="muted" style="font-size: 0.85rem; margin-top: 8px;">You can update your video below.</p>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/proof-video">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+      <div class="form-group">
+        <label>Video URL (YouTube, Vimeo, etc.)</label>
+        <input type="url" name="video_url" class="form-input" 
+               placeholder="https://youtube.com/watch?v=..." 
+               value="{{ user.proof_video_url or '' }}" required />
+        <span class="muted" style="font-size: 0.8rem;">Show us what you can teach! A 1-2 minute demo works great.</span>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 12px;">
+        {% if user.has_proof_video %}Update Video{% else %}Submit & Earn +1 Credit{% endif %}
+      </button>
+    </form>
+
+    {% if not user.has_proof_video %}
+    <div class="card" style="margin-top: 24px; background: var(--primary-bg); border-color: var(--primary);">
+      <p style="font-size: 0.9rem;">
+        <strong>💡 Content Credit Program</strong><br>
+        By sharing your proof video, you agree Relay may use clips for marketing. 
+        You earn <strong>1 free credit</strong> per video. Submit a video for each skill you teach!
+      </p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div style="text-align: center; margin-top: 16px;">
+    <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,84 +1,147 @@
 {% extends "base.html" %}
-{% block title %}Profile{% endblock %}
+{% block title %}{{ profile_user.full_name }} — Profile{% endblock %}
 {% block content %}
-<div class="flex justify-between items-center" style="margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
-  <div class="flex items-center gap-3">
-    <img src="{{ gravatar_url(profile_user.email, 64) }}" alt="" style="width: 56px; height: 56px; border-radius: 50%;" />
-    <div>
-      <h1>{{ profile_user.full_name }}</h1>
-      <p class="muted">{{ profile_user.email }}</p>
-      {% if profile_user.bio %}
-      <p style="margin-top: 8px;">{{ profile_user.bio }}</p>
-    {% endif %}
-  </div>
-  <div style="text-align: right;">
-    {% if avg_rating %}
-      <div style="font-family: var(--display); font-size: 1.6rem; color: var(--orange);">{{ avg_rating }} ★</div>
-      <div class="stat-label">average rating</div>
-    {% endif %}
-    {% if completed_count is defined %}
-      <div class="stat-value" style="font-size: 1.4rem; margin-top: 8px;">{{ completed_count }}</div>
-      <div class="stat-label">sessions completed</div>
-    {% endif %}
-    {% if current_user and current_user.id == profile_user.id %}
-      <div class="credit-badge" style="margin-top: 8px;">This is you</div>
-    {% endif %}
-  </div>
-</div>
-
-<div class="grid-2" style="margin-bottom: 32px;">
-  <div class="card">
-    <h3 class="mb-2">Teaches</h3>
-    {% if skills %}
-      {% for s in skills %}
-        <div class="flex items-center gap-2" style="margin-bottom: 8px;">
-          {% set cat_name = s.category.value if s.category is not string else s.category %}
-          <span class="tag tag-{{ cat_name }}">{{ cat_name }}</span>
-          <span>{{ s.name }}</span>
+<div style="max-width: 800px; margin: 0 auto;">
+  <!-- Profile header -->
+  <div class="card" style="padding: 32px; margin-bottom: 24px;">
+    <div style="display: flex; gap: 24px; align-items: start; flex-wrap: wrap;">
+      <!-- Avatar -->
+      <div style="flex-shrink: 0;">
+        {% if profile_user.profile_photo %}
+        <img src="{{ profile_user.profile_photo }}" alt="" style="width: 96px; height: 96px; border-radius: 50%; object-fit: cover;" />
+        {% elif profile_user.email %}
+        <img src="{{ gravatar_url(profile_user.email, 96) }}" alt="" style="width: 96px; height: 96px; border-radius: 50%;" />
+        {% else %}
+        <div style="width: 96px; height: 96px; border-radius: 50%; background: var(--primary-bg); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--primary);">
+          {{ profile_user.full_name[0] }}
         </div>
-        {% if s.description %}
-          <p class="muted" style="font-size: 0.85rem; margin-bottom: 8px;">{{ s.description }}</p>
         {% endif %}
-      {% endfor %}
-    {% else %}
-      <p class="muted">No skills listed.</p>
-    {% endif %}
-    {% if current_user and current_user.id != profile_user.id and skills %}
-      <a href="/request-session/{{ skills[0].id }}" class="btn btn-sm btn-primary" style="margin-top: 12px;">Request a session</a>
-    {% endif %}
-  </div>
-
-  <div class="card">
-    <h3 class="mb-2">Wants to learn</h3>
-    {% if wants %}
-      {% for w in wants %}
-        <div class="flex items-center gap-2" style="margin-bottom: 8px;">
-          {% set cat_name = w.category.value if w.category is not string else w.category %}
-          <span class="tag tag-{{ cat_name }}">{{ cat_name }}</span>
-          <span>{{ w.name }}</span>
-        </div>
-      {% endfor %}
-    {% else %}
-      <p class="muted">Nothing listed.</p>
-    {% endif %}
-  </div>
-</div>
-
-{% if recent_reviews %}
-<div class="card">
-  <h3 class="mb-2">Recent reviews</h3>
-  {% for r in recent_reviews %}
-    <div style="padding: 12px 0; border-bottom: 1px solid var(--panel-line);">
-      <div class="flex items-center gap-2" style="margin-bottom: 4px;">
-        <strong style="font-size: 0.9rem;">{{ r.reviewer_name }}</strong>
-        <span style="color: var(--cta); font-size: 0.9rem;">{{ r.rating|stars }}</span>
-        <span class="muted" style="font-size: 0.75rem;">{{ r.created_at|time_ago }}</span>
       </div>
-      {% if r.review %}
-        <p class="muted" style="font-size: 0.85rem;">{{ r.review }}</p>
+      <!-- Info -->
+      <div style="flex: 1; min-width: 200px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <h1 style="margin: 0;">{{ profile_user.full_name }}</h1>
+          {% if profile_user.edu_verified %}
+          <span class="tag tag-academic" style="background: var(--success); color: #fff;">✓ Verified Student</span>
+          {% endif %}
+          {% if profile_user.is_ambassador %}
+          <span class="tag tag-social" style="background: var(--cta); color: #fff;">★ Ambassador</span>
+          {% endif %}
+        </div>
+        
+        {% if profile_user.school or profile_user.major %}
+        <p class="muted" style="margin: 4px 0;">
+          {% if profile_user.school %}{{ profile_user.school }}{% endif %}
+          {% if profile_user.major %} · {{ profile_user.major }}{% endif %}
+          {% if profile_user.graduation_year %} · '{{ profile_user.graduation_year[-2:] }}{% endif %}
+        </p>
+        {% endif %}
+        
+        {% if profile_user.bio %}
+        <p style="margin-top: 8px;">{{ profile_user.bio }}</p>
+        {% endif %}
+
+        {% if avg_rating or completed_count is defined %}
+        <div style="display: flex; gap: 24px; margin-top: 12px; flex-wrap: wrap;">
+          {% if avg_rating %}
+          <div>
+            <span style="font-size: 1.4rem; color: var(--cta);">{{ avg_rating }} ★</span>
+            <span class="muted" style="font-size: 0.85rem;">avg rating</span>
+          </div>
+          {% endif %}
+          <div>
+            <span style="font-size: 1.4rem; font-weight: 700;">{{ completed_count }}</span>
+            <span class="muted" style="font-size: 0.85rem;">sessions completed</span>
+          </div>
+          <!-- Student reputation badges -->
+          {% if completed_count >= 3 and profile_user.no_show_count == 0 and profile_user.reported_count == 0 %}
+          <div>
+            <span class="tag" style="background: var(--success); color: #fff;">⭐ Good Student</span>
+          </div>
+          {% elif completed_count >= 10 %}
+          <div>
+            <span class="tag" style="background: #7c3aed; color: #fff;">🏆 Trusted Member</span>
+          </div>
+          {% elif profile_user.no_show_count >= 2 or profile_user.reported_count >= 2 %}
+          <div>
+            <span class="tag" style="background: var(--red); color: #fff; font-size: 0.75rem;">⚠ Needs Improvement</span>
+          </div>
+          {% endif %}
+          {% if profile_user.has_proof_video and profile_user.proof_video_url %}
+          <div>
+            <a href="{{ profile_user.proof_video_url }}" target="_blank" class="btn btn-sm btn-secondary">🎬 Proof video</a>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+      <!-- Edit button if own profile -->
+      {% if user and user.id == profile_user.id %}
+      <div>
+        <a href="/edit-profile" class="btn btn-primary btn-sm">✏️ Edit profile</a>
+      </div>
       {% endif %}
     </div>
-  {% endfor %}
+  </div>
+
+  <!-- Skills grid -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px;">
+    <div class="card" style="padding: 20px;">
+      <h3 style="margin-bottom: 12px;">Teaches</h3>
+      {% if skills %}
+        {% for s in skills %}
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span class="tag tag-{{ s.category }}">{{ s.category }}</span>
+            <span style="font-weight: 500;">{{ s.name }}</span>
+            <span class="proficiency">
+              {% for i in range(s.proficiency or 3) %}<span class="prof-dot filled"></span>{% endfor %}
+              {% for i in range(5 - (s.proficiency or 3)) %}<span class="prof-dot"></span>{% endfor %}
+            </span>
+          </div>
+          {% if s.description %}
+            <p class="muted" style="font-size: 0.85rem; margin: -4px 0 8px 4px;">{{ s.description }}</p>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <p class="muted">No skills listed.</p>
+      {% endif %}
+      {% if user and user.id != profile_user.id and skills %}
+        <a href="/request-session/{{ skills[0].id }}" class="btn btn-sm btn-primary" style="margin-top: 12px;">Request a session</a>
+      {% endif %}
+    </div>
+
+    <div class="card" style="padding: 20px;">
+      <h3 style="margin-bottom: 12px;">Wants to learn</h3>
+      {% if wants %}
+        {% for w in wants %}
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span class="tag tag-{{ w.category }}">{{ w.category }}</span>
+            <span>{{ w.name }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted">Nothing listed.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Reviews -->
+  {% if recent_reviews %}
+  <div class="card" style="padding: 20px;">
+    <h3 style="margin-bottom: 12px;">Recent reviews</h3>
+    {% for r in recent_reviews %}
+      <div style="padding: 12px 0; border-bottom: 1px solid var(--panel-line);">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <strong style="font-size: 0.9rem;">{{ r.reviewer_name }}</strong>
+          <span style="color: var(--cta); font-size: 0.9rem;">{{ r.rating|stars }}</span>
+          <span class="muted" style="font-size: 0.75rem;">{{ r.created_at|time_ago }}</span>
+        </div>
+        {% if r.review %}
+          <p class="muted" style="font-size: 0.85rem;">{{ r.review }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 </div>
-{% endif %}
 {% endblock %}

@@ -2,9 +2,9 @@
   <title id="relayLogoTitle">Relay</title>
   <defs>
     <style>
-      .relay-blue { fill: none; stroke: #0d47c7; stroke-width: 7.5; stroke-linecap: round; stroke-linejoin: round; }
-      .relay-fill { fill: #0d47c7; }
-      .relay-text { fill: #0d47c7; font-family: Inter, Avenir Next, Helvetica Neue, Arial, sans-serif; font-size: 62px; font-weight: 400; letter-spacing: -2px; }
+      .relay-blue { fill: none; stroke: #7c5cfc; stroke-width: 7.5; stroke-linecap: round; stroke-linejoin: round; }
+      .relay-fill { fill: #7c5cfc; }
+      .relay-text { fill: #7c5cfc; font-family: Inter, Avenir Next, Helvetica Neue, Arial, sans-serif; font-size: 62px; font-weight: 400; letter-spacing: -2px; }
     </style>
   </defs>
   <circle class="relay-fill" cx="258.5" cy="56.8" r="8.9"/>

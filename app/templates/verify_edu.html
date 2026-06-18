@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Verify Student Status{% endblock %}
+{% block content %}
+<div style="max-width: 480px; margin: 0 auto; text-align: center;">
+  <div class="card" style="padding: 48px 40px;">
+    <h1 style="margin-bottom: 8px;">🎓 Verify Your Student Status</h1>
+    <p class="muted" style="margin-bottom: 24px;">Get the verified badge by confirming your .edu email.</p>
+
+    {% if message %}
+      <div style="padding: 12px; background: rgba(34,197,94,0.08); border-radius: var(--radius-sm); margin-bottom: 16px; color: var(--success);">{{ message }}</div>
+    {% endif %}
+    {% if error %}
+      <div class="form-error" style="margin-bottom: 16px;">{{ error }}</div>
+    {% endif %}
+
+    {% if not user.edu_verified %}
+    <p style="margin-bottom: 16px; font-size: 0.9rem;">
+      A verification code was sent to <strong>{{ user.email }}</strong>. 
+      Enter it below to confirm you're a student.
+    </p>
+
+    <form method="POST" action="/verify-edu" style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <input type="text" name="code" class="form-input" placeholder="Enter 6-digit code" 
+             style="text-align: center; font-size: 1.5rem; letter-spacing: 8px; max-width: 240px;"
+             maxlength="6" pattern="[0-9]{6}" required />
+      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Verify</button>
+    </form>
+
+    <form method="POST" action="/send-verification-code" style="margin-top: 16px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit" class="btn btn-sm btn-secondary">Resend code</button>
+    </form>
+    {% else %}
+    <div style="padding: 24px;">
+      <span style="font-size: 3rem;">✅</span>
+      <h2 style="margin: 8px 0;">You're verified!</h2>
+      <p class="muted">Your student status is confirmed. You now have the verified badge on your profile.</p>
+      <a href="/profile/{{ user.id }}" class="btn btn-primary" style="margin-top: 16px;">View Profile</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
