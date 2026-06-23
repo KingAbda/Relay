@@ -178,12 +178,12 @@ a:focus-visible,button:focus-visible,summary:focus-visible,
 /* ── "How credits work" — 3 equal steps with a looping highlight ── */
 .credit-loop{display:block;position:relative;margin-top:40px;padding-bottom:58px;max-width:1080px;margin-inline:auto}
 .loop-row{display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr) 64px minmax(0,1fr);gap:18px;align-items:stretch;justify-content:center}
-.loop-step{min-height:210px;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;background:#fff;color:var(--ink);border:1px solid rgba(255,255,255,.18);transition:transform .45s var(--ease-out),box-shadow .45s ease,background .45s ease,border-color .45s ease,filter .45s ease}
+.loop-step{min-height:210px;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;background:var(--card);color:var(--ink);border:1px solid rgba(124,92,252,.15);transition:transform .45s var(--ease-out),box-shadow .45s ease,background .45s ease,border-color .45s ease,filter .45s ease}
 .loop-step b{flex:0 0 auto;transition:transform .45s var(--ease-out),box-shadow .45s ease,background .45s ease}
 .loop-step h3{min-height:2em;display:flex;align-items:flex-end}
 .loop-step p{min-height:2.8em}
-.loop-step.is-active{transform:translateY(-8px);background:linear-gradient(180deg,#fffaf0 0%,#fff 76%);border-color:rgba(255,139,44,.78);box-shadow:0 0 0 1px rgba(255,139,44,.34),0 0 28px rgba(255,139,44,.34),0 28px 56px rgba(0,0,0,.34);filter:saturate(1.08)}
-.loop-step.is-active b{transform:scale(1.12);background:var(--orange);box-shadow:0 0 0 6px rgba(255,139,44,.16),0 10px 24px rgba(255,139,44,.62)}
+.loop-step.is-active{transform:translateY(-8px);background:var(--card);border-color:var(--blue);box-shadow:0 0 0 1px var(--blue),0 0 28px rgba(124,92,252,.25),0 28px 56px rgba(0,0,0,.34);filter:saturate(1.08)}
+.loop-step.is-active b{transform:scale(1.12);background:var(--orange);box-shadow:0 0 0 6px rgba(255,107,53,.16),0 10px 24px rgba(255,107,53,.62)}
 .loop-arrow{display:flex;align-items:center;justify-content:center;color:var(--orange-2);align-self:stretch;min-width:64px}
 .loop-arrow svg{width:60px;height:28px;overflow:visible;opacity:.38;transition:opacity .4s ease,filter .35s ease,transform .35s var(--ease-out)}
 .loop-arrow.is-on svg{opacity:1}
@@ -359,7 +359,7 @@ body.light-mode .skill-marquee { background: rgba(241,245,249,0.7); }
 body.light-mode .skill-marquee .marquee-group span { background: #FFF; border-color: #E2E8F0; color: #64748B; }
 body.light-mode .pricing-section { background: linear-gradient(180deg,#FFF 0%,#F8FAFC 100%); }
 body.light-mode .faq-section { background: linear-gradient(180deg,#F1F5F9 0%,#F8FAFC 100%); }
-body.light-mode .credit-section { background: linear-gradient(135deg,#F1F5F9,#F8FAFC); }
+body.light-mode .credit-section { background: linear-gradient(135deg,#0f0d1a,#1a1730); }
 body.light-mode .cta-card { background: linear-gradient(135deg,#2563EB 0%,#1D4ED8 100%); }
 body.light-mode .legal-callout { background: #F1F5F9; }
 body.light-mode .about-card .about-kicker { color: var(--blue); background: #FFF; }
@@ -368,3 +368,43 @@ body.light-mode .exchange-board { background: var(--card); }
 body.light-mode .brand-intro { background: radial-gradient(120% 120% at 50% 38%,#F1F5F9 0%,#F8FAFC 55%,#E2E8F0 100%); }
 body.light-mode .intro-word { color: var(--blue); }
 body.light-mode .cursor-glow { background: radial-gradient(circle,rgba(37,99,235,0.08),rgba(249,115,22,0.03) 40%,transparent 64%); }
+
+/* Campaign poster polish */
+.campaign-section{overflow:hidden}
+.poster-card{transition:transform .45s var(--ease-out),box-shadow .45s ease,border-color .35s ease;backface-visibility:hidden}
+.poster-card:hover{transform:translateY(-6px);box-shadow:var(--elev-2);border-color:var(--cobalt)}
+.poster-card::after{transition:transform .5s var(--ease-out)}
+.poster-card:hover::after{transform:scale(1.4)}
+.poster-visual{border-color:rgba(124,92,252,.12);transition:border-color .3s ease,box-shadow .3s ease,background .3s ease}
+.poster-card:hover .poster-visual{border-color:rgba(124,92,252,.35);box-shadow:0 0 18px rgba(124,92,252,.08);background:#1a1730}
+.poster-handoff{opacity:.82;transition:opacity .3s ease,transform .35s var(--ease-out);filter:drop-shadow(0 0 4px rgba(124,92,252,.08))}
+.poster-card:hover .poster-handoff{opacity:1;transform:scale(1.06)}
+.poster-handoff-card .poster-visual,.poster-stop .poster-visual{color:var(--cta)}
+.poster-handoff-card:hover .poster-visual{border-color:rgba(255,107,53,.35);box-shadow:0 0 18px rgba(255,107,53,.08)}
+.poster-teach:hover .poster-visual{border-color:rgba(16,185,129,.35);box-shadow:0 0 18px rgba(16,185,129,.08)}
+.poster-stop:hover .poster-visual{border-color:rgba(255,45,120,.35);box-shadow:0 0 18px rgba(255,45,120,.08)}
+.poster-tag{transition:background .3s ease,color .3s ease}
+.poster-card:hover .poster-tag{background:rgba(124,92,252,.12);color:var(--cobalt)}
+.poster-handoff-card:hover .poster-tag{background:rgba(255,107,53,.12);color:var(--orange)}
+.poster-teach:hover .poster-tag{background:rgba(16,185,129,.12);color:var(--green)}
+.poster-stop:hover .poster-tag{background:rgba(255,45,120,.12);color:var(--pink)}
+.poster-body h3{transition:color .3s ease}
+.poster-card:hover .poster-body h3{color:var(--cobalt)}
+.poster-handoff-card:hover .poster-body h3{color:var(--orange)}
+.poster-teach:hover .poster-body h3{color:var(--green)}
+.poster-stop:hover .poster-body h3{color:var(--pink)}
+.loc-chips span{transition:transform .3s var(--ease-out),color .3s ease,background .3s ease,border-color .3s ease}
+.loc-chips span:hover{transform:translateY(-3px);background:rgba(124,92,252,.08)}
+.campaign-footnote{margin-top:32px}
+.campaign-theme{font-style:italic;font-family:var(--display)}
+body.light-mode .campaign-section{background:linear-gradient(180deg,#F1F5F9 0%,#F8FAFC 100%)}
+body.light-mode .poster-label{background:rgba(248,250,252,.88);color:#64748B}
+body.light-mode .poster-label span{color:var(--blue)}
+body.light-mode .map-section{background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%)}
+body.light-mode .campaign-map{background:#E2E8F0}
+body.light-mode .campaign-map .leaflet-control-zoom a{background:#FFF;color:#1E293B;border-color:#E2E8F0}
+body.light-mode .campaign-map .leaflet-popup-content-wrapper{background:#FFF;color:#1E293B;border-color:#E2E8F0}
+body.light-mode .campaign-map .leaflet-popup-tip{background:#FFF;border-color:#E2E8F0}
+body.light-mode .map-legend{background:rgba(248,250,252,.88);color:#64748B}
+body.light-mode .zone-num{background:#E2E8F0;color:#64748B}
+body.light-mode .wild-section{background:linear-gradient(180deg,#F1F5F9 0%,#F8FAFC 100%)}

@@ -121,6 +121,102 @@
   </div>
 </section>
 
+<section class="section campaign-section" id="campaign">
+  <div class="container section-center">
+    <p class="eyebrow" data-reveal>Out-of-home campus campaign</p>
+    <h2 class="section-title" data-split>Your skill is a currency.</h2>
+    <p class="section-sub" data-reveal="0.05">Four posters launching across NYU this fall. Every exchange starts with a handoff — a relay of skill from one student to the next.</p>
+  </div>
+  <div class="container poster-gallery" data-reveal-stagger>
+    <div class="poster-main">
+      <img src="{{ url_for('static', filename='campaign/poster1_currency.png') }}" alt="Your Skill Is a Currency poster" loading="lazy" />
+      <div class="poster-label"><span>Currency</span> — tear-off tabs, cream paper</div>
+    </div>
+    <div class="poster-side">
+      <div class="poster-thumb">
+        <img src="{{ url_for('static', filename='campaign/poster2_trade.png') }}" alt="Trade Skills, Not Money poster" loading="lazy" />
+        <div class="poster-label"><span>Trade</span> — handoff mark, charcoal ground</div>
+      </div>
+      <div class="poster-thumb">
+        <img src="{{ url_for('static', filename='campaign/poster3_teach.png') }}" alt="Teach One Thing. Learn Anything. poster" loading="lazy" />
+        <div class="poster-label"><span>Teach</span> — motion arrows, purple field</div>
+      </div>
+      <div class="poster-thumb">
+        <img src="{{ url_for('static', filename='campaign/poster4_stop.png') }}" alt="Stop Paying for Every Lesson poster" loading="lazy" />
+        <div class="poster-label"><span>Stop</span> — strike-through pricing</div>
+      </div>
+    </div>
+  </div>
+  <div class="container campaign-footnote" data-reveal="0.1">
+    <div class="campaign-locations">
+      <span class="loc-head">Live this fall at</span>
+      <div class="loc-chips">
+        <span>Washington Sq</span>
+        <span>Astor Place</span>
+        <span>Union Square</span>
+        <span>NYU Bulletin Boards</span>
+      </div>
+    </div>
+    <p class="campaign-theme">Built around exchange, motion, and students passing value to each other — starting with the handoff.</p>
+  </div>
+</section>
+
+<section class="section map-section" id="map">
+  <div class="container split-heading">
+    <div>
+      <p class="eyebrow" data-reveal>Strategic placement</p>
+      <h2 class="section-title" data-split>The campus is the canvas.</h2>
+    </div>
+    <p class="section-sub" data-reveal="0.05">18 student-dense NYU &amp; Greenwich Village locations clustered into 8 placement zones — every pin a touchpoint where Relay belongs.</p>
+  </div>
+  <div class="container map-shell" data-reveal="0.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='leaflet.min.css') }}" />
+    <div id="campaignMap" class="campaign-map"></div>
+    <div class="map-legend">
+      <span class="legend-dot dot-target"></span> Target location
+      <span class="legend-dot dot-zone"></span> Placement zone
+    </div>
+  </div>
+  <div class="container zone-grid" data-reveal-stagger>
+    <div class="zone-card"><span class="zone-num">Z1</span><strong>Washington Sq Park</strong><p>Arch, fountain, south promenade — peak foot traffic</p></div>
+    <div class="zone-card"><span class="zone-num">Z2</span><strong>Bobst / Kimmel</strong><p>Library + student center — daily student crossroads</p></div>
+    <div class="zone-card"><span class="zone-num">Z3</span><strong>Silver / Stern / Tisch</strong><p>Academic hub — arts, business, liberal arts</p></div>
+    <div class="zone-card"><span class="zone-num">Z4</span><strong>Astor Place</strong><p>Subway + cube — commuter gateway to campus</p></div>
+    <div class="zone-card"><span class="zone-num">Z5</span><strong>W4th St Station</strong><p>ACEF/BDFM lines — student subway nexus</p></div>
+    <div class="zone-card"><span class="zone-num">Z6</span><strong>Union Square</strong><p>Kiosk boards + farmer's market — broad city audience</p></div>
+    <div class="zone-card"><span class="zone-num">Z7</span><strong>Dorm Corridor</strong><p>University Hall, Third North, Palladium — residential density</p></div>
+    <div class="zone-card"><span class="zone-num">Z8</span><strong>Village Cafés</strong><p>Think Coffee, The Strand, Stumptown — casual study spots</p></div>
+  </div>
+</section>
+
+<section class="section wild-section" id="wild">
+  <div class="container section-center">
+    <p class="eyebrow" data-reveal>In the wild</p>
+    <h2 class="section-title" data-split>See it on the street.</h2>
+    <p class="section-sub" data-reveal="0.05">Photorealistic mockups showing Relay posters in real NYU-adjacent environments — wheatpasted on Washington Square, glowing at a bus shelter, pinned to a campus bulletin board.</p>
+  </div>
+  <div class="container mockup-grid" data-reveal-stagger>
+    <figure class="mockup-card">
+      <div class="mockup-frame">
+        <img src="{{ url_for('static', filename='campaign/mockup_washington_sq.png') }}" alt="Washington Square wheatpaste wall with Relay posters" loading="lazy" />
+      </div>
+      <figcaption><span>Washington Square</span> — Wheatpaste posters on a construction hoarding, golden hour</figcaption>
+    </figure>
+    <figure class="mockup-card">
+      <div class="mockup-frame">
+        <img src="{{ url_for('static', filename='campaign/mockup_astor_place.png') }}" alt="Astor Place bus-shelter ad with Relay poster" loading="lazy" />
+      </div>
+      <figcaption><span>Astor Place</span> — Backlit bus-shelter panel, blue hour</figcaption>
+    </figure>
+    <figure class="mockup-card">
+      <div class="mockup-frame">
+        <img src="{{ url_for('static', filename='campaign/mockup_bulletin_board.png') }}" alt="NYU bulletin board with Relay posters" loading="lazy" />
+      </div>
+      <figcaption><span>NYU Bulletin Board</span> — Pinned posters with tear-off tabs among student flyers</figcaption>
+    </figure>
+  </div>
+</section>
+
 <section class="section pricing-section" id="pricing">
   <div class="container split-heading pricing-heading">
     <div>
@@ -237,4 +333,73 @@
 <section class="cta-section"><div class="container cta-card"><p class="eyebrow">Welcome back</p><h2>Ready for your next exchange?</h2><a href="/dashboard" class="btn btn-primary">Go to Dashboard</a></div></section>
 {% endif %}
 
+{% endblock %}
+
+{% block tail %}
+<script src="{{ url_for('static', filename='leaflet.min.js') }}"></script>
+<script>
+(function(){
+  function initMap(){
+    var mapEl = document.getElementById('campaignMap');
+    if(!mapEl || typeof L === 'undefined') return;
+  var map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: true }).setView([40.7295, -73.9945], 15);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(map);
+  var pins = [
+    {name:"Bobst Library", lat:40.7294, lng:-73.9965, note:"12 floors, 2M+ visits/yr"},
+    {name:"Kimmel Center", lat:40.7298, lng:-73.9973, note:"Student center — events, lounges"},
+    {name:"Silver Center", lat:40.7300, lng:-73.9955, note:"CAS hub, 50K students pass daily"},
+    {name:"Stern School", lat:40.7290, lng:-73.9938, note:"Business school, 5K students"},
+    {name:"Tisch School", lat:40.7288, lng:-73.9942, note:"Arts — film, dance, drama"},
+    {name:"Washington Sq Arch", lat:40.7308, lng:-73.9973, note:"Iconic gathering point"},
+    {name:"Washington Sq Fountain", lat:40.7303, lng:-73.9970, note:"Tabling, protests, hangs"},
+    {name:"Think Coffee", lat:40.7292, lng:-73.9984, note:"Popular study-work spot"},
+    {name:"The Strand", lat:40.7327, lng:-73.9907, note:"Iconic bookstore, foot traffic"},
+    {name:"Palladium Gym", lat:40.7318, lng:-73.9930, note:"NYU gym, 3K daily visits"},
+    {name:"Third North Dorm", lat:40.7317, lng:-73.9955, note:"600-bed residence hall"},
+    {name:"University Hall", lat:40.7293, lng:-73.9985, note:"Freshman dorm + dining"},
+    {name:"Stumptown Coffee", lat:40.7278, lng:-73.9918, note:"Artisan coffee, study crowd"},
+    {name:"W4th St Station", lat:40.7323, lng:-73.9952, note:"ACEF/BDFM — top student subway"},
+    {name:"Astor Place", lat:40.7300, lng:-73.9915, note:"6 train — commuter gateway"},
+    {name:"Union Square", lat:40.7359, lng:-73.9911, note:"L/N/Q/R/4/5/6 — city-wide hub"},
+    {name:"Mercer Playground", lat:40.7278, lng:-73.9976, note:"Green space between buildings"},
+    {name:"Gould Plaza", lat:40.7296, lng:-73.9947, note:"Stern forecourt, tabling events"}
+  ];
+  var purpleIcon = L.divIcon({html:'<span style="display:inline-block;width:16px;height:16px;background:#7c5cfc;border:3px solid #9b7ffc;border-radius:50%;box-shadow:0 0 12px rgba(124,92,252,.5)"></span>', iconSize:[16,16], className:''});
+  pins.forEach(function(p){
+    L.marker([p.lat, p.lng], {icon: purpleIcon}).addTo(map)
+      .bindPopup('<strong>'+p.name+'</strong><em>'+p.note+'</em>');
+  });
+  var zones = [
+    {name:"Z1 Washington Sq", lat:40.7307, lng:-73.9970, note:"Arch to fountain — 4 poster walls"},
+    {name:"Z2 Bobst / Kimmel", lat:40.7296, lng:-73.9969, note:"Library steps + student center boards"},
+    {name:"Z3 Silver / Stern / Tisch", lat:40.7293, lng:-73.9943, note:"Academic corridor flyer boards"},
+    {name:"Z4 Astor Place", lat:40.7302, lng:-73.9912, note:"Cube plaza + subway kiosk panel"},
+    {name:"Z5 W4th St", lat:40.7325, lng:-73.9950, note:"Station entrance displays"},
+    {name:"Z6 Union Square", lat:40.7357, lng:-73.9910, note:"Kiosk boards + subway passage"},
+    {name:"Z7 Dorm Corridor", lat:40.7312, lng:-73.9945, note:"University Hall to Third North"},
+    {name:"Z8 Village Cafés", lat:40.7288, lng:-73.9978, note:"Think Coffee + Stumptown radius"}
+  ];
+  var zoneIcon = L.divIcon({html:'<span style="display:inline-block;width:22px;height:22px;background:#2a1740;border:3px solid #6B21A8;border-radius:50%;opacity:.85;"></span>', iconSize:[22,22], className:''});
+  zones.forEach(function(z){
+    L.marker([z.lat, z.lng], {icon: zoneIcon}).addTo(map)
+      .bindPopup('<strong>'+z.name+'</strong><em>'+z.note+'</em>');
+  });
+  var allPins = pins.concat(zones).map(function(p){ return [p.lat, p.lng]; });
+  map.fitBounds(allPins, {padding:[40,40]});
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', initMap);
+  } else {
+    initMap();
+  }
+  // Fallback if Leaflet CDN loads late
+  setTimeout(function(){
+    if(!document.querySelector('.leaflet-container')) initMap();
+  }, 1500);
+})();
+</script>
 {% endblock %}
