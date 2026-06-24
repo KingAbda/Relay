@@ -1057,17 +1057,30 @@ def claim_request(request_id):
     req.status = "claimed"
     req.claimed_by = user.id
     # Auto-create a session so the claim→booking→credit path is wired end to end
-    # Use the request's max_credits as the credit cost (stored once, never re-read)
-    credit_cost = 1 if RELAY_FLAT_RATE else min(req.max_credits or 1, RELAY_MAX_CREDIT_COST)
-    # Check if learner has enough credits (with row lock) — skip debit if insufficient
-    # The session is still created; teacher can choose to proceed or not
+    # Price = min(teacher's listing cost, request.max_credits) — learner consented up to max_credits
+    # Never exceed what the learner agreed to pay
+    teacher_skill = UserSkill.query.filter(
+        UserSkill.user_id == user.id, UserSkill.name == req.name, UserSkill.is_active == True
+    ).first()
+    listing_cost = teacher_skill.credit_cost if teacher_skill and not RELAY_FLAT_RATE else 1
+    charge = min(listing_cost, req.max_credits or 1, RELAY_MAX_CREDIT_COST)
+    # Block if teacher's price exceeds what the learner posted (learner consented up to max_credits)
+    if listing_cost > (req.max_credits or 1):
+        req.status = "open"
+        req.claimed_by = None
+        db.session.commit()
+        return redirect(url_for("browse_requests"))
+    # Check if learner has enough credits — block the claim if insufficient
     learner_credit = CreditAccount.query.filter(CreditAccount.user_id == req.user_id).with_for_update().first()
-    actual_charged = 0.0
-    if learner_credit and learner_credit.balance >= credit_cost:
-        learner_credit.balance -= credit_cost
-        actual_charged = float(credit_cost)
-        add_credit_transaction(req.user_id, -credit_cost, TransactionType.SPEND, f"Hold: {req.name} (claimed by {user.full_name})", related_user_id=user.id)
-    session = Session(teacher_id=user.id, learner_id=req.user_id, skill_name=req.name, notes=f"Claimed from request: {req.name}", amount_charged=actual_charged)
+    if not learner_credit or learner_credit.balance < charge:
+        req.status = "open"
+        req.claimed_by = None
+        db.session.commit()
+        return redirect(url_for("browse_requests"))
+    learner_credit.balance -= charge
+    add_credit_transaction(req.user_id, -charge, TransactionType.SPEND, f"Hold: {req.name} (claimed by {user.full_name})", related_user_id=user.id)
+    session = Session(teacher_id=user.id, learner_id=req.user_id, skill_name=req.name,
+                      notes=f"Claimed from request: {req.name}", amount_charged=float(charge))
     db.session.add(session)
     db.session.commit()
     return redirect(url_for("browse_requests"))
