@@ -679,7 +679,7 @@ def request_session(skill_id):
         if user_listings == 0:
             return render_template("request_session.html", user=user, skill=skill, error="You need to publish a skill listing before you can book sessions. Add a skill from your dashboard first!", now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
 
-    # Determine credit cost — flat rate forces 1 (applied at charge time, not just creation)
+    # Determine credit cost — flat rate forces 1 (applied at charge time, stored on session)
     credit_cost = 1 if RELAY_FLAT_RATE else (skill.credit_cost or 1)
     
     if request.method == "GET":
@@ -698,7 +698,7 @@ def request_session(skill_id):
     if not credit or credit.balance < credit_cost:
         return render_template("request_session.html", user=user, skill=skill, credit_cost=credit_cost, error=f"Not enough credits. This session costs {credit_cost} credit(s).", now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
     credit.balance -= credit_cost  # debit immediately, refund on cancel
-    session = Session(teacher_id=skill.user_id, learner_id=user.id, skill_name=skill.name, notes=notes, scheduled_at=scheduled_at)
+    session = Session(teacher_id=skill.user_id, learner_id=user.id, skill_name=skill.name, notes=notes, scheduled_at=scheduled_at, amount_charged=credit_cost)
     db.session.add(session)
     add_credit_transaction(user.id, -credit_cost, TransactionType.SPEND, f"Hold: {skill.name}", related_user_id=skill.user_id)
     db.session.commit()
@@ -736,13 +736,17 @@ def complete_session(session_id):
         teacher.completed_sessions_count = (teacher.completed_sessions_count or 0) + 1
     if learner:
         learner.completed_sessions_count = (learner.completed_sessions_count or 0) + 1
-    # Determine credit cost — flat rate forces 1
-    credit_cost = 1 if RELAY_FLAT_RATE else 1  # default fallback
-    # Try to find the skill listing to get its credit_cost
-    skill = UserSkill.query.filter(UserSkill.user_id == session.teacher_id, UserSkill.name == session.skill_name, UserSkill.is_active == True).first()
-    if skill and not RELAY_FLAT_RATE:
-        credit_cost = skill.credit_cost or 1
-    add_credit_transaction(session.teacher_id, credit_cost, TransactionType.EARN, f"Taught {session.skill_name}", related_user_id=session.learner_id)
+    # Credit the teacher from the stored amount_charged — never re-read the listing or FLAT_RATE
+    credit_amount = session.amount_charged or 1.0
+    # Idempotency: skip credit if already completed (shouldn't reach here but guard anyway)
+    existing_credit = CreditTransaction.query.filter_by(
+        user_id=session.teacher_id,
+        type=TransactionType.EARN.value if hasattr(TransactionType.EARN, 'value') else TransactionType.EARN,
+        description=f"Taught {session.skill_name}",
+        related_user_id=session.learner_id
+    ).first()
+    if not existing_credit:
+        add_credit_transaction(session.teacher_id, credit_amount, TransactionType.EARN, f"Taught {session.skill_name}", related_user_id=session.learner_id)
     db.session.commit()
     return redirect(url_for("dashboard"))
 
@@ -755,21 +759,54 @@ def cancel_session(session_id):
         abort(404)
     if session.status == SessionStatus.COMPLETED:
         return redirect(url_for("dashboard"))
+    # Idempotency: prevent double-cancel
+    if session.status == SessionStatus.CANCELLED:
+        return redirect(url_for("dashboard"))
     was_held = session.status == SessionStatus.REQUESTED
     session.status = SessionStatus.CANCELLED
     if was_held:
-        # Refund the actual credit cost, not hardcoded 1
-        credit_cost = 1
-        skill = UserSkill.query.filter(UserSkill.user_id == session.teacher_id, UserSkill.name == session.skill_name, UserSkill.is_active == True).first()
-        if skill and not RELAY_FLAT_RATE:
-            credit_cost = skill.credit_cost or 1
-        # Restore the learner's balance
+        # Refund from stored amount_charged — never re-read the listing or FLAT_RATE
+        refund_amount = session.amount_charged or 1.0
+        # Restore the learner's balance with row lock
         credit = CreditAccount.query.filter(CreditAccount.user_id == session.learner_id).with_for_update().first()
         if credit:
-            credit.balance += credit_cost
-        add_credit_transaction(session.learner_id, credit_cost, TransactionType.REFUND, f"Refund: {session.skill_name}", related_user_id=session.teacher_id)
+            credit.balance += refund_amount
+        add_credit_transaction(session.learner_id, refund_amount, TransactionType.REFUND, f"Refund: {session.skill_name}", related_user_id=session.teacher_id)
     db.session.commit()
     return redirect(url_for("dashboard"))
+
+# ══════════════════════════════════════════════════════════
+#  ROUTES: SESSION TIMEOUT / JANITOR
+# ══════════════════════════════════════════════════════════
+
+@app.route("/admin/timeout-sessions")
+def timeout_sessions():
+    """Auto-cancel and refund stale pending sessions past RELAY_SESSION_TIMEOUT_HOURS."""
+    user = require_user()
+    if not user or not user.is_ambassador:
+        return redirect(url_for("dashboard"))
+    timeout_hours = int(os.environ.get("RELAY_SESSION_TIMEOUT_HOURS", "72"))
+    cutoff = datetime.utcnow() - timedelta(hours=timeout_hours)
+    stale = Session.query.filter(
+        Session.status.in_([SessionStatus.REQUESTED, SessionStatus.CONFIRMED]),
+        Session.created_at < cutoff
+    ).all()
+    count = 0
+    for s in stale:
+        if s.status in (SessionStatus.CANCELLED, SessionStatus.COMPLETED):
+            continue  # idempotency
+        was_held = s.status == SessionStatus.REQUESTED
+        s.status = SessionStatus.CANCELLED
+        if was_held and s.amount_charged > 0:
+            refund = s.amount_charged
+            credit = CreditAccount.query.filter(CreditAccount.user_id == s.learner_id).with_for_update().first()
+            if credit:
+                credit.balance += refund
+            add_credit_transaction(s.learner_id, refund, TransactionType.REFUND,
+                f"Auto-refund: {s.skill_name} (session timed out)", related_user_id=s.teacher_id)
+        count += 1
+    db.session.commit()
+    return jsonify({"status": "ok", "refunded_sessions": count})
 
 # ══════════════════════════════════════════════════════════
 #  ROUTES: REVIEWS
@@ -1020,14 +1057,17 @@ def claim_request(request_id):
     req.status = "claimed"
     req.claimed_by = user.id
     # Auto-create a session so the claim→booking→credit path is wired end to end
-    # Use the request's max_credits as the credit cost
+    # Use the request's max_credits as the credit cost (stored once, never re-read)
     credit_cost = 1 if RELAY_FLAT_RATE else min(req.max_credits or 1, RELAY_MAX_CREDIT_COST)
-    # Check if learner has enough credits (with row lock)
+    # Check if learner has enough credits (with row lock) — skip debit if insufficient
+    # The session is still created; teacher can choose to proceed or not
     learner_credit = CreditAccount.query.filter(CreditAccount.user_id == req.user_id).with_for_update().first()
+    actual_charged = 0.0
     if learner_credit and learner_credit.balance >= credit_cost:
         learner_credit.balance -= credit_cost
+        actual_charged = float(credit_cost)
         add_credit_transaction(req.user_id, -credit_cost, TransactionType.SPEND, f"Hold: {req.name} (claimed by {user.full_name})", related_user_id=user.id)
-    session = Session(teacher_id=user.id, learner_id=req.user_id, skill_name=req.name, notes=f"Claimed from request: {req.name}")
+    session = Session(teacher_id=user.id, learner_id=req.user_id, skill_name=req.name, notes=f"Claimed from request: {req.name}", amount_charged=actual_charged)
     db.session.add(session)
     db.session.commit()
     return redirect(url_for("browse_requests"))

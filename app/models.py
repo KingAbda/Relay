@@ -204,6 +204,9 @@ class Session(db.Model):
     completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     meet_link: Mapped[str] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    # Amount charged at debit time — single source of truth for all credit/refund ops.
+    # Never re-read the listing price or FLAT_RATE after this is set.
+    amount_charged: Mapped[float] = mapped_column(Float, default=0.0)
 
 
 # ── Reviews ────────────────────────────────────────────
