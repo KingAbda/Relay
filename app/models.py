@@ -45,8 +45,42 @@ class TransactionType(str, enum.Enum):
     EXPIRE = "expire"
     REFERRAL = "referral"
     REFUND = "refund"
+    TOPUP = "topup"
+    PURCHASE = "purchase"
     def __str__(self):
         return self.value
+
+
+# ── Session series ──
+
+class SessionSeries(db.Model):
+    __tablename__ = "session_series"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    teacher_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    learner_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    skill_name: Mapped[str] = mapped_column(String, nullable=False)
+    total_sessions: Mapped[int] = mapped_column(Integer, default=1)
+    completed_sessions: Mapped[int] = mapped_column(Integer, default=0)
+    credit_cost_per_session: Mapped[int] = mapped_column(Integer, default=1)
+    status: Mapped[str] = mapped_column(String, default="active")  # active, completed, cancelled
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+# ── Skill request (demand aggregation) ──
+
+class SkillRequest(db.Model):
+    __tablename__ = "skill_requests"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    category: Mapped[SkillCategory] = mapped_column(SAEnum(SkillCategory), nullable=False)
+    description: Mapped[str] = mapped_column(Text, default="")
+    max_credits: Mapped[int] = mapped_column(Integer, default=1)
+    claimed_by: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String, default="open")  # open, claimed, filled
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    user = relationship("User", foreign_keys=[user_id])
+    claimer = relationship("User", foreign_keys=[claimed_by])
 
 
 # ── User ───────────────────────────────────────────────
@@ -92,6 +126,10 @@ class User(db.Model):
     has_proof_video: Mapped[bool] = mapped_column(Boolean, default=False)
     proof_video_url: Mapped[str] = mapped_column(String, default="")
     content_credit_balance: Mapped[int] = mapped_column(Integer, default=0)
+    
+    # Membership & monetization
+    is_member: Mapped[bool] = mapped_column(Boolean, default=False)
+    member_since: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     skills_taught = relationship("UserSkill", back_populates="user",
                                   foreign_keys="UserSkill.user_id")
@@ -110,6 +148,8 @@ class UserSkill(db.Model):
     proficiency: Mapped[int] = mapped_column(Integer, default=3)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    # Variable credit pricing: 1 = flat rate (default), up to RELAY_MAX_CREDIT_COST
+    credit_cost: Mapped[int] = mapped_column(Integer, default=1)
 
     user = relationship("User", back_populates="skills_taught",
                          foreign_keys=[user_id])

@@ -70,11 +70,23 @@ PILOT_VERTICAL_NAME = {
     "all": "All Categories",
 }.get(PILOT_VERTICAL, PILOT_VERTICAL.capitalize())
 
+# ── Feature flags ─────────────────────────────────────
+# Variable pricing: when True, every skill costs exactly 1 credit (old behavior)
+RELAY_FLAT_RATE = os.environ.get("RELAY_FLAT_RATE", "false").lower() == "true"
+# Max credit cost a teacher can set per session
+RELAY_MAX_CREDIT_COST = int(os.environ.get("RELAY_MAX_CREDIT_COST", "4"))
+# Starter credits for new verified users
+RELAY_STARTER_CREDITS = int(os.environ.get("RELAY_STARTER_CREDITS", "3"))
+# Supply-only mode: when True, only users with at least one listing can book
+RELAY_SUPPLY_ONLY_MODE = os.environ.get("RELAY_SUPPLY_ONLY_MODE", "false").lower() == "true"
+# Monetization enabled: when True, show top-up and membership UI
+RELAY_MONETIZATION_ENABLED = os.environ.get("RELAY_MONETIZATION_ENABLED", "false").lower() == "true"
+
 # ── Import models after db init ────────────────────────
 from app.models import (
     User, UserSkill, UserWant, CreditAccount, CreditTransaction,
     Session, SessionReview, SkillCategory, SessionStatus, TransactionType,
-    WaitlistEntry, PasswordResetToken,
+    WaitlistEntry, PasswordResetToken, SkillRequest, SessionSeries,
 )
 
 # ── Auto-seed demo data (defined before use) ──────────
@@ -248,6 +260,10 @@ def inject_globals():
         "pilot_vertical": PILOT_VERTICAL, "pilot_vertical_name": PILOT_VERTICAL_NAME,
         "csrf_token": lambda: generate_csrf(),
         "cache_bust": _CACHE_BUST,
+        "relay_flat_rate": RELAY_FLAT_RATE,
+        "relay_max_credit_cost": RELAY_MAX_CREDIT_COST,
+        "relay_monetization_enabled": RELAY_MONETIZATION_ENABLED,
+        "relay_starter_credits": RELAY_STARTER_CREDITS,
     }
 
 def jinja_capitalize(s):
@@ -402,9 +418,9 @@ def signup():
     )
     db.session.add(user)
     db.session.flush()
-    credit = CreditAccount(user_id=user.id, balance=3.0)
+    credit = CreditAccount(user_id=user.id, balance=float(RELAY_STARTER_CREDITS))
     db.session.add(credit)
-    add_credit_transaction(user.id, 3.0, TransactionType.BONUS, "3 free credits to start!")
+    add_credit_transaction(user.id, float(RELAY_STARTER_CREDITS), TransactionType.BONUS, f"{RELAY_STARTER_CREDITS} free credits to start!")
     if referrer:
         add_credit_transaction(referrer.id, 1.0, TransactionType.REFERRAL, f"You referred {full_name}!", related_user_id=user.id)
         add_credit_transaction(user.id, 1.0, TransactionType.REFERRAL, f"You joined through {referrer.full_name}!", related_user_id=referrer.id)
@@ -582,7 +598,9 @@ def dashboard():
 
     return render_template("dashboard.html", user=user, my_skills=my_skills, my_wants=my_wants,
                            credit=credit, sessions=enriched_sessions, pending_requests=enriched_pending,
-                           transactions=transactions, ref_link=ref_link, categories=get_pilot_categories())
+                           transactions=transactions, ref_link=ref_link, categories=get_pilot_categories(),
+                           relay_flat_rate=RELAY_FLAT_RATE, relay_max_credit_cost=RELAY_MAX_CREDIT_COST,
+                           relay_monetization_enabled=RELAY_MONETIZATION_ENABLED)
 
 @app.route("/browse")
 def browse():
@@ -601,6 +619,12 @@ def browse():
     if q:
         query = query.filter(UserSkill.name.ilike(f"%{q}%"))
     skills = query.order_by(UserSkill.created_at.desc()).all()
+    # Sort: highest proficiency/rating first, then most recent
+    def sort_key(s):
+        # Calculate average rating for this teacher
+        avg_rating = db.session.query(db.func.avg(SessionReview.rating)).filter(SessionReview.reviewee_id == s.user_id).scalar() or 0
+        return (avg_rating, s.proficiency, s.created_at.timestamp())
+    skills.sort(key=sort_key, reverse=True)
     total_skills = len(skills)
     total_users = User.query.count()
     if not user:
@@ -648,8 +672,19 @@ def request_session(skill_id):
         abort(404)
     if skill.user_id == user.id:
         return render_template("request_session.html", user=user, skill=skill, error="You can't request a session from yourself!", now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
+    
+    # Supply-only mode check: only users with at least one listing can book
+    if RELAY_SUPPLY_ONLY_MODE:
+        user_listings = UserSkill.query.filter(UserSkill.user_id == user.id, UserSkill.is_active == True).count()
+        if user_listings == 0:
+            return render_template("request_session.html", user=user, skill=skill, error="You need to publish a skill listing before you can book sessions. Add a skill from your dashboard first!", now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
+
+    # Determine credit cost — flat rate forces 1
+    credit_cost = 1 if RELAY_FLAT_RATE else (skill.credit_cost or 1)
+    
     if request.method == "GET":
-        return render_template("request_session.html", user=user, skill=skill, error=None, now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
+        return render_template("request_session.html", user=user, skill=skill, credit_cost=credit_cost, error=None, now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
+    
     notes = sanitize(request.form.get("notes", ""), 500)
     scheduled_raw = request.form.get("scheduled_at", "")
     scheduled_at = None
@@ -659,11 +694,11 @@ def request_session(skill_id):
         except (ValueError, TypeError):
             pass
     credit = CreditAccount.query.filter(CreditAccount.user_id == user.id).first()
-    if not credit or credit.balance < 1.0:
-        return render_template("request_session.html", user=user, skill=skill, error="Not enough credits.", now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
+    if not credit or credit.balance < credit_cost:
+        return render_template("request_session.html", user=user, skill=skill, credit_cost=credit_cost, error=f"Not enough credits. This session costs {credit_cost} credit(s).", now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
     session = Session(teacher_id=skill.user_id, learner_id=user.id, skill_name=skill.name, notes=notes, scheduled_at=scheduled_at)
     db.session.add(session)
-    add_credit_transaction(user.id, -1.0, TransactionType.SPEND, f"Hold: {skill.name}", related_user_id=skill.user_id)
+    add_credit_transaction(user.id, -credit_cost, TransactionType.SPEND, f"Hold: {skill.name}", related_user_id=skill.user_id)
     db.session.commit()
     return redirect(url_for("dashboard"))
 
@@ -699,7 +734,13 @@ def complete_session(session_id):
         teacher.completed_sessions_count = (teacher.completed_sessions_count or 0) + 1
     if learner:
         learner.completed_sessions_count = (learner.completed_sessions_count or 0) + 1
-    add_credit_transaction(session.teacher_id, 1.0, TransactionType.EARN, f"Taught {session.skill_name}", related_user_id=session.learner_id)
+    # Determine credit cost — flat rate forces 1
+    credit_cost = 1 if RELAY_FLAT_RATE else 1  # default fallback
+    # Try to find the skill listing to get its credit_cost
+    skill = UserSkill.query.filter(UserSkill.user_id == session.teacher_id, UserSkill.name == session.skill_name, UserSkill.is_active == True).first()
+    if skill and not RELAY_FLAT_RATE:
+        credit_cost = skill.credit_cost or 1
+    add_credit_transaction(session.teacher_id, credit_cost, TransactionType.EARN, f"Taught {session.skill_name}", related_user_id=session.learner_id)
     db.session.commit()
     return redirect(url_for("dashboard"))
 
@@ -827,7 +868,104 @@ def become_ambassador():
     return redirect(url_for("dashboard"))
 
 # ══════════════════════════════════════════════════════════
+#  ROUTES: MONETIZATION (stubs — no real payments)
+# ══════════════════════════════════════════════════════════
+
+@app.route("/top-up")
+def top_up():
+    user = require_user()
+    if not user: return redirect(url_for("login"))
+    if not RELAY_MONETIZATION_ENABLED:
+        return redirect(url_for("dashboard"))
+    return render_template("topup.html", user=user, relay_monetization_enabled=RELAY_MONETIZATION_ENABLED)
+
+@app.route("/top-up", methods=["POST"])
+def top_up_post():
+    user = require_user()
+    if not user: return redirect(url_for("login"))
+    if not RELAY_MONETIZATION_ENABLED:
+        return redirect(url_for("dashboard"))
+    amount = request.form.get("amount", 0, type=int)
+    if amount < 1 or amount > 100:
+        return render_template("topup.html", user=user, error="Invalid amount. Choose 1–100 credits.", relay_monetization_enabled=RELAY_MONETIZATION_ENABLED)
+    # TODO: integrate payment provider (Stripe Checkout, Lemon Squeezy, etc.)
+    # For now, add credits directly as a demo — remove this in production
+    credit = CreditAccount.query.filter(CreditAccount.user_id == user.id).first()
+    if credit:
+        credit.balance += float(amount)
+        add_credit_transaction(user.id, float(amount), TransactionType.TOPUP, f"Credit top-up: {amount} credits")
+        db.session.commit()
+    return redirect(url_for("dashboard"))
+
+@app.route("/membership")
+def membership():
+    user = require_user()
+    if not user: return redirect(url_for("login"))
+    if not RELAY_MONETIZATION_ENABLED:
+        return redirect(url_for("dashboard"))
+    return render_template("membership.html", user=user, is_member=user.is_member, relay_monetization_enabled=RELAY_MONETIZATION_ENABLED)
+
+@app.route("/membership/join")
+def membership_join():
+    user = require_user()
+    if not user: return redirect(url_for("login"))
+    if not RELAY_MONETIZATION_ENABLED:
+        return redirect(url_for("dashboard"))
+    # TODO: integrate payment provider for membership billing
+    user.is_member = True
+    user.member_since = datetime.utcnow()
+    db.session.commit()
+    return redirect(url_for("dashboard"))
+
+# ══════════════════════════════════════════════════════════
 #  ROUTES: ABOUT, LEGAL & HEALTH (before profile/param routes)
+# ══════════════════════════════════════════════════════════
+
+@app.route("/top-up")
+def top_up():
+    user = require_user()
+    if not user: return redirect(url_for("login"))
+    if not RELAY_MONETIZATION_ENABLED:
+        return redirect(url_for("dashboard"))
+    return render_template("topup.html", user=user, relay_monetization_enabled=RELAY_MONETIZATION_ENABLED)
+
+@app.route("/top-up", methods=["POST"])
+def top_up_post():
+    user = require_user()
+    if not user: return redirect(url_for("login"))
+    if not RELAY_MONETIZATION_ENABLED:
+        return redirect(url_for("dashboard"))
+    amount = request.form.get("amount", 0, type=int)
+    if amount < 1 or amount > 100:
+        return render_template("topup.html", user=user, error="Invalid amount. Choose 1–100 credits.", relay_monetization_enabled=RELAY_MONETIZATION_ENABLED)
+    # TODO: integrate payment provider (Stripe Checkout, Lemon Squeezy, etc.)
+    # For now, add credits directly as a demo — remove this in production
+    credit = CreditAccount.query.filter(CreditAccount.user_id == user.id).first()
+    if credit:
+        credit.balance += float(amount)
+        add_credit_transaction(user.id, float(amount), TransactionType.TOPUP, f"Credit top-up: {amount} credits")
+        db.session.commit()
+    return redirect(url_for("dashboard"))
+
+@app.route("/membership")
+def membership():
+    user = require_user()
+    if not user: return redirect(url_for("login"))
+    if not RELAY_MONETIZATION_ENABLED:
+        return redirect(url_for("dashboard"))
+    return render_template("membership.html", user=user, is_member=user.is_member, relay_monetization_enabled=RELAY_MONETIZATION_ENABLED)
+
+@app.route("/membership/join")
+def membership_join():
+    user = require_user()
+    if not user: return redirect(url_for("login"))
+    if not RELAY_MONETIZATION_ENABLED:
+        return redirect(url_for("dashboard"))
+    # TODO: integrate payment provider for membership billing
+    user.is_member = True
+    user.member_since = datetime.utcnow()
+    db.session.commit()
+    return redirect(url_for("dashboard"))
 
 # ══════════════════════════════════════════════════════════
 #  ROUTES: ABOUT, LEGAL & HEALTH (before profile/param routes)
@@ -876,7 +1014,55 @@ def view_profile(user_id):
                            completed_count=completed_count, avg_rating=round(avg_rating, 1) if avg_rating else None, recent_reviews=enriched)
 
 # ══════════════════════════════════════════════════════════
-#  ROUTES: SKILLS
+#  ROUTES: SKILL REQUESTS (demand aggregation)
+# ══════════════════════════════════════════════════════════
+
+@app.route("/requests")
+def browse_requests():
+    user = current_user()
+    category = request.args.get("category")
+    query = SkillRequest.query.filter(SkillRequest.status == "open")
+    if user:
+        query = query.filter(SkillRequest.user_id != user.id)
+    if category and category in get_pilot_categories():
+        query = query.filter(SkillRequest.category == category)
+    requests = query.order_by(SkillRequest.created_at.desc()).all()
+    return render_template("requests.html", user=user, requests=requests, categories=get_pilot_categories())
+
+@app.route("/add-request", methods=["POST"])
+def add_request():
+    user = require_user()
+    if not user: return redirect(url_for("login"))
+    name = sanitize(request.form.get("name", ""))
+    category = sanitize(request.form.get("category", ""))
+    description = sanitize(request.form.get("description", ""), 300)
+    max_credits = request.form.get("max_credits", 1, type=int)
+    max_credits = max(1, min(max_credits, RELAY_MAX_CREDIT_COST))
+    if name and category and category in get_pilot_categories():
+        db.session.add(SkillRequest(user_id=user.id, name=name, category=category, description=description, max_credits=max_credits))
+        db.session.commit()
+    return redirect(url_for("browse_requests"))
+
+@app.route("/claim-request/<request_id>")
+def claim_request(request_id):
+    user = require_onboarded()
+    if not user or user == "redirect_onboarding":
+        return redirect(url_for("login"))
+    req = db.session.get(SkillRequest, request_id)
+    if not req or req.status != "open" or req.user_id == user.id:
+        abort(404)
+    # Supply-only mode check
+    if RELAY_SUPPLY_ONLY_MODE:
+        user_listings = UserSkill.query.filter(UserSkill.user_id == user.id, UserSkill.is_active == True).count()
+        if user_listings == 0:
+            return redirect(url_for("browse_requests"))
+    req.status = "claimed"
+    req.claimed_by = user.id
+    db.session.commit()
+    return redirect(url_for("browse_requests"))
+
+# ══════════════════════════════════════════════════════════
+#  ROUTES: SKILLS (updated with credit_cost)
 # ══════════════════════════════════════════════════════════
 
 @app.route("/add-skill", methods=["POST"])
@@ -886,8 +1072,11 @@ def add_skill():
     name = sanitize(request.form.get("name", ""))
     category = sanitize(request.form.get("category", ""))
     description = sanitize(request.form.get("description", ""), 300)
+    # credit_cost: only used when RELAY_FLAT_RATE is False
+    credit_cost = request.form.get("credit_cost", 1, type=int)
+    credit_cost = max(1, min(credit_cost, RELAY_MAX_CREDIT_COST))
     if name and category and category in get_pilot_categories():
-        db.session.add(UserSkill(user_id=user.id, name=name, category=category, description=description))
+        db.session.add(UserSkill(user_id=user.id, name=name, category=category, description=description, credit_cost=credit_cost))
         db.session.commit()
     return redirect(url_for("dashboard"))
 
