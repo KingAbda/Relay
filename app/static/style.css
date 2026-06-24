@@ -9,7 +9,18 @@
   --yellow:#fbbf24;
   --line:#2d2848; --card:#1a1730;
   --shadow:0 18px 45px rgba(0,0,0,.55); --soft-shadow:0 8px 20px rgba(0,0,0,.35);
-  --radius:24px; --display:"Newsreader", Georgia, serif; --body:"Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius:24px; --display:"Bricolage Grotesque","Newsreader",Georgia,serif; --accent-font:"Bungee","Oswald",system-ui,sans-serif; --body:"Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --y2k-cyan:#22d3ee; --y2k-pink:#ff2d78; --y2k-lime:#b6ff3a; --y2k-yellow:#ffd84d;
+  --gel-purple:linear-gradient(180deg,#a78bff 0%,#7c5cfc 52%,#5a39d6 100%);
+  --gel-orange:linear-gradient(180deg,#ffb27a 0%,#ff6b35 52%,#e8500f 100%);
+  --gel-cyan:linear-gradient(180deg,#9bf3ff 0%,#22d3ee 52%,#0bb3cc 100%);
+  --gel-pink:linear-gradient(180deg,#ff96bd 0%,#ff2d78 52%,#d80f57 100%);
+  --chrome:linear-gradient(180deg,#ffffff 0%,#d7d0f5 42%,#9b93c9 52%,#f3eeff 100%);
+  --holo:linear-gradient(120deg,#7c5cfc,#22d3ee,#ff2d78,#ffd84d,#7c5cfc);
+  --sticker-shadow:5px 5px 0 #07060f;
+  --sticker-shadow-sm:3px 3px 0 #07060f;
+  --y2k-line:#3a2f63;
+  --y2k-ease:cubic-bezier(.34,1.56,.64,1);
 }
 body.light-mode{--paper:#F8FAFC;--paper-2:#F1F5F9;--ink:#1E293B;--muted:#64748B;--blue:#2563EB;--blue-2:#60A5FA;--orange:#F97316;--line:#E2E8F0;--card:#FFF;--shadow:0 18px 45px rgba(0,0,0,.08);--soft-shadow:0 8px 20px rgba(0,0,0,.04)}
 /* Light mode section backgrounds */
@@ -134,3 +145,118 @@ body.light-mode .skill-marquee .marquee-group span:nth-child(4n+3){color:#10b981
 .mockup-card figcaption{padding:14px 16px 18px;font-size:14px;color:var(--muted);font-weight:700;line-height:1.5}
 .mockup-card figcaption span{color:var(--ink);font-weight:900;font-family:var(--display);font-size:15px;display:block;margin-bottom:2px;letter-spacing:-.01em}
 @media(max-width:860px){.mockup-grid{grid-template-columns:1fr;max-width:480px;margin-left:auto;margin-right:auto}.mockup-frame{aspect-ratio:16/10}}
+
+/* ════════ Y2K design additions ════════ */
+
+/* Halftone/grid texture overlay */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background-image:radial-gradient(rgba(124,92,252,.16) 1.4px, transparent 1.5px),
+    linear-gradient(rgba(124,92,252,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,92,252,.05) 1px, transparent 1px);
+  background-size:24px 24px, 48px 48px, 48px 48px;opacity:.5;mix-blend-mode:screen}
+
+/* Holographic hero word-swap */
+.hero-kinetic .kx-word{
+  background:var(--holo);background-size:300% 300%;
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;-webkit-text-fill-color:transparent;
+  animation:holoShift 6s linear infinite}
+@keyframes holoShift{to{background-position:300% 0}}
+.hero-kinetic .kx-lead{
+  text-shadow:3px 3px 0 rgba(124,92,252,.35)}
+
+/* Eyebrow Y2K style */
+.eyebrow{font-family:var(--accent-font);letter-spacing:.04em;font-weight:400;
+  color:var(--y2k-cyan);text-shadow:0 0 14px rgba(34,211,238,.45)}
+.eyebrow::before{background:var(--y2k-pink)!important}
+
+/* Interactive map placeholder */
+#campaignMap{display:grid!important;place-items:center;
+  background:repeating-linear-gradient(45deg,#1a1730 0 16px,#141128 16px 32px)!important}
+#campaignMap::after{content:"\01F5FA  Interactive NYU map \2014 live in the app";
+  font-family:var(--accent-font);color:var(--y2k-cyan);font-size:15px;text-align:center;padding:24px;letter-spacing:.02em}
+
+/* Trust row Y2K style */
+.trust-row span{background:var(--card)!important;color:var(--ink)!important;border-color:var(--blue)!important}
+.trust-row span::before{content:"\2714 ";color:var(--green);font-weight:900}
+
+/* Marquee Y2K style */
+.skill-marquee{border-block:3px solid var(--blue)!important;
+  background:repeating-linear-gradient(45deg,rgba(124,92,252,.08) 0 14px,transparent 14px 28px)!important}
+
+/* Footer Y2K style */
+.site-footer{border-top:3px dashed var(--blue)!important}
+
+/* Gauges Y2K LED style */
+.gauge-center{border:2px solid var(--blue)!important;box-shadow:inset 0 0 18px rgba(124,92,252,.35)!important}
+.gauge-center strong{font-family:var(--accent-font)!important;color:var(--y2k-cyan)!important;
+  text-shadow:0 0 16px rgba(34,211,238,.6)!important;letter-spacing:0!important}
+.stat-index{font-family:var(--accent-font)!important;color:var(--y2k-pink)!important}
+
+/* Tags / pills Y2K style */
+.tag,.market-category,.plan-kicker,.zone-num,.trust-row span,.loc-chips span,.credit-badge{
+  border:2px solid var(--ink)!important;border-radius:999px!important;
+  box-shadow:var(--sticker-shadow-sm)!important;font-weight:800!important;
+  background:var(--y2k-yellow)!important;color:#1a1330!important}
+.market-category,.plan-kicker{background:var(--y2k-cyan)!important}
+.trust-row span{background:var(--card)!important;color:var(--ink)!important;border-color:var(--blue)!important}
+
+/* Marquee chip colors */
+.skill-marquee .marquee-group span{border:2px solid var(--ink)!important;border-radius:999px!important;
+  box-shadow:var(--sticker-shadow-sm)!important;background:var(--card)!important;
+  font-family:var(--accent-font)!important;font-weight:400!important;text-transform:uppercase!important;font-size:12px!important}
+.skill-marquee .marquee-group span:nth-child(4n+1){background:var(--y2k-cyan)!important;color:#0a2a30!important}
+.skill-marquee .marquee-group span:nth-child(4n+2){background:var(--y2k-pink)!important;color:#fff!important}
+.skill-marquee .marquee-group span:nth-child(4n+3){background:var(--y2k-yellow)!important;color:#2a1330!important}
+.skill-marquee .marquee-group span:nth-child(4n){background:var(--gel-purple)!important;color:#fff!important}
+
+/* Site nav bottom border */
+.site-nav{border-bottom:2px solid var(--blue)!important}
+
+/* Nav join glossy gel pill */
+.nav-join{background:var(--gel-purple)!important;font-family:var(--accent-font);
+  border:2px solid rgba(0,0,0,.18);text-transform:uppercase;font-size:12px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 4px 0 #5430c4, 0 10px 18px rgba(124,92,252,.45)}
+.nav-join::before{content:"\2726";margin-right:6px;color:#fff}
+.nav-join:hover{transform:translateY(-2px) rotate(-1deg)}
+
+/* Logo hover */
+.logo{transition:transform .3s var(--y2k-ease)}
+.logo:hover{transform:rotate(-3deg) scale(1.04)}
+
+/* Nav link underline holo */
+.nav-link::after{height:3px!important;background:var(--holo)!important;background-size:200% 100%;
+  animation:holoShift 3s linear infinite}
+
+/* Button gel styling */
+.btn{border-radius:16px;font-family:var(--accent-font);font-weight:400;
+  letter-spacing:.02em;border:2px solid rgba(0,0,0,.18);text-transform:uppercase;font-size:13px}
+.btn-primary{background:var(--gel-orange)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 5px 0 #b8431a, 0 12px 20px rgba(255,107,53,.4)}
+.btn-primary:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 7px 0 #b8431a, 0 16px 26px rgba(255,107,53,.5)}
+.btn-secondary{border:2px solid var(--blue);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 4px 0 var(--blue), 0 10px 18px rgba(0,0,0,.3)}
+.btn-secondary:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 6px 0 var(--blue), 0 14px 22px rgba(0,0,0,.35)}
+
+/* Card sticker shadows */
+.card,.stat-card,.market-card,.loop-step,.pricing-card,.gauge-card,.zone-card,
+.about-card,.mockup-card,.browse-stats div,.faq-list details{
+  border-width:2px!important;border-color:var(--y2k-line)!important;
+  box-shadow:var(--sticker-shadow)!important;
+  transition:transform .25s var(--y2k-ease),box-shadow .25s ease,border-color .25s ease!important}
+.card:hover,.stat-card:hover,.market-card:hover,.zone-card:hover,.about-card:hover,.mockup-card:hover{
+  transform:translate(-2px,-4px) rotate(-.6deg)!important;
+  box-shadow:8px 10px 0 rgba(124,92,252,.85)!important;border-color:var(--blue)!important}
+
+/* Light mode */
+body.light-mode::after{mix-blend-mode:multiply;opacity:.45}
+body.light-mode .eyebrow{color:#0891b2;text-shadow:none}
+body.light-mode .site-nav{border-bottom-color:#2563EB!important}
+body.light-mode .nav-join{box-shadow:0 4px 0 #1e40af,0 10px 18px rgba(37,99,235,.45)!important}
+body.light-mode .tag,body.light-mode .market-category,body.light-mode .plan-kicker,
+body.light-mode .zone-num,body.light-mode .trust-row span,body.light-mode .credit-badge{color:#1a1330!important}
+
+/* Reduced motion */
+@media(prefers-reduced-motion:reduce){
+  body::after{display:none}
+  .hero-kinetic .kx-word{animation:none}}

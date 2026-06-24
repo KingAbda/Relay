@@ -407,4 +407,14 @@ body.light-mode .campaign-map .leaflet-popup-content-wrapper{background:#FFF;col
 body.light-mode .campaign-map .leaflet-popup-tip{background:#FFF;border-color:#E2E8F0}
 body.light-mode .map-legend{background:rgba(248,250,252,.88);color:#64748B}
 body.light-mode .zone-num{background:#E2E8F0;color:#64748B}
+
+/* ════════ Y2K sparkle cursor + pop-in ════════ */
+.y2k-spark{position:fixed;z-index:9500;pointer-events:none;font-size:16px;line-height:1;
+  transform:translate(-50%,-50%);will-change:transform,opacity;animation:sparkFade .8s ease-out forwards}
+@keyframes sparkFade{
+  0%{opacity:1;transform:translate(-50%,-50%) scale(.4) rotate(0deg)}
+  100%{opacity:0;transform:translate(-50%,-90%) scale(1.1) rotate(140deg)}}
+.y2k-pop{opacity:0;transform:translateY(24px) scale(.9) rotate(-2deg)}
+.y2k-pop.in{opacity:1;transform:none;transition:opacity .6s var(--y2k-ease),transform .6s var(--y2k-ease)}
+@media(prefers-reduced-motion:reduce){.y2k-spark{display:none!important}.y2k-pop{opacity:1!important;transform:none!important}}
 body.light-mode .wild-section{background:linear-gradient(180deg,#F1F5F9 0%,#F8FAFC 100%)}

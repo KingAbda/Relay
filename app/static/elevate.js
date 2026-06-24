@@ -385,14 +385,14 @@
       function fallbackLoop() {
         resetFallback();
         active(0);
-        setTimeout(function () { glowArrow(0); setPath(shafts[0], 0); setPath(heads[0], 0); }, 1150);
-        setTimeout(function () { arrows[0] && arrows[0].classList.remove("is-glow"); active(1); }, 2500);
-        setTimeout(function () { glowArrow(1); setPath(shafts[1], 0); setPath(heads[1], 0); }, 3650);
-        setTimeout(function () { arrows[1] && arrows[1].classList.remove("is-glow"); active(2); }, 5000);
-        setTimeout(function () { clearArrows(); }, 6500);
+        setTimeout(function () { glowArrow(0); setPath(shafts[0], 0); setPath(heads[0], 0); }, 750);
+        setTimeout(function () { arrows[0] && arrows[0].classList.remove("is-glow"); active(1); }, 1600);
+        setTimeout(function () { glowArrow(1); setPath(shafts[1], 0); setPath(heads[1], 0); }, 2350);
+        setTimeout(function () { arrows[1] && arrows[1].classList.remove("is-glow"); active(2); }, 3200);
+        setTimeout(function () { clearArrows(); }, 4100);
       }
       fallbackLoop();
-      window.setInterval(fallbackLoop, 7200);
+      window.setInterval(fallbackLoop, 4600);
       return;
     }
     var gsap = window.gsap;
@@ -402,29 +402,29 @@
     var tl = gsap.timeline({ repeat: -1, paused: true, defaults: { ease: "power2.out" } });
     tl.call(function () {
         gsap.set(arrowPaths, { strokeDashoffset: 1, opacity: 1 });
-        gsap.set(wrapPaths, { strokeDashoffset: 1, opacity: 0 }); // hidden until its draw phase (no stray dot)
+        gsap.set(wrapPaths, { strokeDashoffset: 1, opacity: 0 });
         clearArrows();
         active(0);
       })
-      // ── Card 1: hold the highlight before motion starts ──
-      .to({}, { duration: 1.1 })
-      // ── Arrow 1: glow after card 1, then hand off to card 2 ──
+      // ── Card 1: hold before motion ──
+      .to({}, { duration: 0.7 })
+      // ── Arrow 1: glow + draw ──
       .add(function () { glowArrow(0); })
-      .to(shafts[0], { strokeDashoffset: 0, duration: 0.62 })
-      .to(heads[0], { strokeDashoffset: 0, duration: 0.26 })
-      .to({}, { duration: 0.48 })
+      .to(shafts[0], { strokeDashoffset: 0, duration: 0.4 })
+      .to(heads[0], { strokeDashoffset: 0, duration: 0.15 })
+      .to({}, { duration: 0.3 })
       .add(function () { arrows[0].classList.remove("is-glow"); active(1); })
-      // ── Card 2: hold, then arrow 2 glows and hands off to card 3 ──
-      .to({}, { duration: 1.1 })
+      // ── Card 2: hold, then arrow 2 ──
+      .to({}, { duration: 0.7 })
       .add(function () { glowArrow(1); })
-      .to(shafts[1], { strokeDashoffset: 0, duration: 0.62 })
-      .to(heads[1], { strokeDashoffset: 0, duration: 0.26 })
-      .to({}, { duration: 0.48 })
+      .to(shafts[1], { strokeDashoffset: 0, duration: 0.4 })
+      .to(heads[1], { strokeDashoffset: 0, duration: 0.15 })
+      .to({}, { duration: 0.3 })
       .add(function () { arrows[1].classList.remove("is-glow"); active(2); })
-      // ── Card 3: hold, then reset directly to card 1 ──
-      .to({}, { duration: 1.25 })
+      // ── Card 3: hold, then reset ──
+      .to({}, { duration: 0.8 })
       .add(function () { clearArrows(); active(0); })
-      .to(arrowPaths, { opacity: 0, duration: 0.25 });
+      .to(arrowPaths, { opacity: 0, duration: 0.15 });
 
     window.ScrollTrigger && window.gsap.registerPlugin(window.ScrollTrigger);
     if (window.ScrollTrigger) {

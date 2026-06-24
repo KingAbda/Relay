@@ -35,9 +35,9 @@
     {% set marquee_skills = [
       'debug my code', 'resume review', 'fix my squat form', 'budgeting', 'learn guitar',
       'Spanish conversation', 'Canva flyer help', 'Figma basics', 'Python homework',
-      'public speaking reps', 'GarageBand beats', 'meal prep', 'calculus tutoring',
-      'LinkedIn cleanup', 'photo editing', 'Japanese basics', 'investing 101',
-      'presentation design', 'essay outline', 'HTML/CSS starter'
+      '67', 'touch grass', 'meal prep', 'calculus tutoring',
+      'LinkedIn cleanup', 'knicks in 5', 'Japanese basics', 'investing 101',
+      'presentation design', 'vibe check', 'HTML/CSS starter'
     ] %}
     <div class="marquee-group">
       {% for skill in marquee_skills %}<span>{{ skill }}</span>{% endfor %}
@@ -227,6 +227,7 @@
   </div>
   <div class="container pricing-grid" data-reveal-stagger>
     <article class="pricing-card pricing-free">
+      <a href="{% if user %}/dashboard?plan=free{% else %}/signup{% endif %}" style="text-decoration:none;color:inherit;display:block;height:100%">
       <div class="pricing-top">
         <span class="plan-kicker">Try Relay</span>
         <h3>Free</h3>
@@ -238,10 +239,12 @@
         <li><span>✓</span> List what you can teach</li>
         <li><span>✓</span> Earn more credits by teaching</li>
       </ul>
-      <a href="/signup" class="btn btn-secondary">Get started</a>
+      <span class="btn btn-secondary">Get started</span>
+      </a>
     </article>
     <article class="pricing-card pricing-featured">
       <div class="popular-pill">Most useful</div>
+      <a href="{% if user %}/dashboard?plan=starter{% else %}/signup{% endif %}" style="text-decoration:none;color:inherit;display:block;height:100%">
       <div class="pricing-top">
         <span class="plan-kicker">Regular learner</span>
         <h3>Starter</h3>
@@ -253,9 +256,11 @@
         <li><span>✓</span> Priority scheduling nudges</li>
         <li><span>✓</span> Keep earning free credits by teaching</li>
       </ul>
-      <a href="/signup" class="btn btn-primary">Start free →</a>
+      <span class="btn btn-primary">Start free →</span>
+      </a>
     </article>
     <article class="pricing-card pricing-pro">
+      <a href="{% if user %}/dashboard?plan=pro{% else %}/signup{% endif %}" style="text-decoration:none;color:inherit;display:block;height:100%">
       <div class="pricing-top">
         <span class="plan-kicker">Power user</span>
         <h3>Pro</h3>
@@ -267,7 +272,8 @@
         <li><span>✓</span> Unlimited active listings</li>
         <li><span>✓</span> Verified badge + priority matching</li>
       </ul>
-      <a href="/signup" class="btn btn-secondary">Go Pro</a>
+      <span class="btn btn-secondary">Go Pro</span>
+      </a>
     </article>
   </div>
 </section>
@@ -400,6 +406,43 @@
   setTimeout(function(){
     if(!document.querySelector('.leaflet-container')) initMap();
   }, 1500);
+})();
+</script>
+
+<!-- Y2K Sparkle cursor + y2k-pop reveals -->
+<script>
+(function(){
+  if(/[?&]static=1/.test(location.search)||matchMedia("(prefers-reduced-motion:reduce)").matches||matchMedia("(hover:none)").matches)return;
+  var G=["\u2726","\u2727","\u2729","\u272A","\u2737"],C=["#7c5cfc","#22d3ee","#ff2d78","#ffd84d","#ff6b35","#b6ff3a"],mx=28,liv=0,th=38,md=14,lx=0,ly=0,lt=0;
+  function sp(x,y,s){
+    if(liv>=mx)return;
+    var e=document.createElement("span");e.className="y2k-spark";
+    e.textContent=G[(Math.random()*G.length)|0];
+    e.style.left=x+"px";e.style.top=y+"px";
+    e.style.color=C[(Math.random()*C.length)|0];
+    e.style.fontSize=(10+Math.random()*12)*(s||1)+"px";
+    document.body.appendChild(e);liv++;
+    e.onanimationend=function(){e.remove();liv--;};
+    setTimeout(function(){if(e.parentNode){e.remove();liv--;}},1000);
+  }
+  document.addEventListener("mousemove",function(e){
+    var n=performance.now(),d=Math.hypot(e.clientX-lx,e.clientY-ly);
+    if(n-lt<th||d<md)return;lt=n;lx=e.clientX;ly=e.clientY;sp(e.clientX,e.clientY);
+  },{passive:true});
+  document.addEventListener("click",function(e){
+    var t=e.target.closest&&e.target.closest(".btn,.nav-join");
+    if(!t)return;
+    for(var i=0;i<7;i++)!function(k){setTimeout(function(){sp(e.clientX+(Math.random()-.5)*46,e.clientY+(Math.random()-.5)*46,1.3);},k*22);}(i);
+  },true);
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(!en.isIntersecting)return;
+      en.target.classList.add("y2k-pop");
+      setTimeout(function(){en.target.classList.add("in");},(parseFloat(en.target.getAttribute("data-y2k-pop"))||0)*1000);
+      io.unobserve(en.target);
+    });
+  },{threshold:.18});
+  document.querySelectorAll("[data-y2k-pop]").forEach(function(el){io.observe(el);});
 })();
 </script>
 {% endblock %}
