@@ -679,7 +679,7 @@ def request_session(skill_id):
         if user_listings == 0:
             return render_template("request_session.html", user=user, skill=skill, error="You need to publish a skill listing before you can book sessions. Add a skill from your dashboard first!", now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
 
-    # Determine credit cost — flat rate forces 1
+    # Determine credit cost — flat rate forces 1 (applied at charge time, not just creation)
     credit_cost = 1 if RELAY_FLAT_RATE else (skill.credit_cost or 1)
     
     if request.method == "GET":
@@ -693,9 +693,11 @@ def request_session(skill_id):
             scheduled_at = datetime.fromisoformat(scheduled_raw)
         except (ValueError, TypeError):
             pass
-    credit = CreditAccount.query.filter(CreditAccount.user_id == user.id).first()
+    # Atomic balance check with row lock to prevent race conditions
+    credit = CreditAccount.query.filter(CreditAccount.user_id == user.id).with_for_update().first()
     if not credit or credit.balance < credit_cost:
         return render_template("request_session.html", user=user, skill=skill, credit_cost=credit_cost, error=f"Not enough credits. This session costs {credit_cost} credit(s).", now=datetime.utcnow().strftime("%Y-%m-%dT%H:%M"))
+    credit.balance -= credit_cost  # debit immediately, refund on cancel
     session = Session(teacher_id=skill.user_id, learner_id=user.id, skill_name=skill.name, notes=notes, scheduled_at=scheduled_at)
     db.session.add(session)
     add_credit_transaction(user.id, -credit_cost, TransactionType.SPEND, f"Hold: {skill.name}", related_user_id=skill.user_id)
@@ -756,7 +758,16 @@ def cancel_session(session_id):
     was_held = session.status == SessionStatus.REQUESTED
     session.status = SessionStatus.CANCELLED
     if was_held:
-        add_credit_transaction(session.learner_id, 1.0, TransactionType.BONUS, f"Refund: {session.skill_name}", related_user_id=session.teacher_id)
+        # Refund the actual credit cost, not hardcoded 1
+        credit_cost = 1
+        skill = UserSkill.query.filter(UserSkill.user_id == session.teacher_id, UserSkill.name == session.skill_name, UserSkill.is_active == True).first()
+        if skill and not RELAY_FLAT_RATE:
+            credit_cost = skill.credit_cost or 1
+        # Restore the learner's balance
+        credit = CreditAccount.query.filter(CreditAccount.user_id == session.learner_id).with_for_update().first()
+        if credit:
+            credit.balance += credit_cost
+        add_credit_transaction(session.learner_id, credit_cost, TransactionType.REFUND, f"Refund: {session.skill_name}", related_user_id=session.teacher_id)
     db.session.commit()
     return redirect(url_for("dashboard"))
 
@@ -905,57 +916,7 @@ def membership():
         return redirect(url_for("dashboard"))
     return render_template("membership.html", user=user, is_member=user.is_member, relay_monetization_enabled=RELAY_MONETIZATION_ENABLED)
 
-@app.route("/membership/join")
-def membership_join():
-    user = require_user()
-    if not user: return redirect(url_for("login"))
-    if not RELAY_MONETIZATION_ENABLED:
-        return redirect(url_for("dashboard"))
-    # TODO: integrate payment provider for membership billing
-    user.is_member = True
-    user.member_since = datetime.utcnow()
-    db.session.commit()
-    return redirect(url_for("dashboard"))
-
-# ══════════════════════════════════════════════════════════
-#  ROUTES: ABOUT, LEGAL & HEALTH (before profile/param routes)
-# ══════════════════════════════════════════════════════════
-
-@app.route("/top-up")
-def top_up():
-    user = require_user()
-    if not user: return redirect(url_for("login"))
-    if not RELAY_MONETIZATION_ENABLED:
-        return redirect(url_for("dashboard"))
-    return render_template("topup.html", user=user, relay_monetization_enabled=RELAY_MONETIZATION_ENABLED)
-
-@app.route("/top-up", methods=["POST"])
-def top_up_post():
-    user = require_user()
-    if not user: return redirect(url_for("login"))
-    if not RELAY_MONETIZATION_ENABLED:
-        return redirect(url_for("dashboard"))
-    amount = request.form.get("amount", 0, type=int)
-    if amount < 1 or amount > 100:
-        return render_template("topup.html", user=user, error="Invalid amount. Choose 1–100 credits.", relay_monetization_enabled=RELAY_MONETIZATION_ENABLED)
-    # TODO: integrate payment provider (Stripe Checkout, Lemon Squeezy, etc.)
-    # For now, add credits directly as a demo — remove this in production
-    credit = CreditAccount.query.filter(CreditAccount.user_id == user.id).first()
-    if credit:
-        credit.balance += float(amount)
-        add_credit_transaction(user.id, float(amount), TransactionType.TOPUP, f"Credit top-up: {amount} credits")
-        db.session.commit()
-    return redirect(url_for("dashboard"))
-
-@app.route("/membership")
-def membership():
-    user = require_user()
-    if not user: return redirect(url_for("login"))
-    if not RELAY_MONETIZATION_ENABLED:
-        return redirect(url_for("dashboard"))
-    return render_template("membership.html", user=user, is_member=user.is_member, relay_monetization_enabled=RELAY_MONETIZATION_ENABLED)
-
-@app.route("/membership/join")
+@app.route("/membership/join", methods=["POST"])
 def membership_join():
     user = require_user()
     if not user: return redirect(url_for("login"))
@@ -1043,7 +1004,7 @@ def add_request():
         db.session.commit()
     return redirect(url_for("browse_requests"))
 
-@app.route("/claim-request/<request_id>")
+@app.route("/claim-request/<request_id>", methods=["POST"])
 def claim_request(request_id):
     user = require_onboarded()
     if not user or user == "redirect_onboarding":
@@ -1058,6 +1019,16 @@ def claim_request(request_id):
             return redirect(url_for("browse_requests"))
     req.status = "claimed"
     req.claimed_by = user.id
+    # Auto-create a session so the claim→booking→credit path is wired end to end
+    # Use the request's max_credits as the credit cost
+    credit_cost = 1 if RELAY_FLAT_RATE else min(req.max_credits or 1, RELAY_MAX_CREDIT_COST)
+    # Check if learner has enough credits (with row lock)
+    learner_credit = CreditAccount.query.filter(CreditAccount.user_id == req.user_id).with_for_update().first()
+    if learner_credit and learner_credit.balance >= credit_cost:
+        learner_credit.balance -= credit_cost
+        add_credit_transaction(req.user_id, -credit_cost, TransactionType.SPEND, f"Hold: {req.name} (claimed by {user.full_name})", related_user_id=user.id)
+    session = Session(teacher_id=user.id, learner_id=req.user_id, skill_name=req.name, notes=f"Claimed from request: {req.name}")
+    db.session.add(session)
     db.session.commit()
     return redirect(url_for("browse_requests"))
 
