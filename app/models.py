@@ -207,6 +207,9 @@ class Session(db.Model):
     # Amount charged at debit time — single source of truth for all credit/refund ops.
     # Never re-read the listing price or FLAT_RATE after this is set.
     amount_charged: Mapped[float] = mapped_column(Float, default=0.0)
+    # Two-party completion: both must confirm before credits release
+    teacher_completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    learner_completed: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 # ── Reviews ────────────────────────────────────────────

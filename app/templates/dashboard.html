@@ -107,8 +107,14 @@
         {% if s.notes %}<p class="muted" style="font-size: 0.8rem; margin: 2px 0 0;">{{ s.notes[:100] }}</p>{% endif %}
       </div>
       <div style="display: flex; gap: 8px;">
-        <a href="/accept-session/{{ s.id }}" class="btn btn-sm btn-blue">Accept</a>
-        <a href="/cancel-session/{{ s.id }}" class="btn btn-sm btn-secondary">✕ Decline</a>
+        <form method="POST" action="/accept-session/{{ s.id }}" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="btn btn-sm btn-blue">Accept</button>
+        </form>
+        <form method="POST" action="/cancel-session/{{ s.id }}" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="btn btn-sm btn-secondary">✕ Decline</button>
+        </form>
       </div>
     </div>
   {% endfor %}
@@ -146,7 +152,10 @@
               {% for i in range(s.proficiency or 3) %}<span class="prof-dot filled"></span>{% endfor %}
               {% for i in range(5 - (s.proficiency or 3)) %}<span class="prof-dot"></span>{% endfor %}
             </span>
-            <a href="/remove-skill/{{ s.id }}" class="btn btn-sm btn-secondary" style="font-size: 0.7rem; padding: 2px 8px;">✕</a>
+            <form method="POST" action="/remove-skill/{{ s.id }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="btn btn-sm btn-secondary" style="font-size: 0.7rem; padding: 2px 8px; border:none; background:transparent; cursor:pointer;">✕</button>
+            </form>
           </div>
         {% endfor %}
       {% else %}
@@ -211,7 +220,15 @@
                     {% if s.status == 'completed' %}
                       <span style="color: var(--success);">✓ Done</span>
                     {% elif s.status == 'confirmed' or s.status == 'accepted' %}
-                      <span style="color: var(--primary);">Confirmed</span>
+                      {% if s.teacher_completed and s.learner_completed %}
+                        <span style="color: var(--success);">✓ Done</span>
+                      {% elif s.role == 'teacher' and s.teacher_completed %}
+                        <span style="color: var(--primary);">Awaiting learner</span>
+                      {% elif s.role == 'learner' and s.learner_completed %}
+                        <span style="color: var(--primary);">Awaiting teacher</span>
+                      {% else %}
+                        <span style="color: var(--primary);">Confirmed</span>
+                      {% endif %}
                     {% elif s.status == 'requested' %}
                       <span style="color: var(--cta);">Pending</span>
                     {% elif s.status == 'cancelled' %}
@@ -221,12 +238,29 @@
                   <td style="white-space: nowrap;">
                     {% if s.status == 'completed' and not s.my_review %}
                       <a href="/review-session/{{ s.id }}" class="btn btn-sm btn-primary" style="font-size: 0.7rem;">Review</a>
-                    {% elif s.role == 'teacher' and s.status in ('confirmed', 'accepted') %}
-                      <a href="/complete-session/{{ s.id }}" class="btn btn-sm btn-blue" style="font-size: 0.7rem;">Complete</a>
-                    {% elif s.role == 'learner' and s.status in ('confirmed', 'accepted') %}
-                      <a href="/complete-session/{{ s.id }}" class="btn btn-sm btn-blue" style="font-size: 0.7rem;">Complete</a>
+                    {% elif s.status in ('confirmed', 'accepted') %}
+                      {% if s.role == 'teacher' and not s.teacher_completed %}
+                        <form method="POST" action="/complete-session/{{ s.id }}" style="display:inline;">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                          <button type="submit" class="btn btn-sm btn-blue" style="font-size: 0.7rem;">Mark taught</button>
+                        </form>
+                      {% elif s.role == 'learner' and not s.learner_completed %}
+                        <form method="POST" action="/complete-session/{{ s.id }}" style="display:inline;">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                          <button type="submit" class="btn btn-sm btn-blue" style="font-size: 0.7rem;">Confirm received</button>
+                        </form>
+                      {% elif s.teacher_completed and s.learner_completed %}
+                        {% if not s.my_review %}
+                          <a href="/review-session/{{ s.id }}" class="btn btn-sm btn-primary" style="font-size: 0.7rem;">Review</a>
+                        {% endif %}
+                      {% else %}
+                        <span class="muted" style="font-size: 0.75rem;">Awaiting other party</span>
+                      {% endif %}
                     {% elif s.status == 'requested' and s.role == 'learner' %}
-                      <a href="/cancel-session/{{ s.id }}" class="btn btn-sm btn-secondary" style="font-size: 0.7rem;">Cancel</a>
+                      <form method="POST" action="/cancel-session/{{ s.id }}" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <button type="submit" class="btn btn-sm btn-secondary" style="font-size: 0.7rem;">Cancel</button>
+                      </form>
                     {% endif %}
                   </td>
                 </tr>

@@ -418,7 +418,7 @@ def signup():
     )
     db.session.add(user)
     db.session.flush()
-    credit = CreditAccount(user_id=user.id, balance=float(RELAY_STARTER_CREDITS))
+    credit = CreditAccount(user_id=user.id, balance=0.0)
     db.session.add(credit)
     add_credit_transaction(user.id, float(RELAY_STARTER_CREDITS), TransactionType.BONUS, f"{RELAY_STARTER_CREDITS} free credits to start!")
     if referrer:
@@ -585,6 +585,7 @@ def dashboard():
             "created_at": s.created_at, "notes": s.notes, "scheduled_at": s.scheduled_at,
             "meet_link": getattr(s, 'meet_link', None),
             "my_review": my_review, "teacher_rating": round(teacher_rating, 1) if teacher_rating else None,
+            "teacher_completed": s.teacher_completed, "learner_completed": s.learner_completed,
         })
 
     pending = Session.query.filter(Session.teacher_id == user.id, Session.status == SessionStatus.REQUESTED).order_by(Session.created_at.desc()).all()
@@ -704,7 +705,8 @@ def request_session(skill_id):
     db.session.commit()
     return redirect(url_for("dashboard"))
 
-@app.route("/accept-session/<session_id>")
+@app.route("/accept-session/<session_id>", methods=["POST"])
+@limiter.limit("30 per minute")
 def accept_session(session_id):
     user = require_user()
     if not user: return redirect(url_for("login"))
@@ -718,7 +720,7 @@ def accept_session(session_id):
     db.session.commit()
     return redirect(url_for("dashboard"))
 
-@app.route("/complete-session/<session_id>")
+@app.route("/complete-session/<session_id>", methods=["POST"])
 def complete_session(session_id):
     user = require_user()
     if not user: return redirect(url_for("login"))
@@ -727,30 +729,43 @@ def complete_session(session_id):
         abort(404)
     if session.status not in (SessionStatus.CONFIRMED, SessionStatus.REQUESTED):
         return redirect(url_for("dashboard"))
-    session.status = SessionStatus.COMPLETED
-    session.completed_at = datetime.utcnow()
-    # Track completed sessions for good-student badging
-    teacher = get_user(session.teacher_id)
-    learner = get_user(session.learner_id)
-    if teacher:
-        teacher.completed_sessions_count = (teacher.completed_sessions_count or 0) + 1
-    if learner:
-        learner.completed_sessions_count = (learner.completed_sessions_count or 0) + 1
-    # Credit the teacher from the stored amount_charged — never re-read the listing or FLAT_RATE
-    credit_amount = session.amount_charged or 1.0
-    # Idempotency: skip credit if already completed (shouldn't reach here but guard anyway)
-    existing_credit = CreditTransaction.query.filter_by(
-        user_id=session.teacher_id,
-        type=TransactionType.EARN.value if hasattr(TransactionType.EARN, 'value') else TransactionType.EARN,
-        description=f"Taught {session.skill_name}",
-        related_user_id=session.learner_id
-    ).first()
-    if not existing_credit:
-        add_credit_transaction(session.teacher_id, credit_amount, TransactionType.EARN, f"Taught {session.skill_name}", related_user_id=session.learner_id)
+
+    # ── Two-party completion ──────────────────────────────────
+    # Neither party can unilaterally release credits. Both must
+    # confirm the session happened before the teacher gets paid.
+    if session.teacher_id == user.id:
+        if session.teacher_completed:
+            return redirect(url_for("dashboard"))
+        session.teacher_completed = True
+    else:  # learner
+        if session.learner_completed:
+            return redirect(url_for("dashboard"))
+        session.learner_completed = True
+
+    # Only release credits when BOTH parties have confirmed
+    if session.teacher_completed and session.learner_completed:
+        session.status = SessionStatus.COMPLETED
+        session.completed_at = datetime.utcnow()
+        teacher = get_user(session.teacher_id)
+        learner = get_user(session.learner_id)
+        if teacher:
+            teacher.completed_sessions_count = (teacher.completed_sessions_count or 0) + 1
+        if learner:
+            learner.completed_sessions_count = (learner.completed_sessions_count or 0) + 1
+        credit_amount = session.amount_charged or 1.0
+        existing_credit = CreditTransaction.query.filter_by(
+            user_id=session.teacher_id,
+            type=TransactionType.EARN.value if hasattr(TransactionType.EARN, 'value') else TransactionType.EARN,
+            description=f"Taught {session.skill_name}",
+            related_user_id=session.learner_id
+        ).first()
+        if not existing_credit:
+            add_credit_transaction(session.teacher_id, credit_amount, TransactionType.EARN, f"Taught {session.skill_name}", related_user_id=session.learner_id)
+
     db.session.commit()
     return redirect(url_for("dashboard"))
 
-@app.route("/cancel-session/<session_id>")
+@app.route("/cancel-session/<session_id>", methods=["POST"])
 def cancel_session(session_id):
     user = require_user()
     if not user: return redirect(url_for("login"))
@@ -1104,7 +1119,7 @@ def add_skill():
         db.session.commit()
     return redirect(url_for("dashboard"))
 
-@app.route("/remove-skill/<skill_id>")
+@app.route("/remove-skill/<skill_id>", methods=["POST"])
 def remove_skill(skill_id):
     user = require_user()
     if not user: return redirect(url_for("login"))
