@@ -184,8 +184,8 @@ a:focus-visible,button:focus-visible,summary:focus-visible,
   background:linear-gradient(180deg,#ff8540 0%,#ff6b35 100%);-webkit-background-clip:text;background-clip:text;
   color:transparent;-webkit-text-fill-color:transparent}
 @media (max-width:720px){.campus-hero{padding:60px 0 40px}.hero-stage .hero-sub{font-size:17px}
-  .hero-kinetic{font-size:clamp(40px,10.5vw,72px);column-gap:.2em;margin:12px auto 22px}}
-@media (max-width:420px){.hero-kinetic{font-size:38px;letter-spacing:-.04em}}
+  .hero .hero-kinetic{font-size:clamp(30px,7vw,48px);column-gap:.2em;margin:12px auto 22px}}
+@media (max-width:420px){.hero .hero-kinetic{font-size:30px;letter-spacing:-.04em}}
 
 /* ── "How credits work" — 3 equal steps with a looping highlight ── */
 .credit-loop{display:block;position:relative;margin-top:40px;padding-bottom:58px;max-width:1080px;margin-inline:auto}
