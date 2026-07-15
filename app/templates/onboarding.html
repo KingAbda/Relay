@@ -12,13 +12,13 @@
   <div class="card" style="border-color: var(--primary); background: var(--primary-bg); margin-bottom: 24px; text-align: center;">
     <p style="font-size: 0.9rem;">
       <strong>Relay is piloting {{ pilot_vertical_name }}.</strong><br>
-      <span class="muted">{% if pilot_vertical == 'all' %}Pick any skill category — or add a demo set to get started fast.{% else %}List any fitness, wellness, or lifestyle skill to join the first cohort.{% endif %}</span>
+      <span class="muted">List one vetted {{ pilot_vertical_name|lower }} skill to teach and one you want to learn.</span>
     </p>
   </div>
   {% endif %}
 
   {% if error %}
-    <div class="form-error" style="margin-bottom: 16px;">{{ error }}</div>
+    <div class="form-error" role="alert" style="margin-bottom: 16px;">{{ error }}</div>
   {% endif %}
 
   <form method="POST" action="/onboarding">
@@ -27,12 +27,12 @@
     <div class="card" style="margin-bottom: 24px;">
       <h3 style="margin-bottom: 16px;">What can you teach?</h3>
       <div class="form-group">
-        <label>Skill name</label>
-        <input type="text" name="teach_name" class="form-input" placeholder="e.g. Weight training, Yoga, Meal prep" required />
+        <label for="teach-name">Skill name</label>
+        <input id="teach-name" type="text" name="teach_name" class="form-input" placeholder="e.g. Guitar basics, Canva design, songwriting" required />
       </div>
       <div class="form-group">
-        <label>Category</label>
-        <select name="teach_category" class="form-select" required>
+        <label for="teach-category">Category</label>
+        <select id="teach-category" name="teach_category" class="form-select" required>
           <option value="">Select a category...</option>
           {% for cat in categories %}
             <option value="{{ cat }}">{{ cat|capitalize }}</option>
@@ -40,20 +40,20 @@
         </select>
       </div>
       <div class="form-group" style="margin-bottom: 0;">
-        <label>Brief description (optional)</label>
-        <textarea name="teach_description" class="form-textarea" placeholder="What level? What will someone learn in 30 minutes?"></textarea>
+        <label for="teach-description">Brief description (optional)</label>
+        <textarea id="teach-description" name="teach_description" class="form-textarea" placeholder="What level? What will someone learn in 30 minutes?"></textarea>
       </div>
     </div>
 
     <div class="card" style="margin-bottom: 24px;">
       <h3 style="margin-bottom: 16px;">What do you want to learn?</h3>
       <div class="form-group">
-        <label>Skill name</label>
-        <input type="text" name="learn_name" class="form-input" placeholder="e.g. Boxing, Nutrition planning" required />
+        <label for="learn-name">Skill name</label>
+        <input id="learn-name" type="text" name="learn_name" class="form-input" placeholder="e.g. Music production, drawing, photography" required />
       </div>
       <div class="form-group">
-        <label>Category</label>
-        <select name="learn_category" class="form-select" required>
+        <label for="learn-category">Category</label>
+        <select id="learn-category" name="learn_category" class="form-select" required>
           <option value="">Select a category...</option>
           {% for cat in categories %}
             <option value="{{ cat }}">{{ cat|capitalize }}</option>
@@ -61,8 +61,8 @@
         </select>
       </div>
       <div class="form-group" style="margin-bottom: 0;">
-        <label>Brief description (optional)</label>
-        <textarea name="learn_description" class="form-textarea" placeholder="What level are you? What are you hoping to achieve?"></textarea>
+        <label for="learn-description">Brief description (optional)</label>
+        <textarea id="learn-description" name="learn_description" class="form-textarea" placeholder="What level are you? What are you hoping to achieve?"></textarea>
       </div>
     </div>
 

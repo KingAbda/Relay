@@ -8,3 +8,23 @@ venv/
 
 # Local agent settings
 .claude/
+
+# Local operating-system and agent evidence
+.DS_Store
+.hermes/
+.playwright-mcp/
+.Rhistory
+
+# Generated local review artifacts (source Markdown remains canonical)
+docs/page-screenshots-*/
+docs/Relay_GitHub_vs_Local_Changes_Report_*.pdf
+docs/Relay_What_Changed_and_Why_*.pdf
+
+# Local promotional source material and unused motion experiments
+promo-vids/
+app/static/media/relay-campus-hero-test.mp4
+app/static/relay-intro-animation.gif
+app/static/relay-intro-animation.mp4
+app/static/relay-intro-frames/
+app/static/relay-pre-smile-mark.png
+app/static/relay-pre-smile-mark.svg

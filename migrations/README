@@ -1,0 +1,12 @@
+Relay database migrations
+=========================
+
+Run migrations through Flask-Migrate so the application configuration supplies
+the database URL:
+
+    flask --app app.main db current
+    flask --app app.main db upgrade
+    flask --app app.main db downgrade <revision>
+
+Never run these commands against a database whose ownership and backup state are
+unknown. See docs/MIGRATION_PLAN.md for the legacy adoption and rollback runbook.

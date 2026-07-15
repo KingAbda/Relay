@@ -2,27 +2,30 @@
 {% block title %}Campus skill swap{% endblock %}
 {% block page_id %}home{% endblock %}
 {% block content %}
-<section class="hero campus-hero">
+<section class="hero campus-hero hero-video-test">
+  <div class="hero-video-wrap" aria-hidden="true">
+    <img class="hero-video" src="{{ url_for('static', filename='media/relay-campus-hero-poster.jpg') }}" alt="" width="1920" height="1080" loading="eager" decoding="async" fetchpriority="high" />
+  </div>
   <div class="container hero-stage">
     <p class="eyebrow" data-reveal>NYU pilot · 30 minutes = 1 credit</p>
     <h1 class="hero-kinetic" data-reveal="0.05" aria-label="Teach what you know, learn what you need">
       <span class="kx-lead">Teach</span>
-      <span class="kx-swap" data-swap aria-hidden="true" data-words="Guitar,Python,Figma,Lifting,Essays">Guitar</span>
+      <span class="kx-swap" data-swap aria-hidden="true" data-words="Guitar,Figma,Piano,Drawing,Collage">Guitar</span>
       <span class="kx-lead">Learn</span>
-      <span class="kx-swap" data-swap aria-hidden="true" data-words="Spanish,Design,Piano,Budgeting,French">Spanish</span>
+      <span class="kx-swap" data-swap aria-hidden="true" data-words="Design,Watercolor,Piano,Illustration,Photography">Design</span>
     </h1>
     <p class="hero-sub" data-reveal="0.12">A campus skill swap where students trade live 30-minute lessons using time credits — not cash. Teach what you know, learn what you need.</p>
     <div class="hero-actions" data-reveal="0.18">
       {% if user %}
         <a href="/dashboard" class="btn btn-primary" data-magnetic data-magnetic-strength="0.3">Open dashboard <span class="arrow">→</span></a>
-        <a href="#pricing" class="btn btn-secondary" data-magnetic data-magnetic-strength="0.3">See pricing</a>
+        <a href="#how" class="btn btn-secondary" data-magnetic data-magnetic-strength="0.3">How it works</a>
       {% else %}
         <a href="/signup" class="btn btn-primary" data-magnetic data-magnetic-strength="0.3">Join the pilot <span class="arrow">→</span></a>
         <a href="#how" class="btn btn-secondary" data-magnetic data-magnetic-strength="0.3">How it works</a>
       {% endif %}
     </div>
     <div class="trust-row" data-reveal="0.24">
-      <span>.edu verified</span>
+      <span>Invite-only NYU verification</span>
       <span>No cash between peers</span>
       <span>Starter credits included</span>
     </div>
@@ -33,11 +36,10 @@
   <div class="marquee-fade" aria-hidden="true"></div>
   <div class="marquee-track">
     {% set marquee_skills = [
-      'debug my code', 'resume review', 'fix my squat form', 'budgeting', 'learn guitar',
-      'Spanish conversation', 'Canva flyer help', 'Figma basics', 'Python homework',
-      '67', 'touch grass', 'meal prep', 'calculus tutoring',
-      'LinkedIn cleanup', 'knicks in 5', 'Japanese basics', 'investing 101',
-      'presentation design', 'vibe check', 'HTML/CSS starter'
+      'learn guitar', 'Canva flyer help', 'Figma basics', 'watercolor',
+      'piano chords', 'collage composition', 'digital illustration', 'photo composition',
+      'music production', 'drawing fundamentals', 'poster design', 'creative writing',
+      'typography basics', 'color theory', 'storyboarding', 'origami'
     ] %}
     <div class="marquee-group">
       {% for skill in marquee_skills %}<span>{{ skill }}</span>{% endfor %}
@@ -76,166 +78,12 @@
   </div>
 </section>
 
-<section class="section research-section">
-  <div class="container split-heading">
-    <div>
-      <p class="eyebrow" data-reveal>Campus field notes</p>
-      <h2 class="section-title" data-split>The demand is already there.</h2>
-    </div>
-    <p class="section-sub" data-reveal="0.05">Relay turns informal favor culture into a trusted student-to-student exchange with structure, reputation, and clear rules.</p>
-  </div>
-  <div class="container stat-grid field-notes gauge-notes" data-reveal-stagger>
-    <div class="stat-card gauge-card" style="--gauge-value:70; --gauge-delay:.05s;">
-      <span class="stat-index">01</span>
-      <div class="gauge-wrap" role="img" aria-label="70 percent of students have a skill to teach">
-        <svg class="gauge-svg" viewBox="0 0 120 120" aria-hidden="true">
-          <circle class="gauge-track" cx="60" cy="60" r="44" pathLength="100" />
-          <circle class="gauge-progress" cx="60" cy="60" r="44" pathLength="100" />
-        </svg>
-        <div class="gauge-center"><strong data-count="70">0</strong><span>%</span></div>
-      </div>
-      <p>of students have a skill to teach but no obvious way to share it.</p>
-    </div>
-    <div class="stat-card gauge-card" style="--gauge-value:85; --gauge-delay:.18s;">
-      <span class="stat-index">02</span>
-      <div class="gauge-wrap" role="img" aria-label="85 percent want to learn something but cannot always afford paid help">
-        <svg class="gauge-svg" viewBox="0 0 120 120" aria-hidden="true">
-          <circle class="gauge-track" cx="60" cy="60" r="44" pathLength="100" />
-          <circle class="gauge-progress" cx="60" cy="60" r="44" pathLength="100" />
-        </svg>
-        <div class="gauge-center"><strong data-count="85">0</strong><span>%</span></div>
-      </div>
-      <p>want to learn something but cannot always afford paid help.</p>
-    </div>
-    <div class="stat-card gauge-card" style="--gauge-value:75; --gauge-delay:.31s;">
-      <span class="stat-index">03</span>
-      <div class="gauge-wrap" role="img" aria-label="75 percent showed overlap between what students can teach and want to learn">
-        <svg class="gauge-svg" viewBox="0 0 120 120" aria-hidden="true">
-          <circle class="gauge-track" cx="60" cy="60" r="44" pathLength="100" />
-          <circle class="gauge-progress" cx="60" cy="60" r="44" pathLength="100" />
-        </svg>
-        <div class="gauge-center"><strong data-count="75">0</strong><span>%</span></div>
-      </div>
-      <p>showed overlap between what students can teach and want to learn.</p>
-    </div>
-  </div>
-</section>
 
-
-<section class="section map-section" id="map">
-  <div class="container split-heading">
-    <div>
-      <p class="eyebrow" data-reveal>Strategic placement</p>
-      <h2 class="section-title" data-split>The campus is the canvas.</h2>
-    </div>
-    <p class="section-sub" data-reveal="0.05">18 student-dense NYU &amp; Greenwich Village locations clustered into 8 placement zones — every pin a touchpoint where Relay belongs.</p>
-  </div>
-  <div class="container map-shell" data-reveal="0.1">
-    <link rel="stylesheet" href="{{ url_for('static', filename='leaflet.min.css') }}" />
-    <div id="campaignMap" class="campaign-map"></div>
-    <div class="map-legend">
-      <span class="legend-dot dot-target"></span> Target location
-      <span class="legend-dot dot-zone"></span> Placement zone
-    </div>
-  </div>
-  <div class="container zone-grid" data-reveal-stagger>
-    <div class="zone-card"><span class="zone-num">Z1</span><strong>Washington Sq Park</strong><p>Arch, fountain, south promenade — peak foot traffic</p></div>
-    <div class="zone-card"><span class="zone-num">Z2</span><strong>Bobst / Kimmel</strong><p>Library + student center — daily student crossroads</p></div>
-    <div class="zone-card"><span class="zone-num">Z3</span><strong>Silver / Stern / Tisch</strong><p>Academic hub — arts, business, liberal arts</p></div>
-    <div class="zone-card"><span class="zone-num">Z4</span><strong>Astor Place</strong><p>Subway + cube — commuter gateway to campus</p></div>
-    <div class="zone-card"><span class="zone-num">Z5</span><strong>W4th St Station</strong><p>ACEF/BDFM lines — student subway nexus</p></div>
-    <div class="zone-card"><span class="zone-num">Z6</span><strong>Union Square</strong><p>Kiosk boards + farmer's market — broad city audience</p></div>
-    <div class="zone-card"><span class="zone-num">Z7</span><strong>Dorm Corridor</strong><p>University Hall, Third North, Palladium — residential density</p></div>
-    <div class="zone-card"><span class="zone-num">Z8</span><strong>Village Cafés</strong><p>Think Coffee, The Strand, Stumptown — casual study spots</p></div>
-  </div>
-</section>
-
-<section class="section wild-section" id="wild">
+<section class="section" id="trial-scope">
   <div class="container section-center">
-    <p class="eyebrow" data-reveal>In the wild</p>
-    <h2 class="section-title" data-split>See it on the street.</h2>
-    <p class="section-sub" data-reveal="0.05">Photorealistic mockups showing Relay posters in real NYU-adjacent environments — wheatpasted on Washington Square, glowing at a bus shelter, pinned to a campus bulletin board.</p>
-  </div>
-  <div class="container mockup-grid" data-reveal-stagger>
-    <figure class="mockup-card">
-      <div class="mockup-frame">
-        <img src="{{ url_for('static', filename='campaign/mockup_washington_sq.png') }}" alt="Washington Square wheatpaste wall with Relay posters" loading="lazy" />
-      </div>
-      <figcaption><span>Washington Square</span> — Wheatpaste posters on a construction hoarding, golden hour</figcaption>
-    </figure>
-    <figure class="mockup-card">
-      <div class="mockup-frame">
-        <img src="{{ url_for('static', filename='campaign/mockup_astor_place.png') }}" alt="Astor Place bus-shelter ad with Relay poster" loading="lazy" />
-      </div>
-      <figcaption><span>Astor Place</span> — Backlit bus-shelter panel, blue hour</figcaption>
-    </figure>
-    <figure class="mockup-card">
-      <div class="mockup-frame">
-        <img src="{{ url_for('static', filename='campaign/mockup_bulletin_board.png') }}" alt="NYU bulletin board with Relay posters" loading="lazy" />
-      </div>
-      <figcaption><span>NYU Bulletin Board</span> — Pinned posters with tear-off tabs among student flyers</figcaption>
-    </figure>
-  </div>
-</section>
-
-<section class="section pricing-section" id="pricing">
-  <div class="container split-heading pricing-heading">
-    <div>
-      <p class="eyebrow" data-reveal>Simple pricing</p>
-      <h2 class="section-title" data-split>Start free. Upgrade only if Relay becomes a habit.</h2>
-    </div>
-    <p class="section-sub" data-reveal="0.05">Everyone gets starter credits to try the exchange. Paid plans are for students who want predictable monthly learning credits, not one-off tutoring fees.</p>
-  </div>
-  <div class="container pricing-grid" data-reveal-stagger>
-    <article class="pricing-card pricing-free">
-      <a href="{% if user %}/dashboard?plan=free{% else %}/signup{% endif %}" style="text-decoration:none;color:inherit;display:block;height:100%">
-      <div class="pricing-top">
-        <span class="plan-kicker">Try Relay</span>
-        <h3>Free</h3>
-        <p>For new students testing the skill board.</p>
-      </div>
-      <div class="price-line"><strong>$0</strong><span>to join</span></div>
-      <ul>
-        <li><span>✓</span> 2 starter credits included</li>
-        <li><span>✓</span> List what you can teach</li>
-        <li><span>✓</span> Earn more credits by teaching</li>
-      </ul>
-      <span class="btn btn-secondary">Get started</span>
-      </a>
-    </article>
-    <article class="pricing-card pricing-featured">
-      <div class="popular-pill">Most useful</div>
-      <a href="{% if user %}/dashboard?plan=starter{% else %}/signup{% endif %}" style="text-decoration:none;color:inherit;display:block;height:100%">
-      <div class="pricing-top">
-        <span class="plan-kicker">Regular learner</span>
-        <h3>Starter</h3>
-        <p>For students who want a few guaranteed sessions every month.</p>
-      </div>
-      <div class="price-line"><strong>$4.99</strong><span>/ month</span></div>
-      <ul>
-        <li><span>✓</span> 5 credits every month</li>
-        <li><span>✓</span> Priority scheduling nudges</li>
-        <li><span>✓</span> Keep earning free credits by teaching</li>
-      </ul>
-      <span class="btn btn-primary">Start free →</span>
-      </a>
-    </article>
-    <article class="pricing-card pricing-pro">
-      <a href="{% if user %}/dashboard?plan=pro{% else %}/signup{% endif %}" style="text-decoration:none;color:inherit;display:block;height:100%">
-      <div class="pricing-top">
-        <span class="plan-kicker">Power user</span>
-        <h3>Pro</h3>
-        <p>For students who are constantly teaching, booking, and building reputation.</p>
-      </div>
-      <div class="price-line"><strong>$9.99</strong><span>/ month</span></div>
-      <ul>
-        <li><span>✓</span> Unlimited monthly credits</li>
-        <li><span>✓</span> Unlimited active listings</li>
-        <li><span>✓</span> Verified badge + priority matching</li>
-      </ul>
-      <span class="btn btn-secondary">Go Pro</span>
-      </a>
-    </article>
+    <p class="eyebrow" data-reveal>Controlled trial scope</p>
+    <h2 class="section-title" data-split>Creative skills, invited participants, no payments.</h2>
+    <p class="section-sub" data-reveal="0.05">Relay is preparing a 10–20 person NYU trial limited to vetted creative-skill listings. Full profiles and booking are available only after invitation and email verification. Referrals, proof rewards, ambassadors, recurring bookings, public request claiming, and paid plans are not part of this trial.</p>
   </div>
 </section>
 
@@ -252,7 +100,7 @@
       </details>
       <details class="faq-item">
         <summary><span class="faq-number">2</span><span class="faq-question">What if I only want to learn?</span></summary>
-        <div class="faq-content"><p>You can start with free credits, then either teach to earn more or use a paid plan if you want predictable monthly credits.</p></div>
+        <div class="faq-content"><p>Verified invited participants receive {{ relay_starter_credits }} starter credits, then earn credits only by completing teaching sessions.</p></div>
       </details>
       <details class="faq-item">
         <summary><span class="faq-number">3</span><span class="faq-question">How do credits work?</span></summary>
@@ -260,23 +108,23 @@
       </details>
       <details class="faq-item">
         <summary><span class="faq-number">4</span><span class="faq-question">What can I teach?</span></summary>
-        <div class="faq-content"><p>Anything useful to another student: debugging, resume feedback, Canva flyers, lifting form, budgeting, languages, music, or class prep.</p></div>
+        <div class="faq-content"><p>The controlled trial accepts vetted creative-skill listings only. High-risk, medical, weapons-related, illegal, or dangerously physical instruction is prohibited.</p></div>
       </details>
       <details class="faq-item">
         <summary><span class="faq-number">5</span><span class="faq-question">How do I know the teacher is good?</span></summary>
-        <div class="faq-content"><p>Profiles show completed sessions, reviews, and what the student says they can teach. No-shows and bad sessions hurt trust quickly.</p></div>
+        <div class="faq-content"><p>Only verified invited participants can open full profiles. Reviews appear only after completed sessions.</p></div>
       </details>
       <details class="faq-item">
         <summary><span class="faq-number">6</span><span class="faq-question">Why not YouTube or AI?</span></summary>
-        <div class="faq-content"><p>Relay is for live feedback: someone watching your form, debugging your actual code, reacting to your draft, or practicing with you in real time.</p></div>
+        <div class="faq-content"><p>Relay is for live creative feedback: someone reacting to your draft, demonstrating a technique, or practicing with you in real time.</p></div>
       </details>
       <details class="faq-item">
         <summary><span class="faq-number">7</span><span class="faq-question">Who can join right now?</span></summary>
-        <div class="faq-content"><p>The redesign is focused on the NYU pilot. Students can join the first cohort with a .edu email.</p></div>
+        <div class="faq-content"><p>The first cohort is limited to 10–20 manually invited NYU participants who verify their institutional email.</p></div>
       </details>
       <details class="faq-item">
         <summary><span class="faq-number">8</span><span class="faq-question">What happens if someone flakes?</span></summary>
-        <div class="faq-content"><p>You get your credit back. Repeated no-shows lose trust and make it harder to keep offering sessions.</p></div>
+        <div class="faq-content"><p>During the controlled trial, cancellation before completion returns the single held credit once.</p></div>
       </details>
     </div>
   </div>
@@ -287,123 +135,12 @@
   <div class="container cta-card" data-reveal>
     <p class="eyebrow">First NYU cohort</p>
     <h2>Put your skill on the board.</h2>
-    <p>Join the pilot, list what you can teach, and get starter credits to learn from another student.</p>
-    <form method="POST" action="/waitlist" class="waitlist-form">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <input type="email" name="email" class="form-input" placeholder="your@email.com" required />
-      <button type="submit" class="btn btn-primary" data-magnetic data-magnetic-strength="0.3">Notify me</button>
-    </form>
-    {% if waitlist_error %}<p class="form-error">{{ waitlist_error }}</p>{% endif %}
+    <p>Already on the manually vetted invite list? Verify your NYU email, list one creative skill, and receive the configured starter credits.</p>
+    <a href="/signup" class="btn btn-primary" data-magnetic data-magnetic-strength="0.3">Use my invitation</a>
   </div>
 </section>
 {% else %}
 <section class="cta-section"><div class="container cta-card"><p class="eyebrow">Welcome back</p><h2>Ready for your next exchange?</h2><a href="/dashboard" class="btn btn-primary">Go to Dashboard</a></div></section>
 {% endif %}
 
-{% endblock %}
-
-{% block tail %}
-<script src="{{ url_for('static', filename='leaflet.min.js') }}"></script>
-<script>
-(function(){
-  function initMap(){
-    var mapEl = document.getElementById('campaignMap');
-    if(!mapEl || typeof L === 'undefined') return;
-  var map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: true }).setView([40.7295, -73.9945], 15);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 19
-  }).addTo(map);
-  var pins = [
-    {name:"Bobst Library", lat:40.7294, lng:-73.9965, note:"12 floors, 2M+ visits/yr"},
-    {name:"Kimmel Center", lat:40.7298, lng:-73.9973, note:"Student center — events, lounges"},
-    {name:"Silver Center", lat:40.7300, lng:-73.9955, note:"CAS hub, 50K students pass daily"},
-    {name:"Stern School", lat:40.7290, lng:-73.9938, note:"Business school, 5K students"},
-    {name:"Tisch School", lat:40.7288, lng:-73.9942, note:"Arts — film, dance, drama"},
-    {name:"Washington Sq Arch", lat:40.7308, lng:-73.9973, note:"Iconic gathering point"},
-    {name:"Washington Sq Fountain", lat:40.7303, lng:-73.9970, note:"Tabling, protests, hangs"},
-    {name:"Think Coffee", lat:40.7292, lng:-73.9984, note:"Popular study-work spot"},
-    {name:"The Strand", lat:40.7327, lng:-73.9907, note:"Iconic bookstore, foot traffic"},
-    {name:"Palladium Gym", lat:40.7318, lng:-73.9930, note:"NYU gym, 3K daily visits"},
-    {name:"Third North Dorm", lat:40.7317, lng:-73.9955, note:"600-bed residence hall"},
-    {name:"University Hall", lat:40.7293, lng:-73.9985, note:"Freshman dorm + dining"},
-    {name:"Stumptown Coffee", lat:40.7278, lng:-73.9918, note:"Artisan coffee, study crowd"},
-    {name:"W4th St Station", lat:40.7323, lng:-73.9952, note:"ACEF/BDFM — top student subway"},
-    {name:"Astor Place", lat:40.7300, lng:-73.9915, note:"6 train — commuter gateway"},
-    {name:"Union Square", lat:40.7359, lng:-73.9911, note:"L/N/Q/R/4/5/6 — city-wide hub"},
-    {name:"Mercer Playground", lat:40.7278, lng:-73.9976, note:"Green space between buildings"},
-    {name:"Gould Plaza", lat:40.7296, lng:-73.9947, note:"Stern forecourt, tabling events"}
-  ];
-  var purpleIcon = L.divIcon({html:'<span style="display:inline-block;width:16px;height:16px;background:#7c5cfc;border:3px solid #9b7ffc;border-radius:50%;box-shadow:0 0 12px rgba(124,92,252,.5)"></span>', iconSize:[16,16], className:''});
-  pins.forEach(function(p){
-    L.marker([p.lat, p.lng], {icon: purpleIcon}).addTo(map)
-      .bindPopup('<strong>'+p.name+'</strong><em>'+p.note+'</em>');
-  });
-  var zones = [
-    {name:"Z1 Washington Sq", lat:40.7307, lng:-73.9970, note:"Arch to fountain — 4 poster walls"},
-    {name:"Z2 Bobst / Kimmel", lat:40.7296, lng:-73.9969, note:"Library steps + student center boards"},
-    {name:"Z3 Silver / Stern / Tisch", lat:40.7293, lng:-73.9943, note:"Academic corridor flyer boards"},
-    {name:"Z4 Astor Place", lat:40.7302, lng:-73.9912, note:"Cube plaza + subway kiosk panel"},
-    {name:"Z5 W4th St", lat:40.7325, lng:-73.9950, note:"Station entrance displays"},
-    {name:"Z6 Union Square", lat:40.7357, lng:-73.9910, note:"Kiosk boards + subway passage"},
-    {name:"Z7 Dorm Corridor", lat:40.7312, lng:-73.9945, note:"University Hall to Third North"},
-    {name:"Z8 Village Cafés", lat:40.7288, lng:-73.9978, note:"Think Coffee + Stumptown radius"}
-  ];
-  var zoneIcon = L.divIcon({html:'<span style="display:inline-block;width:22px;height:22px;background:#2a1740;border:3px solid #6B21A8;border-radius:50%;opacity:.85;"></span>', iconSize:[22,22], className:''});
-  zones.forEach(function(z){
-    L.marker([z.lat, z.lng], {icon: zoneIcon}).addTo(map)
-      .bindPopup('<strong>'+z.name+'</strong><em>'+z.note+'</em>');
-  });
-  var allPins = pins.concat(zones).map(function(p){ return [p.lat, p.lng]; });
-  map.fitBounds(allPins, {padding:[40,40]});
-  }
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', initMap);
-  } else {
-    initMap();
-  }
-  // Fallback if Leaflet CDN loads late
-  setTimeout(function(){
-    if(!document.querySelector('.leaflet-container')) initMap();
-  }, 1500);
-})();
-</script>
-
-<!-- Y2K Sparkle cursor + y2k-pop reveals -->
-<script>
-(function(){
-  if(/[?&]static=1/.test(location.search)||matchMedia("(prefers-reduced-motion:reduce)").matches||matchMedia("(hover:none)").matches)return;
-  var G=["\u2726","\u2727","\u2729","\u272A","\u2737"],C=["#7c5cfc","#22d3ee","#ff2d78","#ffd84d","#ff6b35","#b6ff3a"],mx=28,liv=0,th=38,md=14,lx=0,ly=0,lt=0;
-  function sp(x,y,s){
-    if(liv>=mx)return;
-    var e=document.createElement("span");e.className="y2k-spark";
-    e.textContent=G[(Math.random()*G.length)|0];
-    e.style.left=x+"px";e.style.top=y+"px";
-    e.style.color=C[(Math.random()*C.length)|0];
-    e.style.fontSize=(10+Math.random()*12)*(s||1)+"px";
-    document.body.appendChild(e);liv++;
-    e.onanimationend=function(){e.remove();liv--;};
-    setTimeout(function(){if(e.parentNode){e.remove();liv--;}},1000);
-  }
-  document.addEventListener("mousemove",function(e){
-    var n=performance.now(),d=Math.hypot(e.clientX-lx,e.clientY-ly);
-    if(n-lt<th||d<md)return;lt=n;lx=e.clientX;ly=e.clientY;sp(e.clientX,e.clientY);
-  },{passive:true});
-  document.addEventListener("click",function(e){
-    var t=e.target.closest&&e.target.closest(".btn,.nav-join");
-    if(!t)return;
-    for(var i=0;i<7;i++)!function(k){setTimeout(function(){sp(e.clientX+(Math.random()-.5)*46,e.clientY+(Math.random()-.5)*46,1.3);},k*22);}(i);
-  },true);
-  var io=new IntersectionObserver(function(entries){
-    entries.forEach(function(en){
-      if(!en.isIntersecting)return;
-      en.target.classList.add("y2k-pop");
-      setTimeout(function(){en.target.classList.add("in");},(parseFloat(en.target.getAttribute("data-y2k-pop"))||0)*1000);
-      io.unobserve(en.target);
-    });
-  },{threshold:.18});
-  document.querySelectorAll("[data-y2k-pop]").forEach(function(el){io.observe(el);});
-})();
-</script>
 {% endblock %}

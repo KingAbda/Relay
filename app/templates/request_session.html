@@ -20,7 +20,7 @@
   {% endif %}
 
   {% if error %}
-    <div class="form-error" style="margin-bottom: 16px;">{{ error }}</div>
+    <div class="form-error" role="alert" style="margin-bottom: 16px;">{{ error }}</div>
   {% endif %}
 
   <form method="POST">
@@ -28,52 +28,25 @@
 
     <div class="card" style="margin-bottom: 24px;">
       <div class="form-group">
-        <label>When do you want to meet?</label>
-        <input type="datetime-local" name="scheduled_at" class="form-input" required
+        <label for="scheduled-at">When do you want to meet?</label>
+        <input id="scheduled-at" type="datetime-local" name="scheduled_at" class="form-input" required
                min="{{ now }}" />
+        <p class="form-hint">America/New_York time. Choose at least one hour and no more than 30 days ahead.</p>
       </div>
       <div class="form-group" style="margin-bottom: 0;">
-        <label>Notes for {{ skill.user.full_name.split()[0] }}</label>
-        <textarea name="notes" class="form-textarea" placeholder="What specifically do you want to learn? Any prep needed?"></textarea>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="form-group" style="margin-bottom: 0;">
-        <label>Recurring?</label>
-        <div style="display: flex; gap: 16px; align-items: center;">
-          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-            <input type="radio" name="recurring" value="once" checked onchange="document.getElementById('recurring-count').style.display='none'" />
-            <span style="font-size: 0.9rem;">One-time session</span>
-          </label>
-          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-            <input type="radio" name="recurring" value="weekly" onchange="document.getElementById('recurring-count').style.display='flex'" />
-            <span style="font-size: 0.9rem;">Weekly</span>
-          </label>
-        </div>
-        <div id="recurring-count" style="display: none; margin-top: 8px; align-items: center; gap: 8px;">
-          <span class="muted text-sm">for</span>
-          <select name="recurring_weeks" class="form-select" style="max-width: 80px;">
-            <option value="2">2</option>
-            <option value="4" selected>4</option>
-            <option value="6">6</option>
-            <option value="8">8</option>
-          </select>
-          <span class="muted text-sm">weeks</span>
-        </div>
+        <label for="session-notes">Notes for {{ skill.user.full_name.split()[0] }}</label>
+        <textarea id="session-notes" name="notes" class="form-textarea" placeholder="What specifically do you want to learn? Any prep needed?"></textarea>
       </div>
     </div>
 
     <div class="card" style="background: var(--primary-bg); border-color: var(--primary); margin-bottom: 24px; padding: 16px;">
       <p style="font-size: 0.85rem;">
-        <strong>1 credit will be held</strong> when you request. It's released to
-        <strong>{{ skill.user.full_name.split()[0] }}</strong> after the session is completed.
-        No-show? Cancel before the session to get your credit back.
+        <strong>{{ credit_cost }} credit will be held</strong> when you request. It is released only after both participants confirm completion. Either participant may cancel before completion for one full refund during the controlled trial.
       </p>
     </div>
 
     <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
-      Request session — 1 credit
+      Request session — {{ credit_cost }} credit
     </button>
   </form>
 </div>

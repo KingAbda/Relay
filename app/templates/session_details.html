@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Session Details{% endblock %}
+{% block content %}
+<div style="max-width:760px;margin:0 auto;">
+  <p class="eyebrow">Session details</p>
+  <h1>{{ booked.skill_name }}</h1>
+  <div class="card" style="margin:20px 0;">
+    <dl class="session-facts">
+      <div><dt>Status</dt><dd>{{ booked.status.value if booked.status.value is defined else booked.status }}</dd></div>
+      <div><dt>Teacher</dt><dd>{{ teacher.full_name }}</dd></div>
+      <div><dt>Learner</dt><dd>{{ learner.full_name }}</dd></div>
+      <div><dt>When</dt><dd>{{ booked.scheduled_at|trial_time }}</dd></div>
+      <div><dt>One-credit policy</dt><dd>One credit is held at request, paid once after both confirm completion, and refunded once if cancelled before completion.</dd></div>
+      {% if booked.status.value == 'confirmed' and not blocked %}
+      <div><dt>Where</dt><dd>
+        {% if booked.meet_link and booked.meet_link.startswith('location:') %}
+          {{ booked.meet_link[9:] }} · approved public campus location
+        {% elif booked.meet_link %}
+          <a href="{{ booked.meet_link }}" target="_blank" rel="noopener noreferrer">Open approved-host HTTPS meeting link</a>
+        {% else %}
+          Not yet agreed
+        {% endif %}
+      </dd></div>
+      {% endif %}
+    </dl>
+    {% if booked.notes %}<p><strong>Request notes:</strong> {{ booked.notes }}</p>{% endif %}
+    {% if booked.cancellation_reason %}<p><strong>Cancellation reason:</strong> {{ booked.cancellation_reason }}</p>{% endif %}
+    {% if blocked %}<p class="form-error" role="status">Interaction is blocked. Meeting details and continuation controls are hidden; cancellation, reporting, and moderator review remain available.</p>{% endif %}
+    {% if dispute %}<p><strong>Dispute:</strong> {{ dispute.status }} · {{ dispute.reason }}</p>{% endif %}
+  </div>
+
+  <div class="card-grid">
+    <section class="card">
+      <h2 style="font-size:1.1rem;">Session actions</h2>
+      {% if not blocked and booked.status.value == 'confirmed' %}
+      <form method="POST" action="/complete-session/{{ booked.id }}" style="margin-top:12px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button class="btn btn-primary" type="submit">Confirm my completion</button>
+      </form>
+      <form method="POST" action="/no-show/{{ booked.id }}" style="margin-top:12px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <label for="no-show-reason">No-show notes</label>
+        <textarea id="no-show-reason" name="reason" class="form-textarea"></textarea>
+        <button class="btn btn-secondary" type="submit">Report no-show after grace period</button>
+      </form>
+      {% endif %}
+      {% if booked.status.value in ('requested', 'confirmed') %}
+      <form method="POST" action="/cancel-session/{{ booked.id }}" style="margin-top:12px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button class="btn btn-secondary" type="submit">Cancel and apply trial refund policy</button>
+      </form>
+      {% endif %}
+      {% if booked.status.value in ('confirmed', 'completed', 'no_show') and not dispute %}
+      <form method="POST" action="/dispute-session/{{ booked.id }}" style="margin-top:12px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <label for="dispute-reason">Dispute reason</label>
+        <textarea id="dispute-reason" name="reason" class="form-textarea" required></textarea>
+        <button class="btn btn-secondary" type="submit">Open dispute</button>
+      </form>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <h2 style="font-size:1.1rem;">Safety and support</h2>
+      <form method="POST" action="/report-user/{{ other.id }}" style="margin-top:12px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input type="hidden" name="session_id" value="{{ booked.id }}" />
+        <label for="report-category">Report category</label>
+        <select id="report-category" name="category" class="form-select" required>
+          <option value="">Choose…</option><option value="safety">Safety</option><option value="harassment">Harassment</option><option value="fraud">Fraud</option><option value="prohibited_content">Prohibited content</option><option value="privacy">Privacy</option><option value="other">Other</option>
+        </select>
+        <label for="report-description">What happened?</label>
+        <textarea id="report-description" name="description" class="form-textarea" required></textarea>
+        <button class="btn btn-secondary" type="submit">Send report to moderator queue</button>
+      </form>
+      <form method="POST" action="/block-user/{{ other.id }}" style="margin-top:18px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <label for="block-reason">Private block reason</label>
+        <textarea id="block-reason" name="reason" class="form-textarea" required></textarea>
+        <button class="btn btn-secondary" type="submit">Block interaction and cancel active sessions</button>
+      </form>
+      <p class="muted" style="margin-top:16px;">For urgent danger, contact emergency services or NYU Campus Safety. Relay's named staffed support owner is still a launch blocker.</p>
+    </section>
+  </div>
+</div>
+{% endblock %}

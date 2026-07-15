@@ -10,8 +10,13 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 
 
+def normalize_database_url(database_url: str | None) -> str | None:
+    """Select Psycopg 3 for provider-issued PostgreSQL connection strings."""
+    if database_url and database_url.startswith("postgresql://"):
+        return database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return database_url
+
+
 def init_db(app):
-    """Initialize the database with the Flask app."""
+    """Bind the database; schema changes are handled only by versioned migrations."""
     db.init_app(app)
-    with app.app_context():
-        db.create_all()

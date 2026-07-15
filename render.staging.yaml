@@ -1,0 +1,134 @@
+# Relay production-like staging blueprint.
+#
+# DRAFT / DO NOT SYNC WITHOUT OWNER APPROVAL. Syncing creates paid resources.
+# SMTP credentials, the synthetic invite cohort, and the actual public origin
+# must be supplied in Render; never commit them here.
+
+envVarGroups:
+  - name: relay-staging-config
+    envVars:
+      - key: RELAY_ENV
+        value: staging
+      - key: RELAY_SECRET_KEY
+        generateValue: true
+      - key: RELAY_TRIAL_CATEGORY
+        value: creative
+      - key: RELAY_STARTER_CREDITS
+        value: "2"
+      - key: RELAY_ALLOWED_EMAIL_DOMAINS
+        value: nyu.edu
+      - key: RELAY_REQUIRE_INVITE
+        value: "true"
+      - key: RELAY_INVITED_EMAILS
+        sync: false
+      - key: RELAY_PUBLIC_URL
+        sync: false
+      - key: RELAY_TRUSTED_HOSTS
+        sync: false
+      - key: RELAY_PROXY_X_FOR
+        value: "1"
+      - key: RELAY_PROXY_X_PROTO
+        value: "1"
+      - key: RELAY_PROXY_X_HOST
+        value: "0"
+      - key: RELAY_EMAIL_BACKEND
+        value: smtp
+      - key: RELAY_SMTP_HOST
+        sync: false
+      - key: RELAY_SMTP_PORT
+        value: "587"
+      - key: RELAY_SMTP_USERNAME
+        sync: false
+      - key: RELAY_SMTP_PASSWORD
+        sync: false
+      - key: RELAY_EMAIL_FROM
+        sync: false
+      - key: RELAY_ALLOWED_MEETING_HOSTS
+        value: nyu.zoom.us,zoom.us,meet.google.com,teams.microsoft.com
+      - key: RELAY_CONTACT_EMAIL
+        sync: false
+
+services:
+  - type: web
+    name: relay-staging
+    runtime: python
+    plan: starter
+    region: ohio
+    autoDeployTrigger: off
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app.main:app --workers 2 --worker-class gevent --timeout 30
+    healthCheckPath: /health/ready
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - fromGroup: relay-staging-config
+      - key: DATABASE_URL
+        fromDatabase:
+          name: relay-staging-db
+          property: connectionString
+      - key: RATE_LIMIT_STORAGE
+        fromService:
+          type: keyvalue
+          name: relay-staging-cache
+          property: connectionString
+
+  - type: cron
+    name: relay-staging-expired-requests
+    runtime: python
+    plan: starter
+    region: ohio
+    schedule: "*/15 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask --app app.main settle-expired-requests --apply
+    envVars:
+      - fromGroup: relay-staging-config
+      - key: RELAY_SCHEDULER_AUTHENTICATED
+        value: "true"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: relay-staging-db
+          property: connectionString
+      - key: RATE_LIMIT_STORAGE
+        fromService:
+          type: keyvalue
+          name: relay-staging-cache
+          property: connectionString
+
+  - type: cron
+    name: relay-staging-session-reminders
+    runtime: python
+    plan: starter
+    region: ohio
+    schedule: "0 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask --app app.main send-session-reminders --apply
+    envVars:
+      - fromGroup: relay-staging-config
+      - key: RELAY_SCHEDULER_AUTHENTICATED
+        value: "true"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: relay-staging-db
+          property: connectionString
+      - key: RATE_LIMIT_STORAGE
+        fromService:
+          type: keyvalue
+          name: relay-staging-cache
+          property: connectionString
+
+  - type: keyvalue
+    name: relay-staging-cache
+    plan: starter
+    region: ohio
+    ipAllowList: []
+    maxmemoryPolicy: noeviction
+    persistenceMode: off
+
+databases:
+  - name: relay-staging-db
+    plan: basic-256mb
+    region: ohio
+    postgresMajorVersion: "16"
+    databaseName: relay_staging
+    user: relay_staging
+    connectionPool: none
+    ipAllowList: []

@@ -1,0 +1,1414 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Evidence-based Relay controlled-trial readiness report, updated after repository containment work.">
+  <title>Relay Controlled-Trial Readiness — Current Evidence</title>
+  <style>
+    :root {
+      --bg: #0b0914;
+      --panel: #151126;
+      --panel-2: #1c1731;
+      --ink: #f7f4ff;
+      --muted: #bbb3d0;
+      --line: #393052;
+      --purple: #896bff;
+      --purple-soft: #c8b9ff;
+      --orange: #ff713d;
+      --cyan: #37d7f2;
+      --green: #45dc92;
+      --yellow: #ffd166;
+      --red: #ff5f74;
+      --critical-bg: rgba(255, 95, 116, 0.09);
+      --high-bg: rgba(255, 209, 102, 0.08);
+      --medium-bg: rgba(55, 215, 242, 0.07);
+      --shadow: 0 18px 54px rgba(0, 0, 0, 0.28);
+      --radius: 22px;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 500px at 8% -5%, rgba(137, 107, 255, 0.18), transparent 64%),
+        radial-gradient(700px 500px at 95% 10%, rgba(255, 113, 61, 0.10), transparent 62%),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    a { color: var(--cyan); }
+    a:hover { color: #8cecff; }
+    button, input { font: inherit; }
+    code {
+      padding: 0.1em 0.38em;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      color: var(--purple-soft);
+      background: #0d0a17;
+      font-size: 0.92em;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 100;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: #111;
+      background: #fff;
+      transform: translateY(-160%);
+    }
+    .skip-link:focus { transform: none; }
+
+    .shell {
+      width: min(var(--max), calc(100% - 34px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(137, 107, 255, 0.25);
+      background: rgba(11, 9, 20, 0.9);
+      backdrop-filter: blur(18px);
+    }
+    .topbar-inner {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 900; }
+    .mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--purple);
+      border-radius: 50% 50% 48% 48%;
+      color: var(--purple-soft);
+      box-shadow: 0 0 24px rgba(137, 107, 255, 0.24);
+    }
+    .topnav { display: flex; flex-wrap: wrap; gap: 16px; }
+    .topnav a { color: var(--muted); font-size: 0.9rem; font-weight: 750; text-decoration: none; }
+    .topnav a:hover { color: var(--ink); }
+
+    header { padding: 76px 0 44px; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--cyan);
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3 { letter-spacing: -0.035em; line-height: 1.06; }
+    h1 { max-width: 920px; margin: 0; font-size: clamp(2.8rem, 8vw, 6.6rem); }
+    h1 span { color: var(--orange); }
+    .lede { max-width: 820px; margin: 25px 0 0; color: var(--muted); font-size: clamp(1rem, 2vw, 1.22rem); }
+
+    .verdict {
+      margin-top: 34px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 18px;
+      align-items: center;
+      padding: 22px;
+      border: 1px solid rgba(255, 95, 116, 0.5);
+      border-radius: var(--radius);
+      background: var(--critical-bg);
+      box-shadow: var(--shadow);
+    }
+    .verdict-badge {
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: #190209;
+      background: var(--red);
+      font-size: 0.82rem;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .verdict p { margin: 0; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 13px;
+      margin: 20px 0 0;
+    }
+    .summary-card {
+      min-height: 138px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(21, 17, 38, 0.88);
+    }
+    .summary-card strong { display: block; font-size: 2.2rem; line-height: 1; color: var(--purple-soft); }
+    .summary-card span { display: block; margin-top: 10px; color: var(--muted); font-size: 0.9rem; }
+
+    main { padding-bottom: 80px; }
+    section { padding: 48px 0; scroll-margin-top: 74px; }
+    .section-head { max-width: 800px; margin-bottom: 24px; }
+    h2 { margin: 0; font-size: clamp(2rem, 5vw, 3.8rem); }
+    .section-intro { margin: 14px 0 0; color: var(--muted); font-size: 1.02rem; }
+
+    .callout {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--purple);
+      border-radius: 16px;
+      background: var(--panel);
+    }
+    .callout p { margin: 0; }
+    .callout p + p { margin-top: 10px; }
+    .callout.good { border-left-color: var(--green); }
+    .callout.warn { border-left-color: var(--yellow); }
+
+    .plain-grid, .decision-grid, .gate-grid, .next-step-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 15px;
+    }
+    .plain-card, .decision-card, .gate-card, .next-step-card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel);
+    }
+    .plain-card h3, .decision-card h3, .gate-card h3 { margin: 0 0 9px; font-size: 1.18rem; }
+    .plain-card p, .decision-card p, .gate-card p { margin: 0; color: var(--muted); }
+    .plain-card strong { color: var(--ink); }
+
+    .next-step-grid { counter-reset: next-step; }
+    .next-step-card { position: relative; padding-left: 68px; }
+    .next-step-card::before {
+      counter-increment: next-step;
+      content: counter(next-step, decimal-leading-zero);
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: var(--cyan);
+      font-size: 0.78rem;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+    }
+    .next-step-card h3 { margin: 0 0 9px; font-size: 1.18rem; }
+    .next-step-card p { margin: 0; color: var(--muted); }
+    .next-step-card .boundary { margin-top: 9px; color: var(--yellow); font-size: 0.86rem; font-weight: 800; }
+
+    .update-status-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .update-status {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: var(--panel);
+    }
+    .update-status strong { display: block; font-size: 1.8rem; line-height: 1; }
+    .update-status span { display: block; margin-top: 8px; color: var(--muted); font-size: 0.86rem; }
+    .update-status.fixed strong { color: var(--green); }
+    .update-status.partial strong { color: var(--cyan); }
+    .update-status.attempted strong { color: var(--yellow); }
+    .update-status.risk strong { color: var(--red); }
+
+    .toolbar {
+      position: sticky;
+      top: 64px;
+      z-index: 15;
+      display: grid;
+      grid-template-columns: minmax(210px, 1fr) auto;
+      gap: 12px;
+      margin: 0 0 20px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(21, 17, 38, 0.94);
+      backdrop-filter: blur(15px);
+    }
+    .search {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      background: #0d0a17;
+    }
+    .search:focus, .filter:focus-visible, summary:focus-visible, a:focus-visible {
+      outline: 3px solid rgba(55, 215, 242, 0.48);
+      outline-offset: 3px;
+    }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .filter {
+      min-height: 42px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: #0d0a17;
+      cursor: pointer;
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+    .filter[aria-pressed="true"] { color: #130f20; background: var(--purple-soft); border-color: transparent; }
+
+    .issue-list { display: grid; gap: 13px; }
+    .issue {
+      overflow: clip;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    }
+    .issue[data-severity="critical"] { background: linear-gradient(90deg, var(--critical-bg), var(--panel) 38%); }
+    .issue[data-severity="high"] { background: linear-gradient(90deg, var(--high-bg), var(--panel) 38%); }
+    .issue[data-severity="medium"] { background: linear-gradient(90deg, var(--medium-bg), var(--panel) 38%); }
+    .issue[hidden] { display: none; }
+    .issue summary {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      padding: 18px 20px;
+      cursor: pointer;
+      list-style: none;
+    }
+    .issue summary::-webkit-details-marker { display: none; }
+    .issue summary::after { content: "+"; color: var(--muted); font-size: 1.4rem; font-weight: 500; }
+    .issue[open] summary::after { content: "−"; }
+    .severity {
+      min-width: 76px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 950;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+    .issue[data-severity="critical"] .severity { color: #21040a; background: var(--red); }
+    .issue[data-severity="high"] .severity { color: #201704; background: var(--yellow); }
+    .issue[data-severity="medium"] .severity { color: #02191e; background: var(--cyan); }
+    .issue[data-severity="low"] .severity { color: #071b11; background: var(--green); }
+    .issue-title { font-size: 1.03rem; font-weight: 850; letter-spacing: -0.015em; }
+    .issue-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      padding: 0 20px 20px 110px;
+    }
+    .issue-body p { margin: 0; color: var(--muted); }
+    .issue-body strong { display: block; margin-bottom: 4px; color: var(--ink); }
+    .issue-body .update-note {
+      grid-column: 1 / -1;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 209, 102, 0.3);
+      border-radius: 12px;
+      color: var(--muted);
+      background: rgba(255, 209, 102, 0.06);
+    }
+    .issue-body .update-note.partial { border-color: rgba(55, 215, 242, 0.35); background: rgba(55, 215, 242, 0.06); }
+    .issue-body .update-note.risk { border-color: rgba(255, 95, 116, 0.36); background: rgba(255, 95, 116, 0.07); }
+    .issue-body .update-note strong { display: inline; color: var(--ink); }
+    .empty-state { display: none; padding: 24px; border: 1px dashed var(--line); border-radius: 16px; color: var(--muted); text-align: center; }
+
+    .roadmap { display: grid; gap: 18px; counter-reset: phase; }
+    .phase {
+      position: relative;
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 20px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(140deg, var(--panel-2), var(--panel));
+      box-shadow: var(--shadow);
+      counter-increment: phase;
+    }
+    .phase-num {
+      width: 70px;
+      height: 70px;
+      display: grid;
+      place-items: center;
+      border-radius: 20px;
+      color: #120d20;
+      background: var(--purple-soft);
+      font-size: 1.65rem;
+      font-weight: 950;
+      transform: rotate(-2deg);
+    }
+    .phase h3 { margin: 0; font-size: 1.45rem; }
+    .phase .why { margin: 8px 0 0; color: var(--muted); }
+    .phase ul { margin: 15px 0 0; padding-left: 1.2rem; color: var(--muted); }
+    .phase li + li { margin-top: 7px; }
+    .proof {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border: 1px solid rgba(69, 220, 146, 0.28);
+      border-radius: 12px;
+      color: #c9ffe2;
+      background: rgba(69, 220, 146, 0.06);
+      font-size: 0.91rem;
+    }
+
+    .gate-card { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; }
+    .gate-card input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--green); }
+    .gate-card label { cursor: pointer; }
+    .gate-card strong { display: block; }
+    .gate-card span { display: block; margin-top: 3px; color: var(--muted); font-size: 0.9rem; }
+
+    .glossary { display: grid; gap: 10px; }
+    .glossary details { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+    .glossary summary { padding: 15px 18px; cursor: pointer; font-weight: 850; }
+    .glossary p { margin: 0; padding: 0 18px 17px; color: var(--muted); }
+
+    .footer {
+      padding: 30px 0 50px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .footer strong { color: var(--ink); }
+    .no-results { display: none; }
+
+    /* Bright, document-first treatment: less dashboard chrome, more readable report. */
+    :root {
+      --bg: #f8f6f1;
+      --panel: #ffffff;
+      --panel-2: #f1eee7;
+      --ink: #1d1a24;
+      --muted: #625d68;
+      --line: #d8d3c8;
+      --purple: #5d43c8;
+      --purple-soft: #ebe5ff;
+      --orange: #d64f24;
+      --cyan: #08748a;
+      --green: #087a4f;
+      --yellow: #9a6100;
+      --red: #be3047;
+      --critical-bg: #fff0f2;
+      --high-bg: #fff8e6;
+      --medium-bg: #edf9fb;
+      --shadow: none;
+      --radius: 8px;
+    }
+
+    body { background: var(--bg); }
+    a { color: var(--purple); }
+    a:hover { color: #422aa9; }
+    code { color: #4d369d; background: #f0edf8; border-color: #ddd6ee; }
+
+    .topbar {
+      position: static;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      backdrop-filter: none;
+    }
+    .topbar-inner { min-height: 58px; }
+    .brand { color: var(--ink); }
+    .mark { display: none; }
+    .topnav a { color: var(--muted); font-weight: 650; }
+
+    header { padding: 58px 0 34px; }
+    h1 { max-width: 970px; font-size: clamp(2.65rem, 7vw, 5.5rem); }
+    .lede { margin-top: 20px; }
+
+    .verdict {
+      margin-top: 28px;
+      padding: 18px 20px;
+      border: 0;
+      border-left: 4px solid var(--red);
+      border-radius: 0;
+      background: var(--critical-bg);
+      box-shadow: none;
+    }
+    .verdict-badge {
+      padding: 0;
+      border-radius: 0;
+      color: var(--red);
+      background: transparent;
+    }
+
+    .summary-grid { gap: 24px; margin-top: 28px; }
+    .summary-card {
+      min-height: 0;
+      padding: 16px 0 0;
+      border: 0;
+      border-top: 2px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+    }
+    .summary-card strong { color: var(--ink); font-size: 2rem; }
+
+    section { padding: 38px 0; }
+    .section-head { margin-bottom: 20px; }
+    .callout {
+      padding: 17px 18px;
+      border: 0;
+      border-left: 4px solid var(--purple);
+      border-radius: 0;
+      background: #fff;
+    }
+
+    .plain-grid, .decision-grid, .gate-grid, .next-step-grid { gap: 22px 32px; }
+    .plain-card, .decision-card, .gate-card, .next-step-card {
+      padding: 16px 0 0;
+      border: 0;
+      border-top: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+    }
+    .next-step-card { padding-left: 48px; }
+    .next-step-card::before { top: 17px; left: 0; }
+
+    .update-status-grid { gap: 24px; }
+    .update-status {
+      padding: 14px 0 0;
+      border: 0;
+      border-top: 2px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .toolbar {
+      position: static;
+      display: grid;
+      margin-bottom: 6px;
+      padding: 0 0 18px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+      backdrop-filter: none;
+    }
+    .search { border-radius: 5px; color: var(--ink); background: #fff; }
+    .filter {
+      min-height: 36px;
+      padding: 5px 7px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      color: var(--muted);
+      background: transparent;
+    }
+    .filter[aria-pressed="true"] {
+      color: var(--purple);
+      border-color: var(--purple);
+      background: transparent;
+    }
+
+    .issue-list { gap: 0; }
+    .issue,
+    .issue[data-severity="critical"],
+    .issue[data-severity="high"],
+    .issue[data-severity="medium"] {
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    .issue summary { padding: 18px 0; }
+    .severity {
+      min-width: 74px;
+      padding: 0;
+      border-radius: 0;
+      text-align: left;
+      background: transparent !important;
+    }
+    .issue[data-severity="critical"] .severity { color: var(--red); }
+    .issue[data-severity="high"] .severity { color: var(--yellow); }
+    .issue[data-severity="medium"] .severity { color: var(--cyan); }
+    .issue[data-severity="low"] .severity { color: var(--green); }
+    .issue-body { padding: 0 0 20px 88px; }
+    .issue-body .update-note,
+    .issue-body .update-note.partial,
+    .issue-body .update-note.risk {
+      padding: 11px 13px;
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .roadmap { gap: 0; }
+    .phase {
+      grid-template-columns: 58px minmax(0, 1fr);
+      gap: 18px;
+      padding: 25px 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    .phase-num {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      color: var(--purple);
+      background: var(--purple-soft);
+      font-size: 1.1rem;
+      transform: none;
+    }
+    .proof {
+      border-color: #b9dccb;
+      border-radius: 4px;
+      color: #22583f;
+      background: #edf8f2;
+    }
+
+    .glossary { gap: 0; }
+    .glossary details {
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+    }
+    .glossary summary { padding-left: 0; padding-right: 0; }
+    .glossary p { padding-left: 0; padding-right: 0; }
+    .footer { padding-top: 24px; }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      width: max-content;
+      padding: 3px 8px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .status-pass { color: var(--green); }
+    .status-fail { color: var(--red); }
+    .status-blocked { color: var(--yellow); }
+    .status-not-tested { color: var(--cyan); }
+    .current-result {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 10px 14px;
+      padding: 14px;
+      border-left: 4px solid var(--line);
+      background: #fff;
+    }
+    .current-result[data-status="PASS"] { border-left-color: var(--green); }
+    .current-result[data-status="FAIL"] { border-left-color: var(--red); }
+    .current-result[data-status="BLOCKED"] { border-left-color: var(--yellow); }
+    .current-result[data-status="NOT TESTED"] { border-left-color: var(--cyan); }
+    .current-result p { color: var(--ink); }
+    .current-result .remaining { grid-column: 2; color: var(--muted); font-size: 0.9rem; }
+    .gate-card { grid-template-columns: 1fr; }
+    .gate-card .gate-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .gate-card .gate-evidence { margin-top: 10px; color: var(--ink); }
+    .gate-card .gate-blocker { margin-top: 7px; color: var(--muted); }
+    .verification-list { margin: 14px 0 0; padding-left: 1.2rem; color: var(--muted); }
+    .verification-list li + li { margin-top: 6px; }
+
+    @media (max-width: 900px) {
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .update-status-grid { grid-template-columns: repeat(2, 1fr); }
+      .toolbar { position: static; grid-template-columns: 1fr; }
+      .topnav { display: none; }
+    }
+    @media (max-width: 680px) {
+      header { padding-top: 50px; }
+      .summary-grid, .plain-grid, .decision-grid, .gate-grid, .next-step-grid { grid-template-columns: 1fr; }
+      .update-status-grid { grid-template-columns: 1fr; }
+      .verdict { grid-template-columns: 1fr; }
+      .issue summary { grid-template-columns: 1fr auto; }
+      .issue summary .severity { width: max-content; }
+      .issue-title { grid-column: 1 / -1; grid-row: 2; }
+      .issue-body { grid-template-columns: 1fr; padding: 0 0 18px; }
+      .current-result { grid-template-columns: 1fr; }
+      .current-result .remaining { grid-column: 1; }
+      .phase { grid-template-columns: 1fr; }
+      .phase-num { width: 58px; height: 58px; border-radius: 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+
+    @media print {
+      :root { --bg: #fff; --panel: #fff; --panel-2: #fff; --ink: #111; --muted: #444; --line: #bbb; }
+      body { background: #fff; color: #111; font-size: 10.5pt; }
+      .topbar, .toolbar, .skip-link { display: none !important; }
+      header, section { padding: 20px 0; }
+      h1 { font-size: 34pt; }
+      h2 { font-size: 24pt; }
+      .summary-card, .issue, .phase, .plain-card, .decision-card, .gate-card, .next-step-card, .callout { box-shadow: none; break-inside: avoid; }
+      .issue:not([open]) .issue-body { display: grid; }
+      .issue summary::after { display: none; }
+      .issue-body { padding-top: 0; }
+      a { color: #111; text-decoration: underline; }
+      code { color: #111; background: #f3f3f3; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the report</a>
+
+  <div class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand"><span class="mark" aria-hidden="true">↔</span> Relay readiness</div>
+      <nav class="topnav" aria-label="Report sections">
+        <a href="#latest-update">Current state</a>
+        <a href="#next-steps">Next steps</a>
+        <a href="#problems">Audit ledger</a>
+        <a href="#plan">Work completed</a>
+        <a href="#gates">Launch gates</a>
+        <a href="#decisions">External work</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="shell">
+    <p class="eyebrow">Trial-readiness audit · July 14, 2026</p>
+    <h1>Safer locally. <span>Still no-go</span> for a student trial.</h1>
+    <p class="lede">
+      This is the updated evidence report after repository-controlled containment work. It preserves all 50 original
+      findings, records what now passes, and keeps staging, email, recovery, staffing, and legal claims blocked until
+      real evidence exists.
+    </p>
+
+    <div class="verdict" role="status">
+      <span class="verdict-badge">No-go</span>
+      <p>
+        <strong>Do not deploy or invite participants yet.</strong> Local containment is materially stronger, but production-like
+        full staging readiness with real email, deployed infrastructure, real recovery, production-like rehearsal,
+        named operators, and legal review remain unresolved.
+      </p>
+    </div>
+
+    <div class="summary-grid" aria-label="Issue summary">
+      <div class="summary-card"><strong>44</strong><span>Audit issues with current repository evidence marked PASS</span></div>
+      <div class="summary-card"><strong>0</strong><span>Audit issues still marked FAIL</span></div>
+      <div class="summary-card"><strong>6</strong><span>Audit issues BLOCKED; none are FAIL or NOT TESTED</span></div>
+      <div class="summary-card"><strong>5 / 12</strong><span>Launch gates currently passing</span></div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="shell" id="latest-update" aria-labelledby="latest-update-title">
+      <div class="section-head">
+        <p class="eyebrow">Current engineering state · July 14, 2026</p>
+        <h2 id="latest-update-title">What changed, what passed, and what remains unproven</h2>
+        <p class="section-intro">
+          The application was contained around an invite-only 10–20 person NYU cohort, one configurable creative
+          vertical, exactly one credit per 30-minute session, and no payments or unfinished reward programs.
+        </p>
+      </div>
+      <div class="update-status-grid" aria-label="Current readiness reconciliation">
+        <div class="update-status fixed"><strong>69</strong><span>62 warning-strict plus seven guarded infrastructure tests passing</span></div>
+        <div class="update-status partial"><strong>44 / 50</strong><span>Audit issues with current PASS evidence</span></div>
+        <div class="update-status attempted"><strong>5 / 12</strong><span>Launch gates passing; mocks and plans do not count</span></div>
+        <div class="update-status risk"><strong>NO-GO</strong><span>Four gates are blocked; three are not tested</span></div>
+      </div>
+      <div class="plain-grid">
+        <article class="plain-card">
+          <h3>Exact credit and session settlement</h3>
+          <p>All balance changes use an integer, source-unique ledger. Holds, refunds, payouts, and reversals require their original source events; duplicate and malformed settlements fail closed and reconcile in local tests.</p>
+        </article>
+        <article class="plain-card">
+          <h3>Verified-only, invite-only participation</h3>
+          <p>Production requires 10–20 unique invited NYU addresses, hashed expiring verification secrets, current versioned consent, and verified access before identities, listings, booking, or marketplace actions are available.</p>
+        </article>
+        <article class="plain-card">
+          <h3>Real safety and moderation paths</h3>
+          <p>Report, block, no-show, dispute, suspension, listing removal, refund/reversal, dismissal, and append-only action records now exist. Closed and cross-case repeat resolutions are rejected.</p>
+        </article>
+        <article class="plain-card">
+          <h3>Honest operational boundaries</h3>
+          <p>Production fails closed on weak secrets, non-PostgreSQL/non-Redis configuration, missing SMTP settings, and unspecified trusted-proxy hops. Delivery failures are recorded without token or message-body leakage. No deployment or external service is claimed as tested.</p>
+        </article>
+      </div>
+      <div class="callout good" style="margin-top: 16px;">
+        <p><strong>Local verification:</strong></p>
+        <ul class="verification-list">
+          <li><code>.venv/bin/python -W error::DeprecationWarning -m unittest discover -v</code> — 62 tests passed.</li>
+          <li>The current homepage returned <code>200</code> at loopback-only <code>http://localhost:8000/</code>, emitted the expected security headers, and <code>/health/live</code> returned <code>{"status":"ok"}</code> before the preview was opened in an isolated local browser.</li>
+          <li>Four fresh/legacy/fail-closed SQLite migration tests passed.</li>
+          <li>Package consistency, all 14 direct pins, and the resolved runtime graph pass local advisory checks.</li>
+          <li>Five guarded migration and competing-action tests passed on disposable PostgreSQL 16.14 database <code>relay_migration_ci</code>.</li>
+          <li>Two guarded tests passed for Redis 7.4.9 sharing/proxy behavior and exact-head production-shaped readiness.</li>
+          <li>Production-shaped PostgreSQL/Redis readiness, a synthetic logical restore, and isolated responsive/basic-accessibility browser checks passed locally.</li>
+        </ul>
+      </div>
+      <div class="callout warn" style="margin-top: 16px;">
+        <p><strong>Repository boundary:</strong> exact dependencies, versioned migrations, disposable SQLite databases, and localhost-only Docker containers for PostgreSQL 16.14 and Redis 7.4.9 were used under explicit authorization. Guarded tests destroyed the disposable schema and flushed Redis database 15. A local <code>release/controlled-trial-readiness-20260714</code> branch and secret-free release manifest now isolate the proposed scope, but the branch remains uncommitted and unpushed. No existing or remote database, account, commit, push, deployment, credential, or participant communication was touched. Remote <code>9fbc1ea</code> was inspected and has not been integrated.</p>
+      </div>
+      <div class="callout good" style="margin-top: 16px;">
+        <p><strong>Local preview · July 14:</strong> Relay is running from the current working tree on <code>127.0.0.1:8000</code> and was opened at <code>http://localhost:8000/</code>. The homepage and liveness response are healthy. This temporary development server is reachable only from this Mac and does not prove CI, staging, SMTP, recovery, or deployment readiness.</p>
+      </div>
+    </section>
+
+    <section class="shell" aria-labelledby="simple-title">
+      <div class="section-head">
+        <p class="eyebrow">The simple version</p>
+        <h2 id="simple-title">The local engine is safer; the launch environment is not evidenced.</h2>
+        <p class="section-intro">Passing SQLite tests prove important behavior, but they do not prove a recoverable production trial.</p>
+      </div>
+      <div class="plain-grid">
+        <article class="plain-card">
+          <h3>Credits pass locally</h3>
+          <p>Booking, cancellation, timeout, completion, repeat-session, moderation, and reconciliation paths pass. Three guarded competing-write cases also pass on disposable PostgreSQL 16.14.</p>
+        </article>
+        <article class="plain-card">
+          <h3>Verification is enforced</h3>
+          <p>Fake and unverified accounts are blocked from protected product actions. Real SMTP delivery and abuse behavior still require staging evidence.</p>
+        </article>
+        <article class="plain-card">
+          <h3>Production is deliberately fail-closed</h3>
+          <p>The PostgreSQL driver, versioned migrations, and production-shaped application boot pass locally. Readiness correctly stays unavailable without Redis, so the product still cannot be called deployable.</p>
+        </article>
+        <article class="plain-card">
+          <h3>Safety code exists; staffing does not</h3>
+          <p>Automated incident drills pass, but no named moderator coverage, monitored support inbox, or signed human rehearsal exists.</p>
+        </article>
+      </div>
+      <div class="callout warn" style="margin-top: 16px;">
+        <p><strong>Why the verdict stays NO-GO:</strong> recoverable infrastructure, real email, the deployed proxy/NAT topology, real backup restoration, full staging rehearsal, legal review, and accountable operators all require evidence that does not exist yet.</p>
+      </div>
+    </section>
+
+    <section class="shell" id="next-steps" aria-labelledby="next-steps-title">
+      <div class="section-head">
+        <p class="eyebrow">From here · work that can start now</p>
+        <h2 id="next-steps-title">Finish the release candidate before asking another operator to rehearse it</h2>
+        <p class="section-intro">These steps do not require a second operator. They keep the trial at NO-GO while turning the current working tree into a reviewable, reproducible staging candidate.</p>
+      </div>
+      <div class="next-step-grid">
+        <article class="next-step-card">
+          <h3>Reconcile the repository</h3>
+          <p>Remote <code>9fbc1ea</code> is reviewed. A read-only three-way simulation merged its homepage removal without conflicts and matched the current controlled-trial homepage byte-for-byte; its three one-off database repair utilities are unsafe and excluded. Base the final local release commit on that reviewed head without restoring those utilities.</p>
+          <p class="boundary">Content reconciliation is proven; branch ancestry and a local commit await owner approval.</p>
+        </article>
+        <article class="next-step-card">
+          <h3>Approve the release scope</h3>
+          <p><code>docs/RELEASE_SCOPE.md</code> classifies the intended files, intentional removals, and narrow local-only ignores. An enforced scope check rejects unsafe utilities and candidate database, dump, environment, and local-media residue. The hero poster has no embedded source or license metadata and still requires an owner rights attestation or an approved replacement.</p>
+          <p class="boundary">Scope is prepared; media rights confirmation is still required.</p>
+        </article>
+        <article class="next-step-card">
+          <h3>Repeat the complete local gate</h3>
+          <p>The warning-strict suite, compilation, dependency consistency and advisory scans, secret scan, readiness-artifact check, deployment-blueprint parse, and diff hygiene all pass on July 14.</p>
+          <p class="boundary">Local gate is green; guarded PostgreSQL/Redis checks must repeat in CI after repository integration.</p>
+        </article>
+        <article class="next-step-card">
+          <h3>Create one release candidate</h3>
+          <p>After scope and media approval, integrate the reviewed remote head, stage only the manifest paths, create an intentional local commit, and leave the clean release branch for the owner to push. Require green GitHub Actions before staging.</p>
+          <p class="boundary">No commit or push has occurred; the agent will not push to <code>main</code> or any remote branch.</p>
+        </article>
+        <article class="next-step-card">
+          <h3>Prepare the staging configuration</h3>
+          <p><code>render.staging.yaml</code> and <code>docs/STAGING_PROVISIONING_PLAN.md</code> now define a secret-free draft for PostgreSQL, Redis, SMTP, authenticated schedulers, trusted proxy hops, canonical HTTPS origin, alerts, and recovery evidence.</p>
+          <p class="boundary">The draft parses locally; no paid resource, credential, alert, or provider has been created.</p>
+        </article>
+        <article class="next-step-card">
+          <h3>Run staging evidence when approved</h3>
+          <p>Deploy the reviewed candidate, migrate a fresh database, prove real inbox delivery, exercise proxy and NAT limits, run the two-participant journey, and complete an encrypted backup and isolated restore.</p>
+          <p class="boundary">Requires live services and deployment approval, but not necessarily a second operator.</p>
+        </article>
+      </div>
+      <div class="callout warn" style="margin-top: 20px;">
+        <p><strong>Still cannot be closed by engineering alone:</strong> <code>docs/OWNER_DECISION_PACKET.md</code> now consolidates the required decisions, but named primary and backup moderation coverage, a signed human incident and rollback rehearsal, monitored support ownership, external legal and privacy review, and final invitation approval remain unassigned.</p>
+      </div>
+    </section>
+
+    <section class="shell" id="problems" aria-labelledby="problems-title">
+      <div class="section-head">
+        <p class="eyebrow">Complete 50-item evidence ledger</p>
+        <h2 id="problems-title">Every original finding, reconciled to current evidence</h2>
+        <p class="section-intro">Open any item for its current status and remaining proof. The original diagnosis and proposed repair are retained beneath it for historical context.</p>
+      </div>
+
+      <div class="toolbar" aria-label="Issue filters">
+        <label>
+          <span class="sr-only" style="position:absolute;left:-9999px;">Search issues</span>
+          <input class="search" id="issueSearch" type="search" placeholder="Search: credits, email, safety, mobile…">
+        </label>
+        <div class="filters" role="group" aria-label="Filter by severity">
+          <button class="filter" type="button" data-filter="all" aria-pressed="true">All</button>
+          <button class="filter" type="button" data-filter="critical" aria-pressed="false">Critical</button>
+          <button class="filter" type="button" data-filter="high" aria-pressed="false">High</button>
+          <button class="filter" type="button" data-filter="medium" aria-pressed="false">Medium</button>
+          <button class="filter" type="button" data-filter="low" aria-pressed="false">Low</button>
+        </div>
+      </div>
+
+      <div class="issue-list" id="issueList">
+        <details class="issue" data-severity="critical" data-area="deployment database postgres">
+          <summary><span class="severity">Critical</span><span class="issue-title">The planned Render deployment cannot connect to PostgreSQL</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The app asks Render for a PostgreSQL database, but the Python package that speaks to PostgreSQL is missing. Production startup fails before the website can serve a page.</p><p><strong>Original repair direction</strong>Add and pin the correct PostgreSQL driver, create a production-like smoke test, and prove the app boots against PostgreSQL before touching deployment.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="credits accounting booking">
+          <summary><span class="severity">Critical</span><span class="issue-title">A booking can charge the learner twice</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The booking route subtracted credits directly, then called another function that subtracted the same amount again. In the original audit, a two-credit booking took four credits.</p><p><strong>Original repair direction</strong>Create one authoritative ledger function that changes the balance exactly once and records the matching transaction in the same database operation.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="credits refund cancellation">
+          <summary><span class="severity">Critical</span><span class="issue-title">Cancellation and timeout refunds are incorrect</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Pending sessions can be refunded twice. Accepted sessions can receive no refund at all. The result depends on the session state instead of a clear cancellation policy.</p><p><strong>Original repair direction</strong>Define the policy, attach each hold and refund to a session ID, and enforce at most one refund per session at the database level.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="credits payment repeat session">
+          <summary><span class="severity">Critical</span><span class="issue-title">A teacher may not be paid for a second session of the same skill</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The duplicate-payment check does not identify the actual session. Two valid sessions between the same people for the same skill look like one payment.</p><p><strong>Original repair direction</strong>Add a unique session ID to every payout and enforce one payout per completed session—not one payout per teacher, learner, and skill name.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="credits concurrency race claims">
+          <summary><span class="severity">Critical</span><span class="issue-title">Two simultaneous actions can corrupt session or request state</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Two teachers can attempt to claim one request, or both participants can complete a session at nearly the same time. Current locking does not protect the whole business operation.</p><p><strong>Original repair direction</strong>Lock the request/session and both affected accounts, add uniqueness constraints, then test real simultaneous requests on PostgreSQL.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="authentication verification edu">
+          <summary><span class="severity">Critical</span><span class="issue-title">Student verification can be completely bypassed</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The signup check only looks for text ending in <code>.edu</code>. It does not confirm that the text is a real address, and unverified accounts can still onboard, browse, book, and earn credits.</p><p><strong>Original repair direction</strong>Validate the address properly, send a real email, and block every protected product action until verification succeeds.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="referral fraud credits verification">
+          <summary><span class="severity">Critical</span><span class="issue-title">Fake accounts can farm referral credits</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Referral credits are granted immediately, before the new account proves it belongs to a real student. An attacker can create many fake-looking accounts and inflate balances.</p><p><strong>Original repair direction</strong>Delay rewards until verification and onboarding are complete, add abuse limits, and make referral rewards idempotent.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="security xss proof video url">
+          <summary><span class="severity">Critical</span><span class="issue-title">A proof-video URL can become a stored script attack</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The server accepted a <code>javascript:</code> link because the text also contained “youtube.com.” That link is saved and shown on public profiles.</p><p><strong>Original repair direction</strong>Parse the URL, allow only HTTPS, allow only exact approved video hosts, reject everything else, and add security regression tests.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="credits fraud bonus ambassador proof">
+          <summary><span class="severity">Critical</span><span class="issue-title">Bonus-credit endpoints can be repeated without limit</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Updating a proof link keeps awarding credits. Calling the ambassador route repeatedly keeps awarding two more. The interface hides the button, but an attacker does not need to use the interface.</p><p><strong>Original repair direction</strong>Disable both reward programs for the trial, then later add one-time database constraints, approval state, audit logs, and abuse monitoring.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="authorization ambassador admin timeout">
+          <summary><span class="severity">Critical</span><span class="issue-title">Any user can make themselves an ambassador and gain admin-like power</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Ambassador status is instant and self-service. Ambassadors can run the global timeout operation that modifies other students’ sessions.</p><p><strong>Original repair direction</strong>Create separate user, ambassador, moderator, and administrator roles. Only a real background job or administrator should perform global maintenance.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="request board template 500">
+          <summary><span class="severity">Critical</span><span class="issue-title">The skill-request board crashes with a 500 error</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The route tries to open a page file that does not exist. The monetization routes also reference missing pages.</p><p><strong>Original repair direction</strong>Either finish the request-board journey and its tests or remove it from the trial. Keep monetization disabled and remove dead routes until they are real.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="session meeting google meet">
+          <summary><span class="severity">Critical</span><span class="issue-title">Accepted sessions receive a fake Google Meet link</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The app invents a URL that looks like Google Meet but does not create an actual meeting. Students will click it and fail to join.</p><p><strong>Original repair direction</strong>For the trial, let the teacher supply a validated meeting link or choose an approved public campus location. Add calendar integration only after the core trial works.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="email verification reset sendgrid">
+          <summary><span class="severity">Critical</span><span class="issue-title">Verification and password-reset email are not production-ready</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The email library is missing, Render has no email configuration, and delivery errors are swallowed. A student can be told “sent” even though nothing was delivered.</p><p><strong>Original repair direction</strong>Add an approved transactional-email provider, verified sender, delivery monitoring, retries, and staging tests using real inboxes.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="email logs tokens privacy host header">
+          <summary><span class="severity">Critical</span><span class="issue-title">Secret reset links leak into logs and can use an attacker-controlled domain</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Email bodies—including verification and reset tokens—are printed. The domain in generated links comes from the incoming request, so a malicious Host header produced an evil-domain reset link during testing.</p><p><strong>Original repair direction</strong>Never log email bodies or tokens, configure a canonical public URL, validate trusted hosts, and test link generation behind the real proxy.</p></div>
+        </details>
+
+        <details class="issue" data-severity="critical" data-area="database migrations schema">
+          <summary><span class="severity">Critical</span><span class="issue-title">There is no safe database migration system</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong><code>create_all()</code> can create missing tables, but it does not safely upgrade existing tables. New fields can make a deployment crash against an older database.</p><p><strong>Original repair direction</strong>Add Alembic/Flask-Migrate, create reviewed forward and rollback migrations, and rehearse them on representative production-like data.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="authentication login lockout brute force">
+          <summary><span class="severity">High</span><span class="issue-title">The advertised account lockout does not work</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Failed login attempts are never added to the counter. Five wrong passwords left the counter at zero in testing.</p><p><strong>Original repair direction</strong>Implement account-aware throttling, increment and reset rules, secure lockout timing, and tests that prevent both brute force and denial-of-service abuse.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="rate limit redis proxy campus">
+          <summary><span class="severity">High</span><span class="issue-title">Rate limiting is both unreliable and likely too restrictive</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Limits are held in each web worker’s memory, so workers disagree. A low global limit can also block many students who share campus networking or a reverse proxy.</p><p><strong>Original repair direction</strong>Use shared Redis storage, configure proxy IP handling safely, and set different limits for login, verification, browsing, static files, and money-moving actions.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="verification code random expiry attempts">
+          <summary><span class="severity">High</span><span class="issue-title">The six-digit student-verification code is weakly protected</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>It uses a non-security random generator, has no enforced expiration, no retry limit, and no resend cooldown.</p><p><strong>Original repair direction</strong>Generate codes securely, store only a hash, expire them quickly, limit attempts, throttle resends, and alert on abuse.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="session auth cookies logout revocation">
+          <summary><span class="severity">High</span><span class="issue-title">Thirty-day login sessions cannot be centrally revoked</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>A stolen signed cookie can remain useful, and resetting a password does not sign other devices out.</p><p><strong>Original repair direction</strong>Add session-version or server-side session controls, revoke sessions after password resets, and use a shorter sensible lifetime for shared student devices.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="security csp scripts map inline">
+          <summary><span class="severity">High</span><span class="issue-title">The Content Security Policy is internally contradictory</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>It blocks the external animation libraries and map images the page tries to load, but permits inline scripts—the category that needs tighter control.</p><p><strong>Original repair direction</strong>Remove unused third-party scripts, self-host what remains, use nonces or hashes for necessary inline code, and allow only the exact map hosts if the map stays.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="session completion requested bypass accept">
+          <summary><span class="severity">High</span><span class="issue-title">A requested session can be completed before the teacher accepts it</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The completion endpoint accepts both “requested” and “confirmed” states. Direct requests can bypass the intended journey.</p><p><strong>Original repair direction</strong>Define a strict state machine: requested → accepted → completed or cancelled/disputed. Reject every illegal transition server-side.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="session scheduling timezone validation">
+          <summary><span class="severity">High</span><span class="issue-title">Scheduling is incomplete and ambiguous</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The server can accept missing, invalid, or past dates. Timezones are not recorded, and the teacher does not see the requested date before accepting.</p><p><strong>Original repair direction</strong>Store timezone-aware dates, validate an allowed range, show the exact time to both parties, and require acceptance of the schedule.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="safety reports blocks disputes moderation">
+          <summary><span class="severity">High</span><span class="issue-title">There is no working report, block, dispute, or moderation flow</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The database has reputation counters, but students cannot report harm, block contact, dispute a session, or request a safety review.</p><p><strong>Original repair direction</strong>Build reporting and blocking first, then a moderator queue, evidence notes, resolution outcomes, credit reversals, and an immutable audit trail.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="safety prohibited skills physical medical">
+          <summary><span class="severity">High</span><span class="issue-title">Unsafe or prohibited skills are only banned in policy text</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>A user can still list medical, clinical, weapons-related, illegal, or dangerously physical instruction because listing creation has no policy enforcement.</p><p><strong>Original repair direction</strong>Define permitted trial categories, block high-risk topics in code, add human review for flagged listings, and launch with one low-risk vertical.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="legal consent age waiver terms">
+          <summary><span class="severity">High</span><span class="issue-title">Users never affirmatively accept the terms, age rule, or safety waiver</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The terms say users must be 18 and accept a waiver, but signup records no checkbox, version, date, or proof of acceptance.</p><p><strong>Original repair direction</strong>Have counsel review the documents, then record explicit versioned consent for terms, privacy, code of conduct, age eligibility, and safety rules.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="privacy deletion export retention">
+          <summary><span class="severity">High</span><span class="issue-title">The privacy policy promises controls the product does not provide</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The policy promises access, correction, and deletion within 30 days, but there is no account-deletion or export workflow and no documented operator process.</p><p><strong>Original repair direction</strong>Build or document a reliable request process, define retention by data type, test deletion, and update the policy so every sentence matches reality.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="privacy public profiles students">
+          <summary><span class="severity">High</span><span class="issue-title">Anonymous visitors can view student profiles</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Names, schools, majors, skills, learning interests, reviews, and proof links can be visible without joining—even though Relay presents itself as a student-only community.</p><p><strong>Original repair direction</strong>Decide the privacy model explicitly. For a trial, I would require verified login for full profiles and show only limited marketplace previews publicly.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="admin audit suspension roles">
+          <summary><span class="severity">High</span><span class="issue-title">There is no real administrator or safety-operator system</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>There is no safe way to suspend a user, remove harmful content, reverse credits, inspect a dispute, or prove who took an administrative action.</p><p><strong>Original repair direction</strong>Add least-privilege roles, protected admin tools, mandatory reasons, and an append-only audit log.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="database constraints ledger float">
+          <summary><span class="severity">High</span><span class="issue-title">The database does not enforce important business rules</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Balances can lack exactness because they use floats. The database does not guarantee nonnegative balances, unique reviews, valid ratings, sensible prices, or different teacher and learner IDs.</p><p><strong>Original repair direction</strong>Use integer credits or exact decimals and add database constraints so bad states are impossible even if application code has a bug.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="dependencies security flask werkzeug">
+          <summary><span class="severity">High</span><span class="issue-title">Core web dependencies are behind current security fixes</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The pinned Flask version is covered by two low-severity advisories. The Werkzeug version has Windows-specific denial-of-service advisories. Render runs Linux, so the Werkzeug exposure is limited, but the stack is still stale.</p><p><strong>Original repair direction</strong>Upgrade Flask and Werkzeug to fixed releases, review release notes, rerun all security and session tests, and automate future advisory checks.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="hosting render free backups expiry">
+          <summary><span class="severity">High</span><span class="issue-title">The free Render database can expire and has no managed backups</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Render’s free PostgreSQL databases expire after 30 days and do not include recovery. Real trial data could become unavailable or be deleted.</p><p><strong>Original repair direction</strong>Use a paid database for the real trial or run and verify an external backup process. Rehearse a restore before recruiting.</p></div>
+        </details>
+
+        <details class="issue" data-severity="high" data-area="testing verifier false confidence">
+          <summary><span class="severity">High</span><span class="issue-title">The “15/15” credit test gives false confidence</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The script manually simulates simplified balance changes instead of calling the real web routes. It passes while those real routes double-charge users.</p><p><strong>Original repair direction</strong>Replace it with route-level tests covering signup, holds, acceptance, cancellation, timeout, completion, disputes, repeat sessions, and concurrency.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="pricing copy variable credits fidelity">
+          <summary><span class="severity">Medium</span><span class="issue-title">The product tells users conflicting stories about credit prices</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The homepage and marketplace repeatedly say 30 minutes equals one credit, while backend listings can cost up to four credits. Some screens always display “1 credit” regardless of the real charge.</p><p><strong>Original repair direction</strong>For the first trial, use one flat credit per 30 minutes everywhere. Remove variable pricing until research proves it is needed.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="pricing money monetization stripe">
+          <summary><span class="severity">Medium</span><span class="issue-title">Paid plans are advertised even though payments do not exist</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The homepage shows monthly prices and benefits, but the payment feature is disabled and the backend demo route creates credits without charging money.</p><p><strong>Original repair direction</strong>Hide all paid-plan claims during the trial. Do not activate payments until pricing, consumer disclosures, refunds, taxes, and a real provider are ready.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="pricing documents configuration drift">
+          <summary><span class="severity">Medium</span><span class="issue-title">Prices and starter credits disagree across the code and plans</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The homepage, business plan, environment defaults, and email copy name different prices and different starter-credit amounts.</p><p><strong>Original repair direction</strong>Create one source of truth for product configuration and generate all visible copy from it.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="recurring sessions fake ui">
+          <summary><span class="severity">Medium</span><span class="issue-title">The recurring-session controls do nothing</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>A student can select weekly sessions and a number of weeks, but the backend ignores both fields and creates only one ordinary session.</p><p><strong>Original repair direction</strong>Remove recurring controls for the trial. Add recurring bookings later only with clear multi-session pricing, cancellation, reminders, and tests.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="notifications email session logistics">
+          <summary><span class="severity">Medium</span><span class="issue-title">Session participants receive no dependable notifications</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>There are no real request, acceptance, cancellation, reminder, completion, or dispute notifications. Users must repeatedly check the dashboard.</p><p><strong>Original repair direction</strong>Add transactional notifications with idempotent delivery records and preferences, starting with email for the trial.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="session contact reschedule location">
+          <summary><span class="severity">Medium</span><span class="issue-title">The practical “how do we meet?” journey is unfinished</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>There is no safe contact exchange, location agreement, working video room, rescheduling, or detailed session view.</p><p><strong>Original repair direction</strong>Add a single session-details page where both parties see time, place/link, status, cancellation action, safety guidance, and support access.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="profile proof upload consent marketing">
+          <summary><span class="severity">Medium</span><span class="issue-title">“Upload proof” is misleading and its marketing consent is too vague</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The product only saves a link, does not verify the content, and says Relay may reuse clips without a proper content-release record.</p><p><strong>Original repair direction</strong>Remove the reward from the trial. If restored, use exact host validation, one proof per skill, moderation, versioned marketing permission, and a withdrawal process.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="pilot vertical strategy all categories">
+          <summary><span class="severity">Medium</span><span class="issue-title">The stated one-vertical pilot defaults to all categories</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The documents recommend a narrow pilot for safety and marketplace density, but the application defaults to every category.</p><p><strong>Original repair direction</strong>Choose one lower-risk, high-density vertical and enforce it in configuration, onboarding, listings, copy, moderation rules, and metrics.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="homepage intro performance motion">
+          <summary><span class="severity">Medium</span><span class="issue-title">The four-second homepage intro plays on every visit</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The intro blocks access to the product repeatedly even though the page comment says once per session.</p><p><strong>Original repair direction</strong>Show it at most once, make skipping obvious, keep the reduced-motion bypass, and measure whether it hurts signup conversion.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="accessibility labels navigation keyboard mobile">
+          <summary><span class="severity">Medium</span><span class="issue-title">Accessibility basics are incomplete</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>There is no skip link in the app, some labels are not explicitly tied to inputs, the hamburger does not report whether it is open, and there is no automated accessibility test.</p><p><strong>Original repair direction</strong>Fix semantics and keyboard behavior, test screen-reader names and focus order, then run automated and manual checks at 375px, 500px, and desktop.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="performance images assets media">
+          <summary><span class="severity">Medium</span><span class="issue-title">The marketing experience carries heavy image and media assets</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The tracked campaign images totaled roughly 16 MB, while a large untracked promotional folder added much more. Slow mobile connections would feel the cost.</p><p><strong>Original repair direction</strong>Serve only required assets, add responsive sizing and intrinsic dimensions, lazy-load appropriate media, and enforce a page-weight budget.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="git deployment uncommitted assets">
+          <summary><span class="severity">Medium</span><span class="issue-title">The newest visual work is not part of a reproducible release</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Homepage, dashboard, profile, and media changes are uncommitted. A clean clone or deployment will not necessarily match the version being reviewed.</p><p><strong>Original repair direction</strong>Separate intended release assets from experiments, ignore local clutter, verify file sizes and licenses, then request approval for an intentional commit.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="health monitoring observability">
+          <summary><span class="severity">Medium</span><span class="issue-title">Health checks and monitoring do not prove the product is healthy</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>Render checks the full homepage, while the simple health route does not verify database access. There are no alerts, request IDs, error service, or product-health dashboard.</p><p><strong>Original repair direction</strong>Add liveness and database-aware readiness endpoints, structured logs, error monitoring, uptime alerts, and trial metrics.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="background jobs timeout cron">
+          <summary><span class="severity">Medium</span><span class="issue-title">Timeouts depend on a person visiting an admin URL</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>There is no scheduler. The cleanup endpoint is a GET request, changes data, and can be run by self-appointed ambassadors.</p><p><strong>Original repair direction</strong>Move it into a scheduled authenticated job, make each run idempotent, log outcomes, and alert on failures.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="ci tests deployment staging">
+          <summary><span class="severity">Medium</span><span class="issue-title">There is no continuous-integration safety net or staging environment</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>No automated gate runs tests, migrations, dependency checks, or deployment smoke tests before code reaches users.</p><p><strong>Original repair direction</strong>Add CI, a separate staging database and email setup, deterministic test data, and a promotion checklist from staging to production.</p></div>
+        </details>
+
+        <details class="issue" data-severity="medium" data-area="analytics metrics trial success">
+          <summary><span class="severity">Medium</span><span class="issue-title">The trial cannot reliably measure whether Relay works</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>The business plan defines session and retention metrics, but the product has no trustworthy trial dashboard or event definitions.</p><p><strong>Original repair direction</strong>Define events and a small privacy-conscious dashboard for verified signups, listings, requests, acceptance, completion, no-shows, disputes, repeat use, and ledger reconciliation.</p></div>
+        </details>
+
+        <details class="issue" data-severity="low" data-area="repository scripts cleanup">
+          <summary><span class="severity">Low</span><span class="issue-title">Fragile one-off repair scripts remain in the product root</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>A script edited exact line numbers in the main application. Running it after the file changed could delete or corrupt unrelated code.</p><p><strong>Original repair direction</strong>Remove obsolete scripts after inspection and keep repeatable maintenance in tested commands or versioned migrations.</p></div>
+        </details>
+
+        <details class="issue" data-severity="low" data-area="profile reputation badges reviews">
+          <summary><span class="severity">Low</span><span class="issue-title">Reputation badges and counters do not reflect a complete trust system</span></summary>
+          <div class="issue-body"><p><strong>Original finding</strong>No-show and report counters are not connected to real actions, and badge ordering can make a higher trust badge unreachable for clean users.</p><p><strong>Original repair direction</strong>Hide unsupported badges during the trial, then derive reputation only from verified, auditable events.</p></div>
+        </details>
+      </div>
+      <p class="empty-state" id="emptyState">No issues match that search and filter.</p>
+    </section>
+
+    <section class="shell" id="plan" aria-labelledby="plan-title">
+      <div class="section-head">
+        <p class="eyebrow">Implementation path used</p>
+        <h2 id="plan-title">The seven-phase program and its current boundary</h2>
+        <p class="section-intro">The repository work followed this order. Phases 1–4 and 6 now have substantial local evidence; Phase 5 is locally exercised but not proven in staging, and the real Phase 7 rehearsal remains incomplete.</p>
+      </div>
+
+      <div class="callout warn" style="margin-bottom: 20px;">
+        <p><strong>Implemented trial contract:</strong> one configurable creative vertical, 10–20 invited and manually vetted NYU participants, one credit per 30-minute session, no payments, no request-board claiming, no referral rewards, no proof-video rewards, and no self-service ambassadors.</p>
+      </div>
+
+      <div class="roadmap">
+        <article class="phase">
+          <div class="phase-num">01</div>
+          <div>
+            <h3>Freeze dangerous features and build a real test harness</h3>
+            <p class="why">First, stop the app from creating new harm while preserving the current experience for diagnosis.</p>
+            <ul>
+              <li>Disable bonus-credit, ambassador, top-up, request-claim, recurring-session, and fake meeting-link behavior.</li>
+              <li>Write failing tests that reproduce every confirmed bug from this report.</li>
+              <li>Test through real HTTP routes with CSRF and authorization—not simplified copies of the code.</li>
+              <li>Add CI so a known bug cannot quietly return.</li>
+            </ul>
+            <div class="proof"><strong>Current evidence:</strong> unsafe routes are contained, the obsolete simulator is removed, CI is defined, and 62 warning-strict local tests pass.</div>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="phase-num">02</div>
+          <div>
+            <h3>Rebuild credits and session settlement around strict rules</h3>
+            <p class="why">The credit ledger is the product’s trust core. Nothing else should launch until it is mathematically dependable.</p>
+            <ul>
+              <li>Use one service for holds, refunds, payouts, bonuses, and reversals.</li>
+              <li>Link every transaction to a unique session or reward event.</li>
+              <li>Add database constraints, row locks, idempotency keys, and reconciliation.</li>
+              <li>Define and enforce a session state machine and cancellation policy.</li>
+              <li>Run simultaneous booking, claiming, completion, and cancellation tests on PostgreSQL.</li>
+            </ul>
+            <div class="proof"><strong>Current evidence:</strong> local lifecycle, repeat, malformed-source, and reconciliation tests pass, along with three guarded competing-action cases on disposable PostgreSQL 16.14.</div>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="phase-num">03</div>
+          <div>
+            <h3>Make identity, login, email, and authorization real</h3>
+            <p class="why">“Student-only” must be enforced by the server, not merely displayed as a badge.</p>
+            <ul>
+              <li>Add strict email validation and a working transactional-email provider.</li>
+              <li>Gate product actions behind successful verification.</li>
+              <li>Secure verification and reset tokens, trusted hosts, session revocation, and rate limits.</li>
+              <li>Separate user, ambassador, moderator, and administrator privileges.</li>
+              <li>Remove token and personal-data leakage from logs.</li>
+            </ul>
+            <div class="proof"><strong>Current evidence:</strong> unverified and unauthorized route matrices pass; shared Redis and trusted-proxy behavior pass locally. Real inbox/provider and deployed proxy/NAT evidence remain external.</div>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="phase-num">04</div>
+          <div>
+            <h3>Build the minimum safe session experience</h3>
+            <p class="why">A successful match still fails if students cannot agree on when and where to meet or get help when something goes wrong.</p>
+            <ul>
+              <li>Create a detailed session page with timezone-aware schedule, public place or valid video link, and clear status.</li>
+              <li>Add request, acceptance, reminder, cancellation, completion, and dispute notifications.</li>
+              <li>Add reporting, blocking, no-show, dispute, suspension, and refund tools.</li>
+              <li>Enforce the trial’s allowed skill categories and high-risk-topic ban.</li>
+              <li>Create a moderator queue and immutable action log.</li>
+            </ul>
+            <div class="proof"><strong>Current evidence:</strong> automated two-user and moderator component drills pass, including no-show, dismissal, refund, reversal, suspension, and repeat resolution. Human rehearsal remains BLOCKED.</div>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="phase-num">05</div>
+          <div>
+            <h3>Make data, deployment, and operations recoverable</h3>
+            <p class="why">A trial is not safe if a deployment can erase data, fail silently, or leave the founder unable to recover.</p>
+            <ul>
+              <li>Add the PostgreSQL driver and versioned migrations.</li>
+              <li>Create staging and production with separate secrets, databases, and email configuration.</li>
+              <li>Add database-aware readiness checks, logs, error monitoring, uptime alerts, and scheduled jobs.</li>
+              <li>Use a backed-up database and rehearse both restore and rollback.</li>
+              <li>Validate required production settings and refuse unsafe startup.</li>
+            </ul>
+            <div class="proof"><strong>Current evidence:</strong> production-shaped PostgreSQL/Redis exact-head readiness, guarded jobs, and a synthetic local logical restore pass. Real SMTP/staging, deployed proxy/NAT, alerts, and provider recovery remain NOT TESTED/BLOCKED.</div>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="phase-num">06</div>
+          <div>
+            <h3>Align every screen with the real product</h3>
+            <p class="why">High fidelity means the interface tells the truth and every visible control works.</p>
+            <ul>
+              <li>Use one credit price, one starter-credit amount, one pilot vertical, and one set of public claims.</li>
+              <li>Remove paid plans and unfinished features from trial-facing pages.</li>
+              <li>Fix accessibility semantics, keyboard use, focus, contrast, and reduced motion.</li>
+              <li>Optimize images and define mobile performance budgets.</li>
+              <li>Verify the entire journey at 375px, 500px, and desktop with screenshots and browser checks.</li>
+            </ul>
+            <div class="proof"><strong>Current evidence:</strong> unsupported controls are removed; isolated Chrome passes public-route truthfulness, 375/500/768/1440 rendering, keyboard/focus, 200% reflow, reduced motion, accessibility-tree naming, strict same-origin CSP, screenshots, and corrected AA contrast. Official DevTools/Core Web Vitals tracing remains unavailable and is not claimed.</div>
+          </div>
+        </article>
+
+        <article class="phase">
+          <div class="phase-num">07</div>
+          <div>
+            <h3>Run a controlled rehearsal before recruiting</h3>
+            <p class="why">The final test should look like the real trial, including failure and support scenarios.</p>
+            <ul>
+              <li>Seed only manually vetted test teachers and reviewed listings.</li>
+              <li>Run scripted two-user journeys, failed-email, no-show, dispute, and account-recovery drills.</li>
+              <li>Verify trial metrics, privacy requests, moderator response, ledger reconciliation, and alerts.</li>
+              <li>Get legal review and record versioned participant consent.</li>
+              <li>Invite the first 10–20 participants only after every launch gate below is signed off.</li>
+            </ul>
+            <div class="proof"><strong>Current evidence:</strong> deterministic synthetic fixture, rehearsal checklist, runbooks, 50-item matrix, and this NO-GO report exist. Production-like rehearsal and sign-offs have not run.</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="shell" id="gates" aria-labelledby="gates-title">
+      <div class="section-head">
+        <p class="eyebrow">Definition of done · 5 PASS · 0 FAIL · 4 BLOCKED · 3 NOT TESTED</p>
+        <h2 id="gates-title">The trial does not start until all 12 gates pass</h2>
+        <p class="section-intro">These are read-only evidence states. Plans, mocks, and local-only coverage do not turn a launch gate green.</p>
+      </div>
+      <div class="gate-grid">
+        <article class="gate-card" data-gate="G01"><div class="gate-head"><strong>G01 · Production-like deployment works</strong><span class="status-pill status-not-tested">NOT TESTED</span></div><p class="gate-evidence">Production-shaped PostgreSQL migration/current/check, exact production import, live Redis limiter storage, trusted proxy/host behavior, and exact-head readiness passed locally with readiness 200; no real SMTP/provider or staging was used.</p><p class="gate-blocker"><strong>Required:</strong> recoverable staging PostgreSQL/Redis, real SMTP, and a successful full readiness transcript.</p></article>
+        <article class="gate-card" data-gate="G02"><div class="gate-head"><strong>G02 · Credits reconcile exactly under concurrency</strong><span class="status-pill status-pass">PASS</span></div><p class="gate-evidence">Local repeat-session tests and three guarded PostgreSQL 16.14 competing-action tests on disposable <code>relay_migration_ci</code> reconcile exactly.</p><p class="gate-blocker"><strong>Remaining:</strong> repeat in CI and the production-like G12 rehearsal.</p></article>
+        <article class="gate-card" data-gate="G03"><div class="gate-head"><strong>G03 · Verification is mandatory</strong><span class="status-pill status-pass">PASS</span></div><p class="gate-evidence">Invite/domain validation, hashed verification, delayed unique starter award, identity-safe preview, and the unverified authorization matrix pass.</p><p class="gate-blocker"><strong>Remaining:</strong> recheck in the full staging rehearsal.</p></article>
+        <article class="gate-card" data-gate="G04"><div class="gate-head"><strong>G04 · Session logistics work for both parties</strong><span class="status-pill status-not-tested">NOT TESTED</span></div><p class="gate-evidence">Route tests cover Eastern scheduling, exact real details, acceptance, and refund-once; no two-browser staging rehearsal exists.</p><p class="gate-blocker"><strong>Required:</strong> two-participant browser rehearsal.</p></article>
+        <article class="gate-card" data-gate="G05"><div class="gate-head"><strong>G05 · Safety operations work</strong><span class="status-pill status-blocked">BLOCKED</span></div><p class="gate-evidence">Automated end-to-end drills pass and reconcile, including malformed settlement and repeat-resolution cases.</p><p class="gate-blocker"><strong>Required:</strong> a named moderator completes and signs the human incident rehearsal.</p></article>
+        <article class="gate-card" data-gate="G06"><div class="gate-head"><strong>G06 · Data can be recovered</strong><span class="status-pill status-blocked">BLOCKED</span></div><p class="gate-evidence">A synthetic local custom-format dump restored into an isolated database at exact head with matching counts, ready test-mode application state, and zero ledger discrepancies.</p><p class="gate-blocker"><strong>Required:</strong> a real encrypted/provider backup, isolated restore, approved RPO/RTO, and operator sign-off.</p></article>
+        <article class="gate-card" data-gate="G07"><div class="gate-head"><strong>G07 · Security gates pass</strong><span class="status-pill status-pass">PASS</span></div><p class="gate-evidence">Authorization, CSRF, stored-XSS stripping, trusted host/proxy, CSP, secrets and dependency checks pass; two app instances share disposable Redis limits, spoofed leftmost input is ignored, and an independent participant address retains allowance.</p><p class="gate-blocker"><strong>Remaining:</strong> repeat with the real deployed proxy/NAT topology during G12.</p></article>
+        <article class="gate-card" data-gate="G08"><div class="gate-head"><strong>G08 · The interface tells the truth</strong><span class="status-pill status-pass">PASS</span></div><p class="gate-evidence">Ten public routes rendered in isolated Chrome with expected claims/controls, strict same-origin CSP, and no console, page, or request errors.</p><p class="gate-blocker"><strong>Remaining:</strong> repeat after scope/copy changes and in the full staging rehearsal.</p></article>
+        <article class="gate-card" data-gate="G09"><div class="gate-head"><strong>G09 · Mobile and accessibility pass</strong><span class="status-pill status-pass">PASS</span></div><p class="gate-evidence">Isolated Chrome passes 375/500/768/1440 screenshots, 200% reflow, keyboard/focus/skip-link, menu, reduced motion, accessibility-tree names, labels, unique IDs/H1s, images, and corrected AA contrast.</p><p class="gate-blocker"><strong>Remaining:</strong> official DevTools performance tracing is unavailable and not claimed; targeted human assistive-technology review remains prudent.</p></article>
+        <article class="gate-card" data-gate="G10"><div class="gate-head"><strong>G10 · Trial operations are staffed</strong><span class="status-pill status-blocked">BLOCKED</span></div><p class="gate-evidence">Runbooks and response targets exist; accountable roles and the monitored inbox are unassigned.</p><p class="gate-blocker"><strong>Required:</strong> named coverage, approved targets, and inbox/alert proof.</p></article>
+        <article class="gate-card" data-gate="G11"><div class="gate-head"><strong>G11 · Legal and consent are reviewed</strong><span class="status-pill status-blocked">BLOCKED</span></div><p class="gate-evidence">Versioned five-document consent works and legal/privacy/safety pages truthfully state draft status.</p><p class="gate-blocker"><strong>Required:</strong> external counsel/privacy review and approved versions.</p></article>
+        <article class="gate-card" data-gate="G12"><div class="gate-head"><strong>G12 · A full rehearsal passes</strong><span class="status-pill status-not-tested">NOT TESTED</span></div><p class="gate-evidence">Local component drills exist; the staging checklist and recovery exercise have not run.</p><p class="gate-blocker"><strong>Required:</strong> production-like two-user/operator/email/recovery rehearsal and sign-offs.</p></article>
+      </div>
+    </section>
+
+    <section class="shell" id="decisions" aria-labelledby="decisions-title">
+      <div class="section-head">
+        <p class="eyebrow">External-action boundary</p>
+        <h2 id="decisions-title">What remains after the repository is release-ready</h2>
+        <p class="section-intro">The trial contract is now fixed in code. These are the remaining approvals, live-service proofs, and accountable-person requirements.</p>
+      </div>
+      <div class="decision-grid">
+        <article class="decision-card"><h3>Production-like database evidence</h3><p>Repeat the passing PostgreSQL suites in CI, then prove the full application boot/readiness path in staging before any persistent migration.</p></article>
+        <article class="decision-card"><h3>Recoverable infrastructure</h3><p>Provision approved PostgreSQL, Redis, SMTP, scheduler, log/error, uptime alert, backup, and isolated restore targets. These cannot be simulated into a passing gate.</p></article>
+        <article class="decision-card"><h3>Performance trace</h3><p>Configure the Chrome DevTools performance connector only if an official lab trace/Core Web Vitals artifact is required; responsive and basic-accessibility browser evidence now passes locally.</p></article>
+        <article class="decision-card"><h3>Named people and support</h3><p>Assign primary and backup moderator, technical operator, privacy contact, monitored support inbox, decision-maker, and rollback approver; then rehearse coverage.</p></article>
+        <article class="decision-card"><h3>Legal and privacy review</h3><p>Have external counsel/privacy reviewers approve the versioned terms, privacy, age eligibility, conduct, safety, retention, and operator procedures.</p></article>
+        <article class="decision-card"><h3>Release remains separate</h3><p>A commit, push, CI run, staging deployment, production deployment, invitation, or participant message still requires explicit approval after the dirty-worktree scope and asset provenance are reviewed.</p></article>
+      </div>
+    </section>
+
+    <section class="shell" aria-labelledby="glossary-title">
+      <div class="section-head">
+        <p class="eyebrow">Plain-English glossary</p>
+        <h2 id="glossary-title">Technical words used in this report</h2>
+      </div>
+      <div class="glossary">
+        <details><summary>Ledger</summary><p>The permanent list of every credit added or removed. A student’s displayed balance should always equal the total of this list.</p></details>
+        <details><summary>Idempotent</summary><p>Safe to repeat. For example, clicking “refund” twice should still produce only one refund.</p></details>
+        <details><summary>Race condition</summary><p>A bug caused by two actions happening nearly simultaneously, such as two teachers claiming the same request before either sees the other.</p></details>
+        <details><summary>CSRF</summary><p>Protection that stops another website from secretly making a logged-in user perform an action on Relay.</p></details>
+        <details><summary>XSS</summary><p>A security problem where attacker-controlled text or links cause script code to run inside another user’s browser.</p></details>
+        <details><summary>Content Security Policy</summary><p>Browser rules that control which scripts, images, fonts, and network locations a page is allowed to use.</p></details>
+        <details><summary>Migration</summary><p>A controlled, versioned change to the database structure that preserves existing data while the application evolves.</p></details>
+        <details><summary>Staging</summary><p>A private production-like copy of the app used to test releases safely before real users receive them.</p></details>
+        <details><summary>Reconciliation</summary><p>Checking that balances, transactions, session states, and expected totals all agree.</p></details>
+        <details><summary>Regression test</summary><p>An automated test that proves a known bug is fixed and prevents the same bug from returning later.</p></details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="shell">
+      <strong>Scope:</strong> repository source and working tree, 62 warning-strict local migration/route/unit/CLI/static-rendering tests, five guarded disposable PostgreSQL 16.14 migration/concurrency tests, two guarded Redis/production-infrastructure tests, production-shaped local readiness, synthetic logical restore, isolated responsive/basic-accessibility browser checks, direct and resolved-graph advisory checks, static security checks, deployment configuration, and documented external boundaries. No real inbox, provider recovery, staging/CI/deployment, deployed proxy/NAT exercise, official DevTools/Core Web Vitals trace, human screen-reader review, or legal approval is claimed. This is an engineering readiness report, not legal advice. Exact locators live in <a href="docs/TRIAL_EVIDENCE_INDEX.md">the evidence index</a> and authoritative statuses in <a href="docs/TRIAL_READINESS_MATRIX.md">the readiness matrix</a>.
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const issues = Array.from(document.querySelectorAll('.issue'));
+      const issueEvidence = [
+        ["C01", "PASS", "Provider-issued postgresql:// URLs normalize to the installed Psycopg 3 dialect under regression coverage. Exact production configuration previously booted against disposable PostgreSQL 16.14 and Redis 7.4.9 after migration/current/check with readiness 200.", "Repeat the updated provider-shaped production test in CI; full staging still requires recoverable infrastructure and real SMTP under G01."],
+        ["C02", "PASS", "Booking uses the ledger helper once; a real CSRF-enabled route test proves one-credit balance and ledger agreement.", "Local PostgreSQL concurrency now passes under G02; repeat in staging."],
+        ["C03", "PASS", "Requested/confirmed cancellation and authenticated expiry settlement use the source-unique ledger; repeat actions refund once and reconcile.", "Local PostgreSQL concurrency passes under G02/C05; repeat in staging."],
+        ["C04", "PASS", "Payout identity is the session ID; two sessions for the same pair and skill each pay once and reconcile under repeat calls.", "Local PostgreSQL concurrency passes under G02/C05; repeat in staging."],
+        ["C05", "PASS", "Three guarded PostgreSQL 16.14 tests on disposable relay_migration_ci prove competing holds cannot overdraw, completion confirmations pay once, and cancellation racing one confirmation refunds once; every account reconciles.", "Repeat the guarded transcript in CI and production-like staging."],
+        ["C06", "PASS", "NYU/invite validation, hashed one-hour secrets, resend cooldown, delayed starter credits, privacy-safe preview, and authorization-matrix tests pass.", "Production-like abuse rehearsal remains G07/G12."],
+        ["C07", "PASS", "Signup grants no referral awards; referral UI and copy are absent and the program is intentionally disabled.", "Use the documented re-enable conditions before restoring it."],
+        ["C08", "PASS", "/proof-video returns 404; proof links and reward claims are not rendered; containment tests pass.", "Re-enable only with exact-host validation and moderation."],
+        ["C09", "PASS", "Proof and ambassador endpoints return 404; verification is the only starter-credit source and repeat verification grants once.", "Keep reward programs disabled until database source uniqueness and eligibility rules are approved."],
+        ["C10", "PASS", "Self-elevation and user timeout routes return 404; unsupported badges and controls are absent.", "Named moderator/admin provisioning remains external."],
+        ["C11", "PASS", "Request-board browse/add/claim routes intentionally return 404 and no board control is rendered.", "Use the documented re-enable conditions before restoring it."],
+        ["C12", "PASS", "Acceptance requires an approved public location or exact-host HTTPS link; substring attacks return 400 and no URL is invented.", "The two-browser logistics rehearsal remains G04/G12."],
+        ["C13", "BLOCKED", "SMTP fails honestly; secret-free idempotent outcomes are stored; production requires SMTP settings; failed-delivery routes are tested.", "Prove real provider/inbox delivery, sender-domain setup, and production-like failure/retry behavior."],
+        ["C14", "PASS", "Links derive only from RELAY_PUBLIC_URL; production trusted hosts and explicit proxy-hop counts are required; token/body logging is removed; attacker-Host and rightmost-hop regressions pass.", "Production proxy/header exercise remains G07."],
+        ["C15", "PASS", "Versioned legacy/current revisions pass four SQLite safety cases plus guarded PostgreSQL 16.14 fresh/no-drift and representative legacy forward-and-rollback tests.", "Verify backup/restore and production-like preflight before any persistent migration."],
+        ["H01", "PASS", "Five failed route logins increment a known account and create a 15-minute lock; successful login resets it.", "Shared limiter evidence remains H02/G07."],
+        ["H02", "PASS", "Account-scoped and hashed-identity limits pass campus isolation; two app instances share disposable Redis 7.4.9 limits, spoofed leftmost proxy input is ignored, an independent address retains allowance, and production readiness passes with the store.", "Repeat with the real deployed proxy/NAT topology under G12."],
+        ["H03", "PASS", "Verification uses a cryptographic URL secret stored only as SHA-256, expires in one hour, has resend cooldown and route limits, and is repeat-safe.", "Production abuse exercise remains G07/G12."],
+        ["H04", "PASS", "Sessions last 12 hours and carry a server-checked version; reset, suspension, and deletion revoke existing sessions.", "Production cookie/header review remains G07."],
+        ["H05", "PASS", "External scripts are removed, core controls are self-hosted, script-src excludes unsafe inline script, and all four browser widths produced zero external requests, console/page errors, or request failures.", "Repeat after any asset or deployment-header change."],
+        ["H06", "PASS", "Only confirmed sessions can complete; the CSRF route regression keeps a requested session requested and unpaid.", "PostgreSQL competing-action proof passes under G02; repeat in staging."],
+        ["H07", "PASS", "Requests require unambiguous America/New_York times one hour to 30 days ahead; DST gaps/folds are rejected and private details are participant-only.", "Two-browser staging rehearsal remains G04/G12."],
+        ["H08", "PASS", "Report, block, no-show, dispute, suspension, listing removal, refund/reversal, session revocation, dismissal, and attributable actions exist. Closed and cross-case repeats fail closed.", "A named moderator and human incident rehearsal remain G05/G12."],
+        ["H09", "PASS", "Production permits one configured creative category; all/other categories and prohibited medical, weapons, illegal, and high-risk physical topics are rejected.", "Operator content review remains external."],
+        ["H10", "PASS", "Five required versioned acceptances are recorded and re-consent gates protected use after version changes.", "External legal review remains G11."],
+        ["H11", "PASS", "Authenticated export and password-confirmed closure are tested; retained linked records are truthfully described as pseudonymized and potentially identifying.", "Privacy-owner and legal approval remain G10/G11."],
+        ["H12", "PASS", "Full profiles return 404 without a verified session; public browse removes names, avatars, profile links, and free-form descriptions.", "Browser privacy review remains part of the rehearsal."],
+        ["H13", "PASS", "Constrained roles, protected queue, mandatory reasons/evidence, append-only actions, session revocation, and admin-only moderator suspension rules are tested.", "Named staff and safe initial role provisioning remain G10/migrations."],
+        ["H14", "PASS", "Integer/check/unique constraints enforce nonnegative balances, nonzero events, one-credit price, distinct participants, valid ratings, and unique reviews/sources; PostgreSQL tests and production-shaped boot pass.", "Repeat against staging under G12."],
+        ["H15", "PASS", "Flask 3.1.3 and Werkzeug 3.1.8 are pinned; all 14 direct pins, resolved-graph pip-audit, pip check, and 62 warning-strict tests pass.", "CI must repeat the checks before release."],
+        ["H16", "BLOCKED", "The unsafe free-database declaration is removed; Render requires an approved external database URL, but no recoverable service or restore evidence exists.", "Provision a recoverable trial database and successfully restore a real backup."],
+        ["H17", "PASS", "The simulator is removed; 62 warning-strict tests plus seven guarded PostgreSQL/Redis/infrastructure tests exercise migrations, concurrency, production readiness, provider-issued PostgreSQL URL normalization, constraints, CSRF routes, throttling, authorization, safety, privacy, email, and ledger behavior.", "CI must repeat all suites before release."],
+        ["M01", "PASS", "TrialConfig fixes the cost at one and booking ignores legacy listing prices; route and UI regressions prove one credit.", "Variable pricing remains disabled."],
+        ["M02", "PASS", "Pricing and campaign sections are not rendered; top-up and membership routes return 404.", "Use documented re-enable conditions before adding monetization."],
+        ["M03", "PASS", "Trial price is one and starter default is two in one configuration; booking, rendered copy, and email derive from it.", "No remaining blocker within the contained scope."],
+        ["M04", "PASS", "Recurrence controls are removed and one request creates one one-credit session.", "Use documented re-enable conditions before recurrence."],
+        ["M05", "PASS", "Lifecycle notifications use secret-free idempotent outcomes; reminders are guarded and repeat-safe; failures preserve state and surface honestly.", "Real inbox/provider rehearsal remains C13/G12."],
+        ["M06", "PASS", "Participant-only details, Eastern time, approved location/link, acceptance, cancellation, completion, block, report, dispute, and no-show support exist.", "Two-browser staging rehearsal remains G04/G12."],
+        ["M07", "PASS", "Proof routes, controls, profile link, reward claim, and marketing-permission copy are unavailable in the trial product.", "Use documented re-enable conditions before restoring proof video."],
+        ["M08", "PASS", "TrialConfig selects creative, rejects all, and requires explicit production configuration; config regressions pass.", "The founder must still confirm vetted teacher supply."],
+        ["M09", "PASS", "sessionStorage limits the intro to once per browser session; the reduced-motion browser run removed the intro, settled all reveals, and exposed no active animation.", "Repeat after motion-layer changes."],
+        ["M10", "PASS", "Isolated Chrome at all required widths plus 200% reflow passes overflow, labels, accessibility-tree naming, keyboard focus, skip link, menu state, reduced motion, and corrected AA contrast checks.", "Targeted human assistive-technology review remains prudent before a broader release."],
+        ["M11", "PASS", "The home uses only same-origin contained assets; browser runs transferred 468,188 resource bytes, observed 68–76 ms loopback FCP and CLS 0.", "The DevTools connector was unavailable, so no official trace or Core Web Vitals claim is made."],
+        ["M12", "BLOCKED", "Intended templates, CSS, and media remain uncommitted; main is behind origin/main and automatic deploys are disabled.", "Review intentional scope and asset provenance, then explicitly approve commit, push, and deploy."],
+        ["M13", "BLOCKED", "Liveness/readiness checks exact Alembic head and limiter storage; production-shaped readiness returns 200 with disposable PostgreSQL/Redis and missing-storage regressions fail closed.", "Prove external log retention, alert delivery, and a production failure exercise."],
+        ["M14", "BLOCKED", "The mutating web route returns 404; guarded dry-run-first CLIs are repeat-safe, refused unauthenticated apply, and accepted authenticated no-candidate runs.", "Provision and authenticate the scheduler and verify schedules and alerting in staging."],
+        ["M15", "BLOCKED", "A least-privilege workflow enforces the source-only release boundary, artifacts and deployment blueprints, compile, 62 tests, direct/resolved scans, and disposable PostgreSQL/Redis infrastructure jobs; it is unpushed and staging is absent.", "Confirm media/scope, approve a release action, observe green CI, and provision staging."],
+        ["M16", "PASS", "trial-health-report emits tested aggregate, read-only participant, listing, session, safety, email, and ledger counts without names or addresses.", "Operator interpretation and interviews remain external trial work."],
+        ["L01", "PASS", "Unsafe one-off repair scripts were removed; remote 9fbc1ea remains unmerged and its unsafe scripts are excluded.", "Future maintenance must use reviewed commands or migrations."],
+        ["L02", "PASS", "Ambassador, inferred reliability/no-show/report, and proof badges are not rendered.", "Re-enable reputation only from immutable, auditable events."]
+      ];
+
+      if (issues.length !== issueEvidence.length) {
+        throw new Error(`Readiness evidence mismatch: ${issues.length} issue elements for ${issueEvidence.length} records`);
+      }
+
+      const statusClass = (status) => `status-${status.toLowerCase().replaceAll(' ', '-')}`;
+      issues.forEach((issue, index) => {
+        const [id, status, evidence, blocker] = issueEvidence[index];
+        issue.dataset.status = status;
+        const title = issue.querySelector('.issue-title');
+        title.textContent = `${id} · ${title.textContent}`;
+        issue.querySelectorAll('.update-note').forEach((note) => note.remove());
+
+        const result = document.createElement('div');
+        result.className = 'current-result';
+        result.dataset.status = status;
+        const pill = document.createElement('span');
+        pill.className = `status-pill ${statusClass(status)}`;
+        pill.textContent = status;
+        const evidenceText = document.createElement('p');
+        const evidenceLabel = document.createElement('strong');
+        evidenceLabel.textContent = 'Current evidence';
+        evidenceText.append(evidenceLabel, document.createTextNode(evidence));
+        const blockerText = document.createElement('p');
+        blockerText.className = 'remaining';
+        const blockerLabel = document.createElement('strong');
+        blockerLabel.textContent = status === 'PASS' ? 'Remaining proof / boundary' : 'Required next proof';
+        blockerText.append(blockerLabel, document.createTextNode(blocker));
+        result.append(pill, evidenceText, blockerText);
+        issue.querySelector('.issue-body').prepend(result);
+      });
+
+      const search = document.getElementById('issueSearch');
+      const filters = Array.from(document.querySelectorAll('.filter'));
+      const empty = document.getElementById('emptyState');
+      let active = 'all';
+
+      function applyFilters() {
+        const query = search.value.trim().toLowerCase();
+        let visible = 0;
+        issues.forEach((issue) => {
+          const matchesSeverity = active === 'all' || issue.dataset.severity === active;
+          const haystack = (issue.textContent + ' ' + issue.dataset.area).toLowerCase();
+          const matchesSearch = !query || haystack.includes(query);
+          issue.hidden = !(matchesSeverity && matchesSearch);
+          if (!issue.hidden) visible += 1;
+        });
+        empty.style.display = visible ? 'none' : 'block';
+      }
+
+      filters.forEach((button) => {
+        button.addEventListener('click', () => {
+          active = button.dataset.filter;
+          filters.forEach((candidate) => candidate.setAttribute('aria-pressed', String(candidate === button)));
+          applyFilters();
+        });
+      });
+      search.addEventListener('input', applyFilters);
+    })();
+  </script>
+</body>
+</html>

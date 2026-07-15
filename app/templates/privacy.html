@@ -4,65 +4,78 @@
 <div class="legal-shell">
   <p class="eyebrow" data-reveal>Legal</p>
   <h1 class="legal-title" data-reveal="0.04">Privacy Policy</h1>
-  <p class="muted legal-updated">Last updated: June 17, 2026</p>
+  <p class="muted legal-updated">Version 2026-07-13-draft · External legal review: not yet evidenced</p>
 
   <div class="card" style="margin-bottom: 20px;">
     <h3>What we collect</h3>
     <p class="muted" style="margin-top: 8px;">
-      When you sign up for Relay, we collect your <strong>name</strong>, <strong>.edu email address</strong>,
-      <strong>skills you list</strong>, and <strong>session activity</strong> (who you taught and learned from).
-      We do <strong>not</strong> collect payment information, government IDs, or location data beyond what's
-      implied by your .edu domain.
+      We collect your name, approved university email address, optional school profile details, skills and
+      learning interests, consent records, session details, credit-ledger activity, blocks, reports, disputes,
+      and moderation outcomes. Meeting details are visible only to the two participants and authorized
+      moderators. The public browse preview does not expose participant profiles or contact details. Relay does
+      not collect payment information, government IDs, precise device location, advertising identifiers, or
+      profile images during this trial.
     </p>
   </div>
 
   <div class="card" style="margin-bottom: 20px;">
     <h3>How we use it</h3>
     <p class="muted" style="margin-top: 8px;">
-      Your data powers the Relay marketplace — matching teachers with learners, tracking credits,
-      and showing profiles. We <strong>never sell</strong> your data to third parties.
-      We may use anonymized aggregate data for research and improvement.
+      We use this data only to verify trial eligibility, run the skill exchange, maintain the exact credit
+      ledger, send necessary account and session messages, prevent abuse, respond to safety reports, and evaluate
+      the controlled trial. We do not sell participant data or use it for advertising. Operational email is sent
+      through the configured delivery provider, which processes the destination address and message needed for
+      delivery. The production provider is a launch gate and has not yet been evidenced.
     </p>
   </div>
 
   <div class="card" style="margin-bottom: 20px;">
     <h3>Data retention</h3>
     <p class="muted" style="margin-top: 8px;">
-      Your account and data remain until you request deletion. You can delete your account
-      at any time by contacting us. When deleted, your profile and personal data are removed
-      within 30 days. Session records may be kept anonymized for platform analytics.
+      Direct account and profile data is kept while your account is active. You can download a JSON copy or
+      close your account from Edit Profile; direct profile identifiers are replaced immediately. Linked ledger,
+      session, consent, safety, dispute, and moderation records remain under an opaque deleted-account ID and
+      are therefore pseudonymized, not guaranteed anonymous. Free-text safety evidence may remain identifying
+      and is access-restricted. These limited records are retained for 24 months after the controlled trial
+      closes, then deleted by the operator. This retention supports ledger integrity, safety follow-up, and
+      auditability. A verified production backup and restore process is still a launch gate; once configured,
+      expired backup copies must rotate out within 30 days.
     </p>
   </div>
 
   <div class="card" style="margin-bottom: 20px;">
     <h3>Cookies</h3>
     <p class="muted" style="margin-top: 8px;">
-      Relay uses a single cookie to keep you logged in. It's HTTP-only, same-site restricted,
-      and contains no personal data — just a session identifier. We do not use tracking cookies,
-      analytics cookies, or third-party cookies.
+      Relay uses an essential signed session cookie containing an opaque user identifier and session version.
+      It is HTTP-only and same-site restricted, and is secure-only in production. We do not use analytics,
+      advertising, or third-party cookies. Application assets are served by Relay rather than sending
+      email-derived avatar requests to third-party services.
     </p>
   </div>
 
   <div class="card" style="margin-bottom: 20px;">
     <h3>Security</h3>
     <p class="muted" style="margin-top: 8px;">
-      Passwords are hashed (not stored in plain text). All traffic is encrypted via HTTPS.
-      We rate-limit login attempts to prevent brute-force attacks. Your data is stored in
-      a secure database with no public network access.
+      Passwords and one-time account secrets are stored as hashes. Production startup requires HTTPS-facing
+      configuration, trusted hosts, a persistent database, and shared rate limiting. Login attempts are limited
+      and repeated failures temporarily lock the account. No security program can eliminate all risk; the trial
+      remains blocked until infrastructure and recovery gates are evidenced.
     </p>
   </div>
 
   <div class="card" style="margin-bottom: 20px;">
     <h3>Contact</h3>
     <p class="muted" style="margin-top: 8px;">
-      Questions about this policy? Reach out at <strong>at5441@nyu.edu</strong>.
+      Questions or requests that cannot be completed in-product should go to
+      <strong>{{ contact_email }}</strong>. A named, monitored support owner and response schedule must be
+      confirmed before invitations are sent.
     </p>
   </div>
 
   <div class="card legal-callout">
     <p>
-      <strong>Your rights.</strong> You can request a copy of your data, correct inaccuracies,
-      or delete your account at any time. Relay is a student project and we take your privacy seriously.
+      <strong>Your controls.</strong> You can download your data, correct your profile, or pseudonymize and close
+      your account in-product. This draft is not a substitute for the required external legal/privacy review.
     </p>
   </div>
 </div>

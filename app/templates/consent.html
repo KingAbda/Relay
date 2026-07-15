@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Trial Policies{% endblock %}
+{% block content %}
+<div style="max-width: 620px; margin: 0 auto;">
+  <h1>Review the controlled-trial policies</h1>
+  <p class="muted" style="margin: 8px 0 24px;">Relay records the exact draft versions you accept. These documents have not been represented as counsel-approved.</p>
+  {% if error %}<div class="form-error" role="alert" style="margin-bottom:16px;">{{ error }}</div>{% endif %}
+  <form method="POST" class="card">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <label class="consent-row"><input type="checkbox" name="accept_terms" value="yes" required /> <span>I accept the <a href="/terms" target="_blank" rel="noopener">Terms</a> ({{ policy_versions.terms }}).</span></label>
+    <label class="consent-row"><input type="checkbox" name="accept_privacy" value="yes" required /> <span>I acknowledge the <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a> ({{ policy_versions.privacy }}).</span></label>
+    <label class="consent-row"><input type="checkbox" name="confirm_age" value="yes" required /> <span>I confirm that I am at least 18 ({{ policy_versions.age_eligibility }}).</span></label>
+    <label class="consent-row"><input type="checkbox" name="accept_conduct" value="yes" required /> <span>I accept the <a href="/conduct" target="_blank" rel="noopener">Code of Conduct</a> ({{ policy_versions.code_of_conduct }}).</span></label>
+    <label class="consent-row"><input type="checkbox" name="accept_safety" value="yes" required /> <span>I accept the <a href="/safety" target="_blank" rel="noopener">Safety Rules</a> ({{ policy_versions.safety_rules }}).</span></label>
+    <button class="btn btn-primary" type="submit" style="margin-top:20px;">Record acceptance and continue</button>
+  </form>
+</div>
+{% endblock %}

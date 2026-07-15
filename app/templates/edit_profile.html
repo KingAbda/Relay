@@ -6,7 +6,7 @@
   <p class="muted" style="margin-bottom: 32px;">Update your info so others know who you are.</p>
 
   {% if error %}
-    <div class="form-error" style="margin-bottom: 16px;">{{ error }}</div>
+    <div class="form-error" role="alert" style="margin-bottom: 16px;">{{ error }}</div>
   {% endif %}
 
   <form method="POST" action="/edit-profile">
@@ -15,38 +15,47 @@
     <div class="card" style="margin-bottom: 20px;">
       <h3 style="margin-bottom: 16px;">Basic Info</h3>
       <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" name="full_name" class="form-input" value="{{ user.full_name }}" required />
+        <label for="profile-name">Full Name</label>
+        <input id="profile-name" type="text" name="full_name" class="form-input" value="{{ user.full_name }}" required />
       </div>
       <div class="form-group">
-        <label>Bio / About You</label>
-        <textarea name="bio" class="form-textarea" rows="4" placeholder="Tell people about yourself, your skills, and what you're passionate about.">{{ user.bio or '' }}</textarea>
-      </div>
-      <div class="form-group" style="margin-bottom: 0;">
-        <label>Profile Photo URL</label>
-        <input type="text" name="profile_photo" class="form-input" value="{{ user.profile_photo or '' }}" placeholder="https://example.com/photo.jpg" />
-        <span class="muted" style="font-size: 0.8rem;">Paste a link to your photo (Gravatar, Instagram, etc.)</span>
+        <label for="profile-bio">Bio / About You</label>
+        <textarea id="profile-bio" name="bio" class="form-textarea" rows="4" placeholder="Tell people about yourself, your skills, and what you're passionate about.">{{ user.bio or '' }}</textarea>
       </div>
     </div>
 
     <div class="card" style="margin-bottom: 20px;">
       <h3 style="margin-bottom: 16px;">School Info</h3>
       <div class="form-group">
-        <label>School / University</label>
-        <input type="text" name="school" class="form-input" value="{{ user.school or '' }}" placeholder="e.g. NYU" />
+        <label for="profile-school">School / University</label>
+        <input id="profile-school" type="text" name="school" class="form-input" value="{{ user.school or '' }}" placeholder="e.g. NYU" />
       </div>
       <div class="form-group">
-        <label>Major / Field of Study</label>
-        <input type="text" name="major" class="form-input" value="{{ user.major or '' }}" placeholder="e.g. Business & Technology" />
+        <label for="profile-major">Major / Field of Study</label>
+        <input id="profile-major" type="text" name="major" class="form-input" value="{{ user.major or '' }}" placeholder="e.g. Business & Technology" />
       </div>
       <div class="form-group" style="margin-bottom: 0;">
-        <label>Graduation Year</label>
-        <input type="text" name="graduation_year" class="form-input" value="{{ user.graduation_year or '' }}" placeholder="e.g. 2026" />
+        <label for="profile-year">Graduation Year</label>
+        <input id="profile-year" type="text" name="graduation_year" class="form-input" value="{{ user.graduation_year or '' }}" placeholder="e.g. 2026" />
       </div>
     </div>
 
     <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Save Profile</button>
   </form>
+
+  <section class="card" style="margin-top:24px;">
+    <h2 style="font-size:1.1rem;">Privacy controls</h2>
+    <p class="muted">Download the data associated with your account, or replace direct profile identifiers and close it. Linked safety, consent, session, moderation, and ledger records remain pseudonymized under the published retention rules and may not be fully anonymous.</p>
+    <a href="/account/export" class="btn btn-secondary" style="margin-top:12px;">Download JSON export</a>
+    <form method="POST" action="/account/delete" style="margin-top:18px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <label for="delete-password">Current password</label>
+      <input id="delete-password" type="password" name="password" class="form-input" autocomplete="current-password" required />
+      <label for="delete-confirmation">Type DELETE</label>
+      <input id="delete-confirmation" name="confirmation" class="form-input" required />
+      <button type="submit" class="btn btn-secondary" style="margin-top:10px;">Replace identifiers and close account</button>
+    </form>
+  </section>
 
   <div style="text-align: center; margin-top: 16px;">
     <a href="/profile/{{ user.id }}" class="btn btn-secondary">Cancel</a>

@@ -1,9 +1,11 @@
 # RELAY — Business Action Plan
 ### *The Battleground Blueprint for the Founder*
 
+> **Historical planning document — not current product or release evidence.** This file contains projections, unverified claims, monetization ideas, and features that are disabled for the controlled trial. The current authority is [`docs/TRIAL_CONTRACT.md`](docs/TRIAL_CONTRACT.md) and the honest launch status is [`docs/TRIAL_READINESS_MATRIX.md`](docs/TRIAL_READINESS_MATRIX.md). Nothing here authorizes invitations, purchases, deployment, or claims that a metric has been verified.
+
 **Document Version:** 2.0  
 **Date:** June 13, 2026  
-**Status:** Active Battle Plan  
+**Status:** Historical planning input; not release authority
 
 ---
 

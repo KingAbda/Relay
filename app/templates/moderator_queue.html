@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Moderator Queue{% endblock %}
+{% block content %}
+<div class="container">
+  <p class="eyebrow">Protected operator workspace</p>
+  <h1>Moderator queue</h1>
+  <p class="muted">Every resolution requires a reason and evidence notes. Actions append an audit record; this interface does not delete audit history.</p>
+
+  <h2 style="margin-top:28px;">Open reports</h2>
+  {% for item in reports %}
+  <article class="card" style="margin:12px 0;">
+    <p><strong>{{ item.category }}</strong> · reporter {{ get_user(item.reporter_id).full_name }} · target {{ get_user(item.reported_user_id).full_name }}</p>
+    <p>{{ item.description }}</p>
+    <form method="POST" action="/moderator/resolve/report/{{ item.id }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <label>Resolution action<select name="action_type" class="form-select" required><option value="dismiss">Dismiss</option><option value="suspend">Suspend target</option><option value="remove_listings">Remove target listings</option><option value="refund_hold">Refund held credit</option><option value="reverse_completed">Reverse completed settlement</option></select></label>
+      <label>Decision reason<input name="reason" class="form-input" required /></label>
+      <label>Evidence notes<textarea name="evidence_notes" class="form-textarea" required></textarea></label>
+      <button class="btn btn-primary" type="submit">Record resolution</button>
+    </form>
+  </article>
+  {% else %}<p class="muted">No open reports.</p>{% endfor %}
+
+  <h2 style="margin-top:28px;">Open disputes</h2>
+  {% for item in disputes %}
+  {% set booked = item.session_id %}
+  <article class="card" style="margin:12px 0;">
+    <p><strong>Session {{ item.session_id }}</strong> · opened by {{ get_user(item.opened_by_id).full_name }}</p>
+    <p>{{ item.reason }}</p>
+    <form method="POST" action="/moderator/resolve/dispute/{{ item.id }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <label>Target user ID<input name="target_user_id" class="form-input" required /></label>
+      <label>Resolution action<select name="action_type" class="form-select" required><option value="dismiss">Dismiss and restore prior session state</option><option value="refund_hold">Refund held credit and cancel session</option><option value="reverse_completed">Reverse completed settlement and cancel session</option></select></label>
+      <label>Decision reason<input name="reason" class="form-input" required /></label>
+      <label>Evidence notes<textarea name="evidence_notes" class="form-textarea" required></textarea></label>
+      <button class="btn btn-primary" type="submit">Record resolution</button>
+    </form>
+  </article>
+  {% else %}<p class="muted">No open disputes.</p>{% endfor %}
+
+  <h2 style="margin-top:28px;">Recent append-only actions</h2>
+  {% for action in actions %}<div class="card" style="margin:8px 0;"><strong>{{ action.action_type }}</strong> · {{ action.created_at|trial_time }}<p>{{ action.reason }}</p><p class="muted">{{ action.evidence_notes }}</p></div>{% else %}<p class="muted">No actions recorded.</p>{% endfor %}
+</div>
+{% endblock %}

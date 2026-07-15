@@ -9,21 +9,22 @@
       <p class="browse-sub" data-reveal="0.05">Browse skills being offered by other students. Request a 30-minute session and start learning.</p>
     </div>
     <div class="browse-stats" aria-label="Browse stats" data-reveal-stagger>
+      {% if preview_mode %}
+      <div><strong>Limited</strong><span>identity-safe preview</span></div>
+      <div><strong>Invite-only</strong><span>full trial access</span></div>
+      {% else %}
       <div><strong>{{ total_skills or skills|length }}</strong><span>skills listed</span></div>
       <div><strong>{{ total_users or 0 }}</strong><span>students active</span></div>
+      {% endif %}
     </div>
   </div>
 </section>
 
 <section class="browse-controls-section">
   <div class="container">
-    {% if user and ref_link %}
+    {% if preview_mode %}
     <div class="browse-referral">
-      <div><strong>Share Relay</strong><span>You both get +1 credit when a friend joins.</span></div>
-      <div class="ref-copy">
-        <input type="text" class="form-input" value="{{ ref_link }}" readonly onclick="this.select()" />
-        <button class="btn btn-primary" onclick="navigator.clipboard.writeText('{{ ref_link }}').then(() => this.textContent='Copied')">Copy</button>
-      </div>
+      <div><strong>Limited trial preview</strong><span>Student identities and full profiles are visible only to verified invited participants.</span></div>
     </div>
     {% endif %}
 
@@ -34,7 +35,7 @@
       </label>
       <label class="category-wrap">
         <span>Category</span>
-        <select name="category" class="form-select" onchange="this.form.submit()">
+        <select name="category" class="form-select">
           <option value="">All categories</option>
           {% for cat in categories %}
             <option value="{{ cat }}" {{ 'selected' if selected_category == cat }}>{{ cat|capitalize }}</option>
@@ -61,16 +62,16 @@
       {% for s in skills %}
       <article class="market-card">
         <div class="market-card-top">
-          <div class="teacher-badge">{{ s.user.full_name[:1] }}</div>
+          <div class="teacher-badge">{% if preview_mode %}R{% else %}{{ s.user.full_name[:1] }}{% endif %}</div>
           <div>
-            <strong>{{ s.user.full_name }}</strong>
+            <strong>{% if preview_mode %}Verified trial participant{% else %}{{ s.user.full_name }}{% endif %}</strong>
             <span>30 min · 1 credit</span>
           </div>
         </div>
         <div class="market-card-body">
           <span class="market-category">{{ s.category }}</span>
           <h3>{{ s.name }}</h3>
-          {% if s.description %}
+          {% if not preview_mode and s.description %}
           <p>{{ s.description[:120] }}{% if s.description|length > 120 %}…{% endif %}</p>
           {% endif %}
         </div>
@@ -78,12 +79,11 @@
           <span>{{ s.proficiency }}/5 proficiency</span>
         </div>
         <div class="market-actions">
-          {% if user %}
+          {% if user and user.email_verified %}
             <a href="/request-session/{{ s.id }}" class="btn btn-primary">Request session</a>
             <a href="/profile/{{ s.user_id }}" class="btn btn-secondary">View profile</a>
           {% else %}
-            <a href="/signup" class="btn btn-primary">Sign up to request</a>
-            <a href="/profile/{{ s.user_id }}" class="btn btn-secondary">View profile</a>
+            <a href="/signup" class="btn btn-primary">Invited participants sign up</a>
           {% endif %}
         </div>
       </article>
@@ -96,7 +96,7 @@
         <p>Try a different search or browse all skills.</p>
         <a href="/browse" class="btn btn-primary">Browse all skills</a>
       {% else %}
-        <p>The marketplace is empty — <a href="/seed-demo" style="color: var(--primary);">add demo skills</a> to get started!</p>
+        <p>No participant skills are available yet. Invited members can add a creative skill from their dashboard.</p>
       {% endif %}
     </div>
     {% endif %}

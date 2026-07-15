@@ -1,23 +1,56 @@
-# Relay — Deploy Config for Render
-# https://render.com/docs/blueprint-spec
+# Relay — controlled-trial Render blueprint
+# External credentials and recoverable database selection remain launch blockers.
 services:
   - type: web
     name: relay
-    env: python
+    runtime: python
+    autoDeployTrigger: off
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app.main:app --workers 2 --worker-class gevent --timeout 30
+    healthCheckPath: /health/ready
     envVars:
       - key: RELAY_ENV
         value: production
       - key: RELAY_SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        fromDatabase:
-          name: relay-db
-          property: connectionString
-    healthCheckPath: /
+        sync: false
+      - key: RELAY_TRIAL_CATEGORY
+        value: creative
+      - key: RELAY_STARTER_CREDITS
+        value: "2"
+      - key: RELAY_ALLOWED_EMAIL_DOMAINS
+        value: nyu.edu
+      - key: RELAY_REQUIRE_INVITE
+        value: "true"
+      - key: RELAY_INVITED_EMAILS
+        sync: false
+      - key: RELAY_PUBLIC_URL
+        sync: false
+      - key: RELAY_TRUSTED_HOSTS
+        sync: false
+      - key: RELAY_PROXY_X_FOR
+        sync: false
+      - key: RELAY_PROXY_X_PROTO
+        sync: false
+      - key: RELAY_PROXY_X_HOST
+        sync: false
+      - key: RELAY_EMAIL_BACKEND
+        value: smtp
+      - key: RELAY_SMTP_HOST
+        sync: false
+      - key: RELAY_SMTP_PORT
+        value: "587"
+      - key: RELAY_SMTP_USERNAME
+        sync: false
+      - key: RELAY_SMTP_PASSWORD
+        sync: false
+      - key: RELAY_EMAIL_FROM
+        sync: false
+      - key: RATE_LIMIT_STORAGE
+        sync: false
 
-databases:
-  - name: relay-db
-    plan: free
-    postgresMajorVersion: 16
+# No database is provisioned by this blueprint. DATABASE_URL must point to a
+# separately approved, recoverable PostgreSQL service before any deployment.
+# Run the reviewed Flask-Migrate revision separately; /health/ready refuses a
+# database that is not at the exact application schema head.

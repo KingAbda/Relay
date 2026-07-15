@@ -1,79 +1,96 @@
-# Relay — Trade skills, not money.
+# Relay — trade skills, not money
 
-A campus network where students teach what they know and learn what they want — paid in time credits, not cash.
+Relay is a one-credit campus skill exchange being prepared for a tightly controlled student trial.
 
-## 🚀 Quick Start
+## Current status
+
+**NO-GO for deployment or participant invitations.** Local containment, dependency, SQLite/PostgreSQL migrations and concurrency, production-shaped PostgreSQL/Redis readiness, shared rate limits, and responsive/basic-accessibility browser checks pass. Real email, real recovery, deployed proxy/NAT, staging/CI/deployment, legal review, and named operations ownership remain unresolved.
+
+- [Readiness matrix](docs/TRIAL_READINESS_MATRIX.md) — all 50 audit issues and 12 launch gates
+- [Engineering report](docs/TRIAL_FINAL_REPORT.md) — exact commands, results, and remaining actions
+- [Trial contract](docs/TRIAL_CONTRACT.md)
+- [Operations runbook](docs/TRIAL_OPERATIONS_RUNBOOK.md)
+- [Owner handoff](docs/OWNER_HANDOFF.md) — Abda's checkout, review, and merge sequence
+
+## Controlled-trial scope
+
+- 10–20 manually vetted NYU participants, enforced by a secret invite allowlist in production
+- Exactly one configured category; the reviewed local default is `creative`
+- Exactly one integer credit per 30-minute session
+- Two starter credits by default, granted once after successful verification
+- Full identities and profiles visible only to verified trial participants
+- Agreed approved public location or exact-host HTTPS meeting link; Relay creates no meeting links
+- No payments, paid plans, referrals, proof rewards, self-service ambassador role, recurring bookings, public request claiming, or demo top-ups
+
+See [intentionally disabled features](docs/DISABLED_FEATURES.md) for the evidence and re-enable conditions.
+`RELAY_BUSINESS_PLAN.md`, `RELAY_DOC.md`, and `RELAY_BUSINESS_PLAN.pdf` are
+historical planning artifacts, not current product or launch instructions.
+
+## Local development
+
+Relay uses Python 3.12, pinned for local development, CI, and Render by
+`.python-version`. From a fresh clone on macOS or Linux:
 
 ```bash
-# Clone the repo
-git clone https://github.com/KingAbda/Relay.git
-cd Relay
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set your secret key (generate one: python -c "import secrets; print(secrets.token_hex(32))")
-export RELAY_SECRET_KEY="your-secret-key-here"
-
-# Run the app
-python app/main.py
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+python -m flask --app app.main db upgrade
+python -m flask --app app.main run --port 8000
 ```
 
-Visit **http://localhost:8000** to see it live.
+On Windows PowerShell, create the environment with `py -3.12 -m venv .venv`
+and activate it with `.venv\Scripts\Activate.ps1`; the remaining commands are
+the same. Open <http://localhost:8000> after the server starts.
 
-## 🧱 Tech Stack
+Development defaults to a local ignored SQLite database and the in-memory email
+backend, so no secrets are required for the first run. Review `.env.example`
+before exporting overrides. Run `db upgrade` after every pull that contains a
+new migration. Persistent environments never create or upgrade tables at
+application startup.
 
-| Layer | Technology |
-|-------|-----------|
-| Backend | Flask (Python) |
-| ORM | SQLAlchemy |
-| Database | SQLite (dev) / PostgreSQL (production) |
-| Frontend | HTML/CSS with Chakra Petch + Sora fonts |
-| Security | CSRFProtect, Bleach (XSS), Rate Limiting, Security Headers |
-| Deployment | Render (see `render.yaml`) |
+## Verification
 
-## 📋 Features
+```bash
+.venv/bin/python -W error::DeprecationWarning -m unittest discover -v
+.venv/bin/python -m compileall -q app migrations scripts tests
+.venv/bin/python -m pip check
+.venv/bin/python -m pip_audit --requirement requirements.txt --progress-spinner off
+.venv/bin/python scripts/check_secret_patterns.py
+.venv/bin/python scripts/check_release_scope.py
+.venv/bin/python scripts/check_direct_advisories.py
+.venv/bin/python scripts/check_readiness_artifacts.py
+ruby -e 'require "yaml"; YAML.load_file("render.yaml"); YAML.load_file("render.staging.yaml"); YAML.load_file(".github/workflows/ci.yml"); puts "yaml ok"'
+git diff --check
+```
 
-- ✅ **Time-based credit system** — 30 minutes of teaching = 1 credit
-- ✅ **Skill marketplace** — Browse, request, and complete skill sessions
-- ✅ **Rating & reviews** — Post-session feedback builds reputation
-- ✅ **Referral program** — Both parties earn +1 credit
-- ✅ **.edu email verification** — Students-only community
-- ✅ **Pilot mode** — Launch with a single vertical to build density
-- ✅ **Email verification** — Verify your .edu address
-- ✅ **Security hardened** — CSP headers, CSRF protection, rate limiting, XSS prevention
+All listed local checks pass; the warning-strict suite currently runs 62 tests.
+The advisory checks require network access and fail closed when published data
+cannot be obtained.
 
-## 🧪 Pilot Mode
+SQLite forward/rollback migration tests and guarded disposable PostgreSQL migration/concurrency tests pass. Their exact invocation and the production-shaped local boot boundary are documented in the migration runbook and engineering report.
 
-Relay launches with a single vertical (default: **Fitness & Wellness**) to build campus density first. Set the `RELAY_PILOT_VERTICAL` env var to change the pilot category.
+## Operational commands
 
-## 📖 Full Business Plan
+These commands are read-only unless `--apply` is given. Apply modes have additional environment guards and do not authorize production mutation by themselves.
 
-See [RELAY_DOC.md](./RELAY_DOC.md) for the complete master document — market research, unit economics, competitive analysis, and growth strategy.
+```bash
+flask --app app.main reconcile-credits
+flask --app app.main trial-health-report
+flask --app app.main settle-expired-requests
+flask --app app.main send-session-reminders
+flask --app app.main prepare-rehearsal-data
+```
 
-## 🗺️ Roadmap
+## Stack
 
-- **Phase 1:** 🟢 Google Form + Airtable + Discord pilot (50 users)
-- **Phase 2:** 🟢 Simple web platform with credit ledger, profiles, matching *(current)*
-- **Phase 3:** 🔄 Revenue — memberships, badges, university sponsorships
-- **Phase 4:** 🔄 Multi-campus expansion
+- Flask and SQLAlchemy
+- SQLite for disposable local tests; psycopg-backed PostgreSQL is mandatory for production
+- Flask-Migrate/Alembic versioned migrations and a Redis client for shared rate limits
+- Server-rendered HTML, self-hosted CSS/JavaScript/assets
+- Flask-WTF CSRF protection, Bleach sanitization, Flask-Limiter, trusted hosts with explicit proxy-hop trust, strict script CSP, no-store responses, and structured request IDs
+- Render blueprint with automatic deployment disabled and no database provisioned
 
-## 🔒 Security
+## License
 
-Relay takes security seriously:
-
-- All POST/PUT/DELETE requests require CSRF tokens
-- Input sanitization via Bleach (strip all HTML tags)
-- Rate limiting on auth endpoints (10 signups/hour, 20 logins/hour)
-- Security headers: HSTS, X-Content-Type-Options, X-Frame-Options, CSP
-- Account lockout after repeated failed login attempts
-- Password strength enforcement (8+ chars, upper, lower, number)
-- Session cookies are HTTP-only with SameSite=Lax
-
-## 📄 License
-
-MIT — built by students, for students.
-
-## 👤 Founder
-
-**Abdurrahman Touray (Abda)** — NYU 2026, HEOP Scholar, First Gen Gambian American from the Bronx.
+MIT

@@ -15,17 +15,49 @@
   var hasGSAP = typeof window.gsap !== "undefined";
   var hasLenis = typeof window.Lenis !== "undefined";
 
+  /* ───────────────────────── Core controls ───────────────────────── */
+  (function controls() {
+    var menuToggle = document.getElementById("menuToggle");
+    var navLinks = document.getElementById("navLinks");
+    if (menuToggle && navLinks) {
+      menuToggle.addEventListener("click", function () {
+        var open = navLinks.classList.toggle("responsive");
+        menuToggle.setAttribute("aria-expanded", String(open));
+      });
+    }
+
+    document.querySelectorAll("[data-show-target]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var target = document.getElementById(button.getAttribute("data-show-target"));
+        if (!target) return;
+        target.style.display = "block";
+        button.setAttribute("aria-expanded", "true");
+        var firstField = target.querySelector("input, select, textarea, button");
+        if (firstField) firstField.focus();
+      });
+    });
+  })();
+
   /* ───────────────────────── Brand intro ───────────────────────── */
   (function intro() {
     var el = document.getElementById("brandIntro");
     if (!el) return;
-    // Plays on every home-page load (the markup only exists on home). Skipped
-    // for reduced-motion users.
+    var alreadySeen = false;
+    try { alreadySeen = window.sessionStorage.getItem("relayIntroSeen") === "1"; } catch (e) {}
     var isHome = document.body.getAttribute("data-page") === "home";
-    if (reduceMotion || !isHome) {
+    if (reduceMotion || !isHome || alreadySeen) {
       el.parentNode && el.parentNode.removeChild(el);
       document.body.classList.add("intro-done");
       return;
+    }
+    try { window.sessionStorage.setItem("relayIntroSeen", "1"); } catch (e) {}
+
+    var skip = document.getElementById("introSkip");
+    if (skip) {
+      skip.addEventListener("click", function () {
+        el.parentNode && el.parentNode.removeChild(el);
+        document.body.classList.add("intro-done");
+      });
     }
     document.body.classList.add("intro-active");
     el.classList.add("playing");
@@ -133,16 +165,25 @@
   }
 
   /* ─────────────────── GSAP scroll choreography ─────────────────── */
+  function settleReveals() {
+    document.querySelectorAll("[data-reveal],[data-reveal-stagger],[data-split]")
+      .forEach(function (el) {
+        el.classList.remove("reveal-css");
+        el.classList.add("in");
+        el.style.opacity = "1";
+        el.style.transform = "none";
+      });
+  }
+
   function initGSAP() {
+    if (reduceMotion) {
+      settleReveals();
+      return; // counters handled by initGauges()
+    }
+
     if (!hasGSAP || !window.ScrollTrigger) { fallbackReveals(); return; }
     var gsap = window.gsap;
     gsap.registerPlugin(window.ScrollTrigger);
-
-    if (reduceMotion) {
-      document.querySelectorAll("[data-reveal],[data-reveal-stagger] > *,[data-split]")
-        .forEach(function (el) { gsap.set(el, { clearProps: "all", opacity: 1 }); });
-      return; // counters handled by initGauges()
-    }
 
     // Headline line/word reveal — elements tagged data-split get a clip-up.
     gsap.utils.toArray("[data-split]").forEach(function (el) {

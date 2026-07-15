@@ -1,5 +1,7 @@
 # Relay — Master Document
 
+> **Historical planning document — not current product or release evidence.** This file preserves product history and speculative business ideas, including features that are disabled for the controlled trial. Use [`docs/TRIAL_CONTRACT.md`](docs/TRIAL_CONTRACT.md) for current scope and [`docs/TRIAL_READINESS_MATRIX.md`](docs/TRIAL_READINESS_MATRIX.md) for the NO-GO launch assessment. Claims and projections below are not treated as verified evidence.
+
 > **Founder:** Abdurrahman Touray (Abda)  
 > **Status:** Pre-seed / MVP Phase  
 > **Last Updated:** June 8, 2026

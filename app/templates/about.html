@@ -13,12 +13,12 @@
       <article class="card about-card">
         <span class="about-kicker">The idea</span>
         <h3>A structured way to trade what you know</h3>
-        <p class="muted">No cash, just time. Thirty minutes of teaching earns one credit; spend credits to learn anything on the platform. Everyone is verified through their <strong>.edu</strong> email.</p>
+        <p class="muted">No cash, just time. Thirty minutes of teaching earns one credit; spend one credit on another 30-minute session. Full trial access requires an invitation and verified NYU email.</p>
       </article>
       <article class="card about-card">
-        <span class="about-kicker">The data</span>
-        <h3>The demand is already there</h3>
-        <p class="muted">Across 300+ student interviews: <strong>70%</strong> have a skill they'd want compensation for, <strong>85%</strong> want to learn but can't always afford it, and <strong>75%</strong> showed a supply-and-demand match.</p>
+        <span class="about-kicker">The trial</span>
+        <h3>Evidence before expansion</h3>
+        <p class="muted">Relay is preparing a small, invite-only NYU trial in one creative category. The product will remain closed until its engineering, safety, privacy, operator, and recovery gates have current evidence.</p>
       </article>
       <article class="card about-card">
         <span class="about-kicker">The mission</span>
@@ -36,26 +36,12 @@
       <div class="founder-avatar">AT</div>
       <div class="founder-body">
         <h3>Abdurrahman Touray <span class="founder-role">— Founder</span></h3>
-        <p class="muted">First-generation Gambian American, NYU 2026 (HEOP Scholar). Relay started in Abu Dhabi — a friend taught me music production, and I helped him start going to the gym. No money changed hands. That moment sparked a question: <em>what if there were a system for this?</em></p>
-        <p class="muted">After 300+ student interviews and a 50-person pilot, Relay is built for students who want to learn without breaking the bank and teach without being undervalued.</p>
-        <a href="mailto:hello@joinrelay.co" class="btn btn-secondary" data-magnetic data-magnetic-strength="0.3">hello@joinrelay.co</a>
+        <p class="muted">First-generation Gambian American, NYU 2026 (HEOP Scholar). Relay began with friends informally exchanging skills without money and a question: <em>what if there were a fair, structured system for this?</em></p>
+        <p class="muted">The next step is a controlled creative-skills trial designed to test real usefulness without outrunning participant safety, privacy, or operational readiness.</p>
+        <a href="mailto:{{ contact_email }}" class="btn btn-secondary" data-magnetic data-magnetic-strength="0.3">{{ contact_email }}</a>
       </div>
     </article>
 
-    <article class="card about-ambassadors" data-reveal>
-      <div>
-        <strong>🎓 Student Ambassadors</strong>
-        <p class="muted">Represent Relay at your school! Ambassadors get <strong>bonus credits, early access to new features, and a verified badge</strong> on their profile. Help grow the community and earn rewards.</p>
-      </div>
-      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-        {% if user %}
-          <a href="/become-ambassador" class="btn btn-primary" onclick="event.preventDefault(); fetch('/become-ambassador',{method:'POST',headers:{'X-CSRFToken':document.querySelector('[name=csrf-token]')?.content||''}}).then(()=>window.location='/dashboard');">Become an ambassador →</a>
-        {% else %}
-          <a href="/signup" class="btn btn-primary">Join to apply →</a>
-        {% endif %}
-        <a href="mailto:hello@joinrelay.co?subject=Campus Ambassador" class="btn btn-secondary">Get in touch</a>
-      </div>
-    </article>
   </div>
 </section>
 {% endblock %}

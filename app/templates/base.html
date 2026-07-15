@@ -5,17 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Relay{% endblock %} — Relay</title>
   <meta name="description" content="Relay is a campus skill swap where students teach what they know, earn time credits, and learn what they need without cash." />
-  <meta name="theme-color" content="#0f0d1a" media="(prefers-color-scheme:dark)" /><meta name="theme-color" content="#F8FAFC" media="(prefers-color-scheme:light)" />
+  <meta name="theme-color" content="#0f0d1a" />
   {% block head %}{% endblock %}
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Oswald:wght@400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Bungee&display=swap" rel="stylesheet" />
   <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='elevate.css') }}?v={{ cache_bust }}" />
   <noscript><style>.brand-intro{display:none!important}[data-split],[data-reveal],[data-reveal-stagger]>*{opacity:1!important}</style></noscript>
 </head>
 <body data-page="{% block page_id %}{% endblock %}">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   {% if self.page_id()|trim == 'home' %}
   {# ── Brand intro: animated relay mark, plays once per session (home only) ── #}
   <div class="brand-intro" id="brandIntro" aria-hidden="true">
@@ -45,6 +43,7 @@
         <span>R</span><span>e</span><span>l</span><span>a</span><span>y</span>
       </div>
       <span class="intro-tagline">Trade skills, not money.</span>
+      <button class="intro-skip" id="introSkip" type="button">Skip intro</button>
     </div>
   </div>
   {% endif %}
@@ -57,14 +56,14 @@
     <nav class="site-nav" id="siteNav">
       <div class="container nav-inner">
         <a href="/" class="logo" aria-label="Relay home" data-magnetic data-magnetic-strength="0.25">
-          <img src="{{ url_for('static', filename='relay-logo.svg') }}" alt="Relay" />
+          <img src="{{ url_for('static', filename='relay-logo.svg') }}" alt="Relay" width="245" height="88" decoding="async" />
         </a>
-        <button id="themeToggle" class="theme-toggle" aria-label="Toggle light/dark mode" style="background:none;border:1px solid var(--line);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);font-size:18px;margin-left:auto;margin-right:12px;">🌙</button>
         <div class="nav-links" id="navLinks">
           <a href="/about" class="nav-link">About</a>
           {% if user %}
             <a href="/dashboard" class="nav-link">Dashboard</a>
             <a href="/profile/{{ user.id }}" class="nav-link">Profile</a>
+            {% if user.role in ('moderator', 'admin') %}<a href="/moderator" class="nav-link">Moderator</a>{% endif %}
             {% if user.credit_balance %}<span class="credit-badge">{{ user.credit_balance.balance|int }} credits</span>{% endif %}
             <form method="POST" action="/logout" class="logout-form" style="display:inline;margin:0;padding:0;">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
@@ -74,17 +73,17 @@
             <a href="/login" class="nav-link">Log in</a>
             <a href="/signup" class="nav-join" data-magnetic>Join free</a>
           {% endif %}
-          <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('responsive')" aria-label="Menu">☰</button>
+          <button class="hamburger" id="menuToggle" type="button" aria-label="Menu" aria-controls="navLinks" aria-expanded="false">☰</button>
         </div>
       </div>
     </nav>
-    <main class="site-main">
+    <main class="site-main" id="main-content" tabindex="-1">
       {% block content %}{% endblock %}
     </main>
     <footer class="site-footer">
       <div class="container footer-inner">
         <div>
-          <img src="{{ url_for('static', filename='relay-logo.svg') }}" alt="Relay" class="footer-logo" />
+          <img src="{{ url_for('static', filename='relay-logo.svg') }}" alt="Relay" class="footer-logo" width="245" height="88" loading="lazy" decoding="async" />
           <p>Trade skills, not money. Built by students, for students.</p>
         </div>
         <div class="footer-links">
@@ -92,45 +91,13 @@
           <a href="/privacy" class="nav-link">Privacy</a>
           <a href="/terms" class="nav-link">Terms</a>
           <a href="/safety" class="nav-link">Safety</a>
-          <a href="mailto:hello@joinrelay.co" class="nav-link">Contact</a>
+          <a href="mailto:{{ contact_email }}" class="nav-link">Contact</a>
         </div>
       </div>
     </footer>
   </div>
 
-  <!-- Motion stack: Lenis smooth scroll + GSAP ScrollTrigger -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lenis/1.1.13/lenis.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="{{ url_for('static', filename='elevate.js') }}?v={{ cache_bust }}" defer></script>
   {% block tail %}{% endblock %}
-
-  <!-- Theme toggle -->
-  <script>
-    (function(){
-      const toggle = document.getElementById('themeToggle');
-      const body = document.body;
-      const stored = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme:dark)').matches;
-      const isDark = stored ? stored === 'dark' : prefersDark;
-      function setLogos(dark){
-        document.querySelectorAll('.logo img, .footer-logo').forEach(function(img){
-          img.src = dark ? '/static/relay-logo.svg' : '/static/relay-logo-light.svg';
-        });
-      }
-      if(!isDark){ body.classList.add('light-mode'); }
-      setLogos(isDark);
-      if(toggle){ toggle.textContent = isDark ? '🌙' : '☀️'; }
-      if(toggle){
-        toggle.addEventListener('click',function(){
-          const nowDark = !body.classList.contains('light-mode');
-          body.classList.toggle('light-mode');
-          toggle.textContent = nowDark ? '☀️' : '🌙';
-          localStorage.setItem('theme', nowDark ? 'light' : 'dark');
-          setLogos(nowDark);
-        });
-      }
-    })();
-  </script>
 </body>
 </html>

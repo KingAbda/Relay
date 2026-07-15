@@ -10,7 +10,7 @@
     </p>
 
     {% if error %}
-      <div class="form-error" style="margin-bottom: 16px;">{{ error }}</div>
+      <div class="form-error" role="alert" style="margin-bottom: 16px;">{{ error }}</div>
     {% endif %}
 
     {% if user.has_proof_video %}
@@ -27,8 +27,8 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
       <div class="form-group">
-        <label>Video URL (YouTube, Vimeo, etc.)</label>
-        <input type="url" name="video_url" class="form-input" 
+        <label for="proof-video-url">Video URL (YouTube, Vimeo, etc.)</label>
+        <input id="proof-video-url" type="url" name="video_url" class="form-input"
                placeholder="https://youtube.com/watch?v=..." 
                value="{{ user.proof_video_url or '' }}" required />
         <span class="muted" style="font-size: 0.8rem;">Show us what you can teach! A 1-2 minute demo works great.</span>
