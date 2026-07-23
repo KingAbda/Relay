@@ -1698,13 +1698,25 @@ def delete_account():
     ).delete(synchronize_session=False)
     db.session.commit()
     session.clear()
+    delivery_failures = 0
     for booked, recipient in cancellation_recipients:
-        send_session_notifications(
+        delivery_failures += send_session_notifications(
             [recipient],
             booked=booked,
             message_type="session_cancelled",
             subject="Relay session cancelled",
         )
+    if delivery_failures:
+        return render_template(
+            "error.html",
+            user=None,
+            code=202,
+            message=(
+                "Your account was closed, but Relay could not deliver one or more "
+                "session-cancellation notifications. Contact support if another "
+                "participant needs help."
+            ),
+        ), 202
     return redirect(url_for("home"))
 
 @app.route("/resend-verification", methods=["POST"])
@@ -1822,12 +1834,13 @@ def health_ready():
         revision = db.session.execute(
             sql_text("SELECT version_num FROM alembic_version")
         ).scalar_one_or_none()
+        limiter_storage_ready = limiter.storage.check()
     except Exception:
         db.session.rollback()
         return jsonify({"status": "not_ready"}), 503
     if revision != DATABASE_SCHEMA_REVISION:
         return jsonify({"status": "not_ready"}), 503
-    if not limiter.storage.check():
+    if not limiter_storage_ready:
         return jsonify({"status": "not_ready"}), 503
     return jsonify({"status": "ready"}), 200
 

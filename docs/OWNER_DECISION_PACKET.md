@@ -1,6 +1,6 @@
 # Relay controlled-trial owner decision packet
 
-Last updated: 2026-07-14
+Last updated: 2026-07-23
 
 Status: **UNAPPROVED / NO-GO.** Blank fields are intentional. This packet
 collects decisions that cannot be made by repository tests. Filling it out does
@@ -10,28 +10,29 @@ launch; each external action remains separately approved.
 Never place credentials, invite-list addresses, participant data, private inbox
 contents, or legal advice in this file.
 
-## 1. Local release and media decision
+## 1. Local candidate and publication decision
 
 - Reviewed release manifest: `docs/RELEASE_SCOPE.md`
-- Proposed local branch: `release/controlled-trial-readiness-20260714`
-- Remote base reviewed: `9fbc1ea19fcb8b9353bf8d61619d62a2b46767ec`
-- Hero poster digest:
-  `0bfdc8fc3faea383260b5d30d76f586df57cf27527b12249aaf6e5703436cdf1`
+- Proposed branch: not created; owner to approve a name before push
+- Committed base reviewed:
+  `8c775556ae19540089058d4748e001816814855a`
+- Base CI evidence: `Relay safety gate` run `29427792008` passed
+- Candidate state: saved in one owner-approved local commit, not pushed, and
+  not yet run in CI
 
-Choose exactly one media outcome:
+The redesigned homepage does not request the already tracked hero poster. Choose
+one dormant-media outcome before any future use:
 
-- [ ] Relay owns or has documented permission to publish the identified poster,
-      including the branded composition and depicted or synthetic people.
-- [ ] Replace the poster before release and repeat provenance, browser, and
-      asset-budget checks.
+- [ ] Keep the unused poster tracked but disabled; confirm rights before any
+      future re-enable.
+- [ ] Remove or replace it in a separately reviewed change.
 
 Local Git decision:
 
-- [ ] Approve rebasing the proposed local release branch onto the reviewed
-      `origin/main`, excluding the three unsafe one-off database utilities.
-- [ ] Approve staging only the manifest paths and creating intentional local
-      commit(s).
-- [ ] Keep all remote pushes reserved to the repository owner.
+- [x] Approve one local commit containing only the manifest paths
+      (authorized 2026-07-23).
+- [ ] Approve a branch name and push for pull-request review.
+- [ ] Keep merge, deployment, migrations, and invitations as separate approvals.
 
 Owner name: `[UNASSIGNED]`  Date: `[UNASSIGNED]`
 

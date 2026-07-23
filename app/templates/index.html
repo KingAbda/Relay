@@ -2,85 +2,58 @@
 {% block title %}Campus skill swap{% endblock %}
 {% block page_id %}home{% endblock %}
 {% block content %}
-<section class="hero campus-hero">
-  <div class="container hero-stage">
-    <p class="eyebrow" data-reveal>NYU pilot · 30 minutes = 1 credit</p>
-    <h1 class="hero-kinetic" data-reveal="0.05" aria-label="Teach what you know, learn what you need">
-      <span class="kx-lead">Teach</span>
-      <span class="kx-swap" data-swap aria-hidden="true" data-words="Guitar,Figma,Piano,Drawing,Collage">Guitar</span>
-      <span class="kx-lead">Learn</span>
-      <span class="kx-swap" data-swap aria-hidden="true" data-words="Design,Watercolor,Piano,Illustration,Photography">Design</span>
-    </h1>
-    <p class="hero-sub" data-reveal="0.12">A campus skill swap where students trade live 30-minute lessons using time credits — not cash. Teach what you know, learn what you need.</p>
-    <div class="hero-actions" data-reveal="0.18">
+<section class="hero-min">
+  <div class="container hero-inner">
+    <svg class="hero-mark" viewBox="8 8 48 46" aria-hidden="true">
+      <circle class="hm-eye hm-eye-l" cx="21" cy="17" r="5.5" fill="#8a7ef2"/>
+      <circle class="hm-eye hm-eye-r" cx="43" cy="17" r="5.5" fill="#8a7ef2"/>
+      <path class="hm-smile" pathLength="1" d="M14 35c0-7 6-11 12-8 4 2 4 7 9 7s5-5 9-7c6-3 12 2 12 9 0 11-10 19-24 19S14 46 14 35Z" fill="none" stroke="#8a7ef2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h1 class="hero-wordmark" data-reveal>Relay</h1>
+    <p class="hero-msg" data-reveal="0.06">Teach what you know. Learn what you need. Students trade live 30-minute lessons using <strong>time credits</strong> — never cash.</p>
+    <div class="hero-actions" data-reveal="0.12">
       {% if user %}
-        <a href="/dashboard" class="btn btn-primary" data-magnetic data-magnetic-strength="0.3">Open dashboard <span class="arrow">→</span></a>
-        <a href="#how" class="btn btn-secondary" data-magnetic data-magnetic-strength="0.3">How it works</a>
+        <a href="/dashboard" class="btn btn-primary">Open dashboard <span class="arrow">→</span></a>
       {% else %}
-        <a href="/signup" class="btn btn-primary" data-magnetic data-magnetic-strength="0.3">Join the pilot <span class="arrow">→</span></a>
-        <a href="#how" class="btn btn-secondary" data-magnetic data-magnetic-strength="0.3">How it works</a>
+        <a href="/signup" class="btn btn-primary">Join the pilot <span class="arrow">→</span></a>
       {% endif %}
     </div>
-    <div class="trust-row" data-reveal="0.24">
-      <span>Invite-only NYU verification</span>
-      <span>No cash between peers</span>
-      <span>Starter credits included</span>
-    </div>
-  </div>
-</section>
-
-<section class="marquee-strip skill-marquee" aria-label="Common skills on Relay">
-  <div class="marquee-fade" aria-hidden="true"></div>
-  <div class="marquee-track">
-    {% set marquee_skills = [
-      'learn guitar', 'Canva flyer help', 'Figma basics', 'watercolor',
-      'piano chords', 'collage composition', 'digital illustration', 'photo composition',
-      'music production', 'drawing fundamentals', 'poster design', 'creative writing',
-      'typography basics', 'color theory', 'storyboarding', 'origami'
-    ] %}
-    <div class="marquee-group">
-      {% for skill in marquee_skills %}<span>{{ skill }}</span>{% endfor %}
-    </div>
-    <div class="marquee-group" aria-hidden="true">
-      {% for skill in marquee_skills %}<span>{{ skill }}</span>{% endfor %}
-    </div>
+    <p class="hero-note" data-reveal="0.18">
+      <span>Invite-only NYU trial</span><span>No cash between peers</span><span>Starter credits included</span>
+    </p>
   </div>
 </section>
 
 <section class="section credit-section" id="how">
   <div class="container section-center">
     <p class="eyebrow" data-reveal>How credits work</p>
-    <h2 class="section-title" data-split>Time is the currency.</h2>
-    <p class="section-sub" data-reveal="0.05">Every exchange is simple enough to explain in one sentence: teach for 30 minutes, earn a credit, spend it on another 30-minute lesson.</p>
+    <h2 class="section-title" data-reveal="0.05">Time is the currency.</h2>
+    <p class="section-sub" data-reveal="0.1">Teach for 30 minutes, earn a credit, spend it on another 30-minute lesson. That's the whole system.</p>
   </div>
-  <div class="container credit-loop" data-loop>
+  <div class="container credit-loop" data-loop data-reveal="0.15">
     <div class="loop-row">
       <div class="loop-step"><b>1</b><h3>Teach 30 min</h3><p>Share something you already know.</p></div>
-      <div class="loop-arrow" data-loop-arrow aria-hidden="true">
-        <svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <path class="la-shaft" d="M3 12 H45" pathLength="1" />
-          <path class="la-head" d="M39 6 L48 12 L39 18" pathLength="1" />
+      <div class="loop-arrow" aria-hidden="true">
+        <svg viewBox="0 0 34 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path pathLength="1" d="M2 8 H28" /><path pathLength="1" d="M23 3 L30 8 L23 13" />
         </svg>
       </div>
       <div class="loop-step"><b>2</b><h3>Earn 1 credit</h3><p>Your balance updates after the session.</p></div>
-      <div class="loop-arrow" data-loop-arrow aria-hidden="true">
-        <svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <path class="la-shaft" d="M3 12 H45" pathLength="1" />
-          <path class="la-head" d="M39 6 L48 12 L39 18" pathLength="1" />
+      <div class="loop-arrow" aria-hidden="true">
+        <svg viewBox="0 0 34 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path pathLength="1" d="M2 8 H28" /><path pathLength="1" d="M23 3 L30 8 L23 13" />
         </svg>
       </div>
       <div class="loop-step"><b>3</b><h3>Learn 30 min</h3><p>Spend it to learn from another student.</p></div>
     </div>
-    <svg class="loop-wrap" data-loop-wrap aria-hidden="true"></svg>
   </div>
 </section>
-
 
 <section class="section" id="trial-scope">
   <div class="container section-center">
     <p class="eyebrow" data-reveal>Controlled trial scope</p>
-    <h2 class="section-title" data-split>Creative skills, invited participants, no payments.</h2>
-    <p class="section-sub" data-reveal="0.05">Relay is preparing a 10–20 person NYU trial limited to vetted creative-skill listings. Full profiles and booking are available only after invitation and email verification. Referrals, proof rewards, ambassadors, recurring bookings, public request claiming, and paid plans are not part of this trial.</p>
+    <h2 class="section-title" data-reveal="0.05">Creative skills, invited participants, no payments.</h2>
+    <p class="section-sub" data-reveal="0.1">Relay is preparing a 10–20 person NYU trial limited to vetted creative-skill listings. Full profiles and booking are available only after invitation and email verification. Referrals, proof rewards, ambassadors, recurring bookings, public request claiming, and paid plans are not part of this trial.</p>
   </div>
 </section>
 
@@ -88,39 +61,39 @@
   <div class="container faq-shell">
     <div class="faq-intro">
       <p class="eyebrow" data-reveal>Honest answers</p>
-      <h2 class="section-title" data-split>The questions students ask first.</h2>
+      <h2 class="section-title" data-reveal="0.05">The questions students ask first.</h2>
     </div>
-    <div class="faq-list relay-accordion pricing-accordion" data-reveal-stagger>
+    <div class="faq-list" data-reveal="0.1">
       <details class="faq-item">
-        <summary><span class="faq-number">1</span><span class="faq-question">Is Relay free?</span></summary>
+        <summary><span class="faq-number">01</span><span class="faq-question">Is Relay free?</span></summary>
         <div class="faq-content"><p>Joining is free. Students trade credits for sessions, so no cash changes hands between peers.</p></div>
       </details>
       <details class="faq-item">
-        <summary><span class="faq-number">2</span><span class="faq-question">What if I only want to learn?</span></summary>
+        <summary><span class="faq-number">02</span><span class="faq-question">What if I only want to learn?</span></summary>
         <div class="faq-content"><p>Verified invited participants receive {{ relay_starter_credits }} starter credits, then earn credits only by completing teaching sessions.</p></div>
       </details>
       <details class="faq-item">
-        <summary><span class="faq-number">3</span><span class="faq-question">How do credits work?</span></summary>
+        <summary><span class="faq-number">03</span><span class="faq-question">How do credits work?</span></summary>
         <div class="faq-content"><p>Teach one 30-minute session to earn one credit. Spend one credit to book a 30-minute session with another student.</p></div>
       </details>
       <details class="faq-item">
-        <summary><span class="faq-number">4</span><span class="faq-question">What can I teach?</span></summary>
+        <summary><span class="faq-number">04</span><span class="faq-question">What can I teach?</span></summary>
         <div class="faq-content"><p>The controlled trial accepts vetted creative-skill listings only. High-risk, medical, weapons-related, illegal, or dangerously physical instruction is prohibited.</p></div>
       </details>
       <details class="faq-item">
-        <summary><span class="faq-number">5</span><span class="faq-question">How do I know the teacher is good?</span></summary>
+        <summary><span class="faq-number">05</span><span class="faq-question">How do I know the teacher is good?</span></summary>
         <div class="faq-content"><p>Only verified invited participants can open full profiles. Reviews appear only after completed sessions.</p></div>
       </details>
       <details class="faq-item">
-        <summary><span class="faq-number">6</span><span class="faq-question">Why not YouTube or AI?</span></summary>
+        <summary><span class="faq-number">06</span><span class="faq-question">Why not YouTube or AI?</span></summary>
         <div class="faq-content"><p>Relay is for live creative feedback: someone reacting to your draft, demonstrating a technique, or practicing with you in real time.</p></div>
       </details>
       <details class="faq-item">
-        <summary><span class="faq-number">7</span><span class="faq-question">Who can join right now?</span></summary>
+        <summary><span class="faq-number">07</span><span class="faq-question">Who can join right now?</span></summary>
         <div class="faq-content"><p>The first cohort is limited to 10–20 manually invited NYU participants who verify their institutional email.</p></div>
       </details>
       <details class="faq-item">
-        <summary><span class="faq-number">8</span><span class="faq-question">What happens if someone flakes?</span></summary>
+        <summary><span class="faq-number">08</span><span class="faq-question">What happens if someone flakes?</span></summary>
         <div class="faq-content"><p>During the controlled trial, cancellation before completion returns the single held credit once.</p></div>
       </details>
     </div>
@@ -132,12 +105,18 @@
   <div class="container cta-card" data-reveal>
     <p class="eyebrow">First NYU cohort</p>
     <h2>Put your skill on the board.</h2>
-    <p>Already on the manually vetted invite list? Verify your NYU email, list one creative skill, and receive the configured starter credits.</p>
-    <a href="/signup" class="btn btn-primary" data-magnetic data-magnetic-strength="0.3">Use my invitation</a>
+    <p>Already on the invite list? Verify your NYU email, list one creative skill, and receive your starter credits.</p>
+    <a href="/signup" class="btn btn-primary">Use my invitation</a>
   </div>
 </section>
 {% else %}
-<section class="cta-section"><div class="container cta-card"><p class="eyebrow">Welcome back</p><h2>Ready for your next exchange?</h2><a href="/dashboard" class="btn btn-primary">Go to Dashboard</a></div></section>
+<section class="cta-section">
+  <div class="container cta-card">
+    <p class="eyebrow">Welcome back</p>
+    <h2>Ready for your next exchange?</h2>
+    <a href="/dashboard" class="btn btn-primary">Go to dashboard</a>
+  </div>
+</section>
 {% endif %}
 
 {% endblock %}

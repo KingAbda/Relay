@@ -386,17 +386,19 @@ class TrialContainmentTests(unittest.TestCase):
             self.assertEqual(response.status_code, 200, path)
             self.assertIn(b"External legal review: not yet evidenced", response.data, path)
 
-    def test_intro_is_skippable_once_per_session_and_respects_reduced_motion(self):
+    def test_public_motion_respects_reduced_motion_and_static_mode(self):
         script = self.client.get("/static/elevate.js").text
-        self.assertIn('sessionStorage.getItem("relayIntroSeen")', script)
-        self.assertIn('sessionStorage.setItem("relayIntroSeen", "1")', script)
-        self.assertIn('prefers-reduced-motion: reduce', script)
-        self.assertIn('getElementById("introSkip")', script)
-        self.assertIn("function settleReveals()", script)
-        self.assertLess(
-            script.index("if (reduceMotion) {\n      settleReveals();"),
-            script.index("if (!hasGSAP || !window.ScrollTrigger)"),
-        )
+        stylesheet = self.client.get("/static/style.css").text
+        self.assertIn("prefers-reduced-motion: reduce", script)
+        self.assertIn("[?&]static=1", script)
+        self.assertIn('document.documentElement.classList.add("static-mode")', script)
+        self.assertIn("if (reduceMotion ||", script)
+        self.assertIn("if (reduceMotion) {", script)
+        self.assertIn("@media(prefers-reduced-motion:reduce)", stylesheet)
+        self.assertIn(":root.static-mode *", stylesheet)
+        self.assertIn("animation:none!important", stylesheet)
+        self.assertIn("transition:none!important", stylesheet)
+        self.assertIn("scroll-behavior:auto!important", stylesheet)
 
     def test_public_surface_is_dark_mode_only(self):
         homepage = self.client.get("/").text
@@ -404,9 +406,16 @@ class TrialContainmentTests(unittest.TestCase):
         elevated_stylesheet = self.client.get("/static/elevate.css").text
         script = self.client.get("/static/elevate.js").text
 
-        self.assertIn("linear-gradient(180deg,#6d28d9 0%,#4c1d95 100%)", stylesheet)
-        self.assertIn(".btn-primary{background:var(--gel-orange)!important;\n  color:#0f172a!important", stylesheet)
-        self.assertIn('<meta name="theme-color" content="#0f0d1a" />', homepage)
+        self.assertIn("color-scheme:dark", stylesheet)
+        self.assertIn("--paper:#1b1c22", stylesheet)
+        self.assertIn("--accent:#8a7ef2", stylesheet)
+        self.assertIn("background:linear-gradient(180deg,#988df5,var(--accent))", stylesheet)
+        self.assertIn(
+            ".btn-primary,.btn-blue{background:linear-gradient(180deg,#988df5,var(--accent));color:var(--paper)",
+            stylesheet,
+        )
+        self.assertNotIn("background:linear-gradient(180deg,#988df5,var(--accent));color:#fff", stylesheet)
+        self.assertIn('<meta name="theme-color" content="#1b1c22" />', homepage)
         self.assertNotIn("themeToggle", homepage)
         self.assertNotIn("prefers-color-scheme:light", homepage)
         self.assertNotIn("light-mode", stylesheet)
@@ -460,6 +469,15 @@ class TrialContainmentTests(unittest.TestCase):
             no_limiter_storage = self.client.get("/health/ready")
         self.assertEqual(no_limiter_storage.status_code, 503)
         self.assertEqual(no_limiter_storage.get_json(), {"status": "not_ready"})
+
+        with patch.object(
+            limiter.storage,
+            "check",
+            side_effect=RuntimeError("limiter storage unavailable"),
+        ):
+            limiter_exception = self.client.get("/health/ready")
+        self.assertEqual(limiter_exception.status_code, 503)
+        self.assertEqual(limiter_exception.get_json(), {"status": "not_ready"})
 
     def test_smtp_provider_refusal_is_generic_and_secret_free(self):
         previous_backend = app.config["RELAY_EMAIL_BACKEND"]
@@ -2096,6 +2114,51 @@ class TrialContainmentTests(unittest.TestCase):
             self.assertTrue(LedgerService.reconcile(user.id).reconciles)
             self.assertTrue(PasswordResetToken.query.filter_by(user_id=user.id).one().used)
         self.assertEqual(self.client.get("/dashboard").location, "/login")
+
+        failed_user = self.create_user(
+            "delete-failed-mail@nyu.edu", "Delete Failed Mail", balance=1
+        )
+        failed_other = self.create_user(
+            "delete-failed-mail-other@nyu.edu", "Delete Failed Mail Other"
+        )
+        failed_session_id = self.create_held_session(
+            failed_other.id, failed_user.id
+        )
+        self.login_as(failed_user.id)
+        failed_token = self.csrf("/edit-profile")
+        with patch(
+            "app.main.send_transactional_email",
+            side_effect=EmailDeliveryError("synthetic provider refusal"),
+        ):
+            failed_response = self.client.post(
+                "/account/delete",
+                data={
+                    "csrf_token": failed_token,
+                    "password": "Secure123",
+                    "confirmation": "DELETE",
+                },
+            )
+        self.assertEqual(failed_response.status_code, 202)
+        self.assertIn(
+            b"account was closed, but Relay could not deliver",
+            failed_response.data,
+        )
+        with app.app_context():
+            self.assertEqual(
+                db.session.get(User, failed_user.id).account_status,
+                "deleted",
+            )
+            self.assertEqual(
+                db.session.get(Session, failed_session_id).status,
+                SessionStatus.CANCELLED,
+            )
+            failed_delivery = EmailDelivery.query.filter_by(
+                recipient_user_id=failed_other.id,
+                message_type="session_cancelled",
+                source_id=failed_session_id,
+            ).one()
+            self.assertEqual(failed_delivery.status, "failed")
+            self.assertEqual(failed_delivery.failure_code, "provider_rejected")
 
 
 if __name__ == "__main__":

@@ -5,57 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Relay{% endblock %} — Relay</title>
   <meta name="description" content="Relay is a campus skill swap where students teach what they know, earn time credits, and learn what they need without cash." />
-  <meta name="theme-color" content="#0f0d1a" />
+  <meta name="theme-color" content="#1b1c22" />
   {% block head %}{% endblock %}
   <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ cache_bust }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='elevate.css') }}?v={{ cache_bust }}" />
-  <noscript><style>.brand-intro{display:none!important}[data-split],[data-reveal],[data-reveal-stagger]>*{opacity:1!important}</style></noscript>
+  <noscript><style>[data-split],[data-reveal],[data-reveal-stagger]>*{opacity:1!important}</style></noscript>
 </head>
 <body data-page="{% block page_id %}{% endblock %}">
   <a class="skip-link" href="#main-content">Skip to main content</a>
-  {% if self.page_id()|trim == 'home' %}
-  {# ── Brand intro: animated relay mark, plays once per session (home only) ── #}
-  <div class="brand-intro" id="brandIntro" aria-hidden="true">
-    <div class="brand-intro-inner">
-      <div class="intro-stage">
-        {# Stage 1 — relay baton handoff (two runners passing the baton) #}
-        <svg class="intro-s1" viewBox="-2.5 0 200 165" aria-hidden="true">
-          <g stroke="#7c5cfc" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path class="i1 i1-left" d="M83.5 73.5 C71 61.5 51 60.5 40.5 73.5 C27.5 89.5 33.5 113 52 123 C74 134.5 104 126 124 107" stroke-width="8.5" pathLength="1" />
-            <path class="i1 i1-arrow" d="M116.5 105 L130.5 99 L127.5 114" stroke-width="8.5" pathLength="1" />
-            <path class="i1 i1-right" d="M94 77 C110 62.5 129 54 145 67 C162 81 161 113 144.5 126.5" stroke-width="8.5" pathLength="1" />
-            <circle class="i1-dot i1-dot-l" cx="59" cy="33" r="11.5" fill="#7c5cfc" />
-            <circle class="i1-dot i1-dot-r" cx="136" cy="33" r="11.5" fill="#7c5cfc" />
-          </g>
-        </svg>
-        {# Stage 2 — the baton settles into the Relay smile #}
-        <svg class="intro-s2" viewBox="0 0 360 165" aria-hidden="true">
-          <g transform="translate(180 103.8) scale(1.76) translate(-280 -100)">
-            <path class="intro-smile" d="M244.5 91.5 C244.5 80.5 254 75 262 78.5 C269.5 81.8 270.8 91.4 279.3 91.4 C287.8 91.4 289.4 81.8 296.8 78.5 C305 74.8 314.8 81.3 315.1 92 C315.6 108.4 301.3 120.7 279.7 120.7 C258 120.7 244.5 108.3 244.5 91.5 Z"
-              fill="none" stroke="#7c5cfc" stroke-width="4.83" stroke-linecap="round" stroke-linejoin="round" pathLength="1" />
-          </g>
-          <circle class="intro-eye intro-eye-l" cx="141.5" cy="33" r="11.5" fill="#7c5cfc" />
-          <circle class="intro-eye intro-eye-r" cx="218.66" cy="33" r="11.5" fill="#7c5cfc" />
-        </svg>
-      </div>
-      <div class="intro-word" aria-label="Relay">
-        <span>R</span><span>e</span><span>l</span><span>a</span><span>y</span>
-      </div>
-      <span class="intro-tagline">Trade skills, not money.</span>
-      <button class="intro-skip" id="introSkip" type="button">Skip intro</button>
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
-  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
-  <div class="paper-grain" aria-hidden="true"></div>
-
   <div class="page">
     <nav class="site-nav" id="siteNav">
       <div class="container nav-inner">
-        <a href="/" class="logo" aria-label="Relay home" data-magnetic data-magnetic-strength="0.25">
+        <a href="/" class="logo" aria-label="Relay home">
           <img src="{{ url_for('static', filename='relay-logo.svg') }}" alt="Relay" width="245" height="88" decoding="async" />
         </a>
         <div class="nav-links" id="navLinks">
@@ -71,7 +33,7 @@
             </form>
           {% else %}
             <a href="/login" class="nav-link">Log in</a>
-            <a href="/signup" class="nav-join" data-magnetic>Join free</a>
+            <a href="/signup" class="nav-join">Join free</a>
           {% endif %}
           <button class="hamburger" id="menuToggle" type="button" aria-label="Menu" aria-controls="navLinks" aria-expanded="false">☰</button>
         </div>
@@ -85,6 +47,7 @@
         <div>
           <img src="{{ url_for('static', filename='relay-logo.svg') }}" alt="Relay" class="footer-logo" width="245" height="88" loading="lazy" decoding="async" />
           <p>Trade skills, not money. Built by students, for students.</p>
+          <p class="footer-meta">Controlled NYU pilot &middot; test version 1</p>
         </div>
         <div class="footer-links">
           <a href="/about" class="nav-link">About</a>

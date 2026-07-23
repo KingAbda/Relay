@@ -14,6 +14,7 @@ venv/
 .hermes/
 .playwright-mcp/
 .Rhistory
+/Relay Backend Architecture.tldraw
 
 # Generated local review artifacts (source Markdown remains canonical)
 docs/page-screenshots-*/
