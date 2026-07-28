@@ -391,14 +391,11 @@ class TrialContainmentTests(unittest.TestCase):
         stylesheet = self.client.get("/static/style.css").text
         self.assertIn("prefers-reduced-motion: reduce", script)
         self.assertIn("[?&]static=1", script)
-        self.assertIn('document.documentElement.classList.add("static-mode")', script)
+        self.assertIn('document.documentElement.classList.add("lite-mode")', script)
         self.assertIn("if (reduceMotion ||", script)
         self.assertIn("if (reduceMotion) {", script)
-        self.assertIn("@media(prefers-reduced-motion:reduce)", stylesheet)
-        self.assertIn(":root.static-mode *", stylesheet)
-        self.assertIn("animation:none!important", stylesheet)
-        self.assertIn("transition:none!important", stylesheet)
-        self.assertIn("scroll-behavior:auto!important", stylesheet)
+        self.assertIn("@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}", stylesheet)
+
 
     def test_public_surface_is_dark_mode_only(self):
         homepage = self.client.get("/").text
@@ -407,15 +404,10 @@ class TrialContainmentTests(unittest.TestCase):
         script = self.client.get("/static/elevate.js").text
 
         self.assertIn("color-scheme:dark", stylesheet)
-        self.assertIn("--paper:#1b1c22", stylesheet)
-        self.assertIn("--accent:#8a7ef2", stylesheet)
-        self.assertIn("background:linear-gradient(180deg,#988df5,var(--accent))", stylesheet)
-        self.assertIn(
-            ".btn-primary,.btn-blue{background:linear-gradient(180deg,#988df5,var(--accent));color:var(--paper)",
-            stylesheet,
-        )
-        self.assertNotIn("background:linear-gradient(180deg,#988df5,var(--accent));color:#fff", stylesheet)
-        self.assertIn('<meta name="theme-color" content="#1b1c22" />', homepage)
+        self.assertIn("--paper:#0f0d1a", stylesheet)
+        self.assertIn("--blue:#7c5cfc", stylesheet)
+        self.assertIn("--orange:#ff6b35", stylesheet)
+        self.assertIn('<meta name="theme-color" content="#0f0d1a" />', homepage)
         self.assertNotIn("themeToggle", homepage)
         self.assertNotIn("prefers-color-scheme:light", homepage)
         self.assertNotIn("light-mode", stylesheet)

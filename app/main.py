@@ -442,7 +442,7 @@ def jinja_trial_time(dt):
         return "Not scheduled"
     utc_value = dt.replace(tzinfo=ZoneInfo("UTC")) if dt.tzinfo is None else dt
     local = utc_value.astimezone(ZoneInfo("America/New_York"))
-    return local.strftime("%a, %b %-d at %-I:%M %p %Z")
+    return local.strftime("%a, %b %#d at %#I:%M %p %Z")
 
 app.jinja_env.filters["capitalize"] = jinja_capitalize
 app.jinja_env.filters["time_ago"] = jinja_time_ago
@@ -508,11 +508,6 @@ def add_security_headers(response):
 # ══════════════════════════════════════════════════════════
 #  INTENTIONALLY UNAVAILABLE LEGACY ROUTES
 # ══════════════════════════════════════════════════════════
-
-@app.route("/seed-demo")
-def seed_demo():
-    """Keep the former demo-data endpoint unavailable."""
-    abort(404)
 
 # ══════════════════════════════════════════════════════════
 #  ROUTES: AUTH
@@ -1270,9 +1265,13 @@ def moderator_queue():
         abort(404)
     reports = SafetyReport.query.filter(SafetyReport.status.in_(["open", "reviewing"])).order_by(SafetyReport.created_at).all()
     disputes = SessionDispute.query.filter_by(status="open").order_by(SessionDispute.created_at).all()
+    dispute_sessions = {
+        d.id: Session.query.get(d.session_id) for d in disputes
+    }
     actions = ModerationAction.query.order_by(ModerationAction.created_at.desc()).limit(50).all()
     return render_template(
         "moderator_queue.html", user=user, reports=reports, disputes=disputes,
+        dispute_sessions=dispute_sessions,
         actions=actions, get_user=get_user,
     )
 
@@ -1440,10 +1439,6 @@ def moderator_resolve(item_type, item_id):
 # ══════════════════════════════════════════════════════════
 #  ROUTES: SESSION TIMEOUT / JANITOR
 # ══════════════════════════════════════════════════════════
-
-@app.route("/admin/timeout-sessions")
-def timeout_sessions():
-    abort(404)
 
 # ══════════════════════════════════════════════════════════
 #  ROUTES: REVIEWS
@@ -1764,36 +1759,6 @@ def verify_edu():
     if user.email_verified:
         return redirect(url_for("dashboard"))
     return render_template("verify_edu.html", user=user, error=None, message=None)
-
-# ── Add proof video route ──
-@app.route("/proof-video", methods=["GET", "POST"])
-def proof_video():
-    abort(404)
-
-# ── Student ambassador signup ──
-@app.route("/become-ambassador", methods=["POST"])
-def become_ambassador():
-    abort(404)
-
-# ══════════════════════════════════════════════════════════
-#  ROUTES: MONETIZATION (stubs — no real payments)
-# ══════════════════════════════════════════════════════════
-
-@app.route("/top-up")
-def top_up():
-    abort(404)
-
-@app.route("/top-up", methods=["POST"])
-def top_up_post():
-    abort(404)
-
-@app.route("/membership")
-def membership():
-    abort(404)
-
-@app.route("/membership/join", methods=["POST"])
-def membership_join():
-    abort(404)
 
 # ══════════════════════════════════════════════════════════
 #  ROUTES: ABOUT, LEGAL & HEALTH (before profile/param routes)
@@ -2147,25 +2112,8 @@ def view_profile(user_id):
                            completed_count=completed_count, avg_rating=round(avg_rating, 1) if avg_rating else None, recent_reviews=enriched)
 
 # ══════════════════════════════════════════════════════════
-#  ROUTES: SKILL REQUESTS (demand aggregation)
+#  ROUTES: AFTER LOGIN INIT / REDIRECT
 # ══════════════════════════════════════════════════════════
-
-@app.route("/requests")
-def browse_requests():
-    abort(404)
-
-@app.route("/add-request", methods=["POST"])
-def add_request():
-    abort(404)
-
-@app.route("/claim-request/<request_id>", methods=["POST"])
-def claim_request(request_id):
-    abort(404)
-
-# ══════════════════════════════════════════════════════════
-#  ROUTES: SKILLS (updated with credit_cost)
-# ══════════════════════════════════════════════════════════
-
 @app.route("/add-skill", methods=["POST"])
 @limiter.limit("30 per hour", key_func=authenticated_limit_key)
 def add_skill():

@@ -24,12 +24,21 @@
   <h2 style="margin-top:28px;">Open disputes</h2>
   {% for item in disputes %}
   {% set booked = item.session_id %}
+  {% set booked_session = dispute_sessions.get(item.id) %}
   <article class="card" style="margin:12px 0;">
     <p><strong>Session {{ item.session_id }}</strong> · opened by {{ get_user(item.opened_by_id).full_name }}</p>
+    {% if booked_session %}
+    <p class="muted" style="margin:4px 0 10px;">Teacher: {{ get_user(booked_session.teacher_id).full_name }} · Learner: {{ get_user(booked_session.learner_id).full_name }}</p>
+    {% endif %}
     <p>{{ item.reason }}</p>
     <form method="POST" action="/moderator/resolve/dispute/{{ item.id }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <label>Target user ID<input name="target_user_id" class="form-input" required /></label>
+      <label>Target participant<select name="target_user_id" class="form-select" required>
+        {% if booked_session %}
+        <option value="{{ booked_session.teacher_id }}">{{ get_user(booked_session.teacher_id).full_name }} (teacher)</option>
+        <option value="{{ booked_session.learner_id }}">{{ get_user(booked_session.learner_id).full_name }} (learner)</option>
+        {% endif %}
+      </select></label>
       <label>Resolution action<select name="action_type" class="form-select" required><option value="dismiss">Dismiss and restore prior session state</option><option value="refund_hold">Refund held credit and cancel session</option><option value="reverse_completed">Reverse completed settlement and cancel session</option></select></label>
       <label>Decision reason<input name="reason" class="form-input" required /></label>
       <label>Evidence notes<textarea name="evidence_notes" class="form-textarea" required></textarea></label>
