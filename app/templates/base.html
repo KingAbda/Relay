@@ -8,9 +8,9 @@
   <meta name="theme-color" content="#0f0d1a" />
   {% block head %}{% endblock %}
   <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ cache_bust }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='elevate.css') }}?v={{ cache_bust }}" />
-  <noscript><style>.brand-intro{display:none!important}[data-split],[data-reveal],[data-reveal-stagger]>*{opacity:1!important}</style></noscript>
+  <noscript><style>[data-split],[data-reveal],[data-reveal-stagger]>*{opacity:1!important}</style></noscript>
 </head>
 <body data-page="{% block page_id %}{% endblock %}">
   <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -85,6 +85,7 @@
         <div>
           <img src="{{ url_for('static', filename='relay-logo.svg') }}" alt="Relay" class="footer-logo" width="245" height="88" loading="lazy" decoding="async" />
           <p>Trade skills, not money. Built by students, for students.</p>
+          <p class="footer-meta">Controlled NYU pilot &middot; test version 1</p>
         </div>
         <div class="footer-links">
           <a href="/about" class="nav-link">About</a>

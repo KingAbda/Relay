@@ -130,14 +130,12 @@ class User(db.Model):
     completed_sessions_count: Mapped[int] = mapped_column(Integer, default=0)
     no_show_count: Mapped[int] = mapped_column(Integer, default=0)
     reported_count: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Retained only for migration compatibility — feature removed.
     is_ambassador: Mapped[bool] = mapped_column(Boolean, default=False)
-    
-    # Video proof / content credits
     has_proof_video: Mapped[bool] = mapped_column(Boolean, default=False)
     proof_video_url: Mapped[str] = mapped_column(String, default="")
     content_credit_balance: Mapped[int] = mapped_column(Integer, default=0)
-    
-    # Membership & monetization
     is_member: Mapped[bool] = mapped_column(Boolean, default=False)
     member_since: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 

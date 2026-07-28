@@ -1,125 +1,99 @@
-# Relay controlled-trial release scope
+# Relay owner-ready candidate scope
 
-Last reviewed: 2026-07-14
+Last reviewed: 2026-07-23
 
-Status: **LOCAL RELEASE CANDIDATE / NO-GO FOR DEPLOYMENT.** This manifest defines
-the intended Git scope. It does not authorize a commit, push, deployment,
-credential change, participant contact, or trial launch.
+Status: **OWNER-READY LOCAL CANDIDATE / NO-GO FOR DEPLOYMENT.** This manifest
+defines the contents of the owner-approved local candidate commit. It does not
+authorize a push, deployment, paid resource, database migration, participant
+contact, or launch.
 
-## Remote reconciliation
+## Base and branch state
 
-The reviewed remote head is `9fbc1ea19fcb8b9353bf8d61619d62a2b46767ec`.
-Its useful intent—removing the out-of-home campaign from the trial homepage—is
-already met by the controlled-trial template, which does not render the
-campaign, maps, street mockups, or paid plans.
+- Local `main` and `origin/main` both point to
+  `8c775556ae19540089058d4748e001816814855a`.
+- The committed base passed the `Relay safety gate` GitHub Actions workflow in
+  run `29427792008`.
+- The candidate below is saved as one local commit on top of that base. It has
+  not been pushed or run in GitHub Actions.
+- Automatic Render deployment remains disabled.
 
-The remote commit also adds three unsafe one-off utilities:
+## One intended change set
 
-- `del_db.py` deletes a developer-specific SQLite file and may kill Python
-  processes.
-- `fix_double_credits.py` edits account balances directly instead of appending
-  an attributable ledger event.
-- `migrate_db.py` performs developer-specific SQLite schema changes outside
-  Alembic.
+The candidate consists of these coupled groups:
 
-The local release branch must be based on the reviewed remote head, retain the
-controlled-trial homepage, and delete all three utilities. Versioned migrations,
-read-only reconciliation, and attributable ledger operations supersede them.
+1. Calm-dark public redesign:
+   - `app/static/elevate.css`
+   - `app/static/elevate.js`
+   - `app/static/favicon.svg`
+   - `app/static/relay-logo.svg`
+   - `app/static/style.css`
+   - `app/templates/about.html`
+   - `app/templates/base.html`
+   - `app/templates/index.html`
+2. Operational edge cases and regressions:
+   - `app/main.py`
+   - `tests/test_trial_containment.py`
+3. Local-only exclusion:
+   - `.gitignore`
+4. Readiness and owner handoff:
+   - `README.md`
+   - `RELAY_TRIAL_READINESS_AUDIT.html`
+   - `docs/DEPENDENCY_REVIEW.md`
+   - `docs/OWNER_DECISION_PACKET.md`
+   - `docs/OWNER_HANDOFF.md`
+   - `docs/RELEASE_SCOPE.md`
+   - `docs/TRIAL_EVIDENCE_INDEX.md`
+   - `docs/TRIAL_FINAL_REPORT.md`
+   - `docs/TRIAL_READINESS_MATRIX.md`
 
-### Read-only reconciliation proof
+These groups were saved together as one local commit. Reconfirm the exact list
+with `git diff-tree --no-commit-id --name-only -r HEAD` before authorizing a
+push.
 
-On 2026-07-14, a three-way merge simulation used the local controlled-trial
-homepage as the current file, local `HEAD` as the common base, and
-`origin/main` as the incoming version. It returned status `0`, produced no
-conflict markers, and its merged output matched the current local
-`app/templates/index.html` byte-for-byte. The three incoming utility paths are
-absent locally. This proves the content decision is conflict-free; it does not
-alter branch ancestry or authorize the still-required local commit.
+## What is deliberately excluded
 
-## Intended release groups
+- `Relay Backend Architecture.tldraw` is the owner's local design file. The
+  exact root path is ignored and must not be staged or released.
+- `.hermes/`, `.playwright-mcp/`, local browser captures, temporary QA
+  databases, Python caches, local environments, secrets, database files, dumps,
+  and promo source material remain excluded.
+- The already tracked hero poster is unchanged and is not requested by the
+  redesigned homepage. It is not part of this candidate diff. Publication
+  rights must be confirmed before any future re-enable.
 
-The candidate is one coupled change set. Do not commit only part of a group.
-
-1. Application and policy:
-   - `.env.example`, `app/database.py`, `app/main.py`, `app/models.py`
-   - `app/email_service.py`, `app/ledger.py`, `app/policies.py`,
-     `app/session_service.py`, `app/trial_config.py`
-2. Product surface:
-   - all modified templates and CSS/JavaScript under `app/templates/` and
-     `app/static/`
-   - new `conduct.html`, `consent.html`, `moderator_queue.html`, and
-     `session_details.html`
-3. Release-critical media:
-   - `app/static/media/relay-campus-hero-poster.jpg`
-4. Database and verification:
-   - `migrations/`, `tests/`, `scripts/`, `requirements.txt`, and
-     `requirements-dev.txt`
-5. Delivery and evidence:
-   - `.python-version`, `.github/CODEOWNERS`,
-     `.github/pull_request_template.md`, `.github/workflows/ci.yml`,
-     `.gitignore`, `render.yaml`, `render.staging.yaml`, and `README.md`
-   - `RELAY_BUSINESS_PLAN.md`, `RELAY_DOC.md`,
-     `RELAY_TRIAL_READINESS_AUDIT.html`, and `docs/`
-6. Intentional removals:
-   - local obsolete `fix_dup.py` and `verify_conservation.py`
-   - remote-only `del_db.py`, `fix_double_credits.py`, and `migrate_db.py`
-
-Recount the exact path totals after every scope change and after rebasing onto
-the reviewed remote head. The staging blueprint is a reviewed proposal only;
-syncing it would create paid resources and requires separate owner approval.
-
-## Deliberately excluded local material
-
-Narrow `.gitignore` rules keep these files local without deleting them:
-
-- `.DS_Store` and `.hermes/`
-- `.playwright-mcp/` and `.Rhistory`
-- generated `docs/page-screenshots-*/` captures and point-in-time PDF reports;
-  the reviewed Markdown sources remain canonical
-- all of `promo-vids/`
-- `app/static/media/relay-campus-hero-test.mp4`
-- `app/static/relay-intro-animation.gif` and `.mp4`
-- `app/static/relay-intro-frames/`
-- `app/static/relay-pre-smile-mark.png` and `.svg`
-- ignored environments, databases, secrets, and Python caches
-
-Do not use `git add .` or `git add -A`. Stage only the intended release groups
-and confirm the cached name list before committing.
-
-## Media provenance boundary
-
-The rendered hero poster is 1,920×1,080 JPEG content with SHA-256:
+For source-boundary verification, the unchanged dormant poster at
+`app/static/media/relay-campus-hero-poster.jpg` has SHA-256:
 
 ```text
 0bfdc8fc3faea383260b5d30d76f586df57cf27527b12249aaf6e5703436cdf1
 ```
 
-It has no embedded author, copyright, license, or source metadata. It contains
-a branded campus composite and incidental student figures. The owner must
-attest that Relay may publish it, or it must be replaced with an approved asset
-and the browser/asset-budget evidence rerun. Until then, release scope is not
-fully approved.
+`git ls-files --others --exclude-standard` is empty. Do not use `git add .` or
+`git add -A`; stage only the reviewed paths above.
 
-## Commit boundary
+## Verification boundary
 
-The final local branch must:
+The local candidate passes the standard release-scope check, all 62 ordinary
+tests, five guarded PostgreSQL 16 migration/concurrency tests, the guarded
+Redis/proxy test, production-shaped PostgreSQL/Redis boot and readiness,
+dependency and secret checks, and fresh headless responsive/accessibility QA.
+The exact local candidate still needs its GitHub Actions run after a separately
+approved push.
 
-- be based on the reviewed `origin/main` object;
-- contain no unsafe utility, ignored local artifact, secret, database, dump, or
-  participant identifier;
-- pass the complete local verification set and network-backed advisory scans;
-- have a clean working tree after the intentional local commit; and
-- remain unpushed until the owner chooses to publish it.
+Candidate verification:
 
-Run `python scripts/check_release_scope.py` before staging. After the approved
-local commit and remote-base reconciliation, also run:
+```text
+python scripts/check_release_scope.py
+git diff --check
+git ls-files --others --exclude-standard
+git diff-tree --no-commit-id --name-only -r HEAD
+```
+
+After creating the owner-approved local commit:
 
 ```text
 python scripts/check_release_scope.py --require-clean --require-origin-main-base
 ```
 
-The check proves the source boundary and poster identity only. It does not
-prove publication rights, approve the media, or authorize a release.
-
-Deployment and invitations remain separately blocked by the launch gates in
-`TRIAL_READINESS_MATRIX.md`.
+The clean-tree form passes for the local candidate. Publication, deployment,
+and invitations remain separately blocked by `TRIAL_READINESS_MATRIX.md`.

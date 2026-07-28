@@ -147,19 +147,6 @@ a:focus-visible,button:focus-visible,summary:focus-visible,
 
 /* ── Kinetic 3D word-swapper hero (Framer "3D Roll" feel) — centered ── */
 .campus-hero{padding:92px 0 56px}
-.hero-video-test{min-height:calc(100vh - 68px);display:grid;align-items:center;padding:118px 0 84px;background:#0f0d1a;color:#fff}
-.hero-video-wrap{position:absolute;inset:0;z-index:0;overflow:hidden;background:#0f0d1a}
-.hero-video{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.04) contrast(1.04)}
-.hero-video-test::before{content:"";position:absolute;inset:0;z-index:0;background:linear-gradient(180deg,rgba(8,7,18,.68) 0%,rgba(8,7,18,.42) 45%,rgba(8,7,18,.76) 100%),radial-gradient(720px 360px at 50% 35%,rgba(124,92,252,.24),transparent 70%);pointer-events:none;filter:none}
-.hero-video-test::after{content:"";position:absolute;inset:0;z-index:0;background:linear-gradient(90deg,rgba(8,7,18,.38),transparent 28%,transparent 72%,rgba(8,7,18,.34));pointer-events:none}
-.hero-video-test .hero-stage{color:#fff;text-shadow:0 10px 38px rgba(0,0,0,.45)}
-.hero-video-test .hero-stage::before{content:"";position:absolute;left:50%;top:50%;width:min(760px,92vw);height:74%;z-index:-1;transform:translate(-50%,-50%);border-radius:42px;background:radial-gradient(ellipse at center,rgba(8,7,18,.34),rgba(8,7,18,.12) 58%,transparent 74%);pointer-events:none}
-.hero-video-test .eyebrow{color:rgba(255,255,255,.88)}
-.hero-video-test .eyebrow::before{background:#ff8b2c;box-shadow:0 0 18px rgba(255,139,44,.55)}
-.hero-video-test .hero-kinetic .kx-lead{color:#fff;-webkit-text-fill-color:#fff}
-.hero-video-test .hero-sub{color:rgba(255,255,255,.88)}
-.hero-video-test .btn-secondary{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.36);color:#fff;backdrop-filter:blur(12px)}
-.hero-video-test .trust-row span{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.90);backdrop-filter:blur(10px)}
 .hero-stage{position:relative;z-index:1;max-width:960px;margin:0 auto;text-align:center}
 .hero-stage .eyebrow{justify-content:center}
 .hero-stage .hero-sub{max-width:600px;margin:18px auto 0;font-size:20px}
@@ -184,8 +171,8 @@ a:focus-visible,button:focus-visible,summary:focus-visible,
   background:linear-gradient(180deg,#ff8540 0%,#ff6b35 100%);-webkit-background-clip:text;background-clip:text;
   color:transparent;-webkit-text-fill-color:transparent}
 @media (max-width:720px){.campus-hero{padding:60px 0 40px}.hero-stage .hero-sub{font-size:17px}
-  .hero .hero-kinetic{font-size:clamp(30px,7vw,48px);column-gap:.2em;margin:12px auto 22px}}
-@media (max-width:420px){.hero .hero-kinetic{font-size:30px;letter-spacing:-.04em}}
+  .hero-kinetic{font-size:clamp(40px,10.5vw,72px);column-gap:.2em;margin:12px auto 22px}}
+@media (max-width:420px){.hero-kinetic{font-size:38px;letter-spacing:-.04em}}
 
 /* ── "How credits work" — 3 equal steps with a looping highlight ── */
 .credit-loop{display:block;position:relative;margin-top:40px;padding-bottom:58px;max-width:1080px;margin-inline:auto}

@@ -1,158 +1,112 @@
 # Relay repository owner handoff
 
-Last reviewed: 2026-07-14
+Last reviewed: 2026-07-23
 
 Audience: Abda, repository owner for `KingAbda/Relay`.
 
-Status: **SOURCE RELEASE PREPARATION / NO-GO FOR DEPLOYMENT OR INVITATIONS.**
-This page explains how to receive, verify, and maintain the code. It does not
-authorize a merge, deployment, database mutation, spend, or participant contact.
+Status: **READY FOR OWNER CODE REVIEW / NO-GO FOR DEPLOYMENT OR INVITATIONS.**
 
-## Current GitHub state
+## Where the project is now
 
-As reviewed on 2026-07-14, `KingAbda/Relay` is public, `main` points to
-`9fbc1ea`, and there are no open pull requests, open issues, GitHub Actions
-workflows, branch rulesets, or readable classic branch protection for `main`.
-The release collaborator has push access but not repository admin access.
+The committed `main` branch and `origin/main` are synchronized at
+`8c775556ae19540089058d4748e001816814855a`. GitHub Actions passed on that exact
+committed base. The calm-dark redesign, two operational fixes, regression
+coverage, and current readiness documents are saved together in one
+owner-approved local commit on top of that base.
 
-## What the owner is receiving
+The local candidate now:
 
-The release candidate converts the earlier prototype into an invite-only,
-one-category, one-credit controlled-trial system. It adds versioned migrations,
-an attributable credit ledger, moderation and consent controls, fail-closed
-production configuration, local/CI verification, and operating evidence.
+- removes the blocked Google Font request and uses system fallbacks;
+- keeps the calm-dark direction while passing mobile, desktop, keyboard, focus,
+  reduced-motion, static-mode, and contrast checks;
+- makes Redis readiness exceptions return a clean `503 not_ready`;
+- tells the deleting user when session-cancellation emails fail while still
+  completing the account closure;
+- passes all 62 ordinary tests and five guarded PostgreSQL migration/concurrency
+  tests;
+- passes the guarded shared-Redis/trusted-proxy test and production-shaped
+  PostgreSQL/Redis readiness at exact migration head;
+- passes compile, secret, dependency, advisory, source-scope, YAML, whitespace,
+  and untracked-file checks; and
+- excludes `Relay Backend Architecture.tldraw` from release scope without
+  deleting the owner's local file.
 
-The pre-release GitHub baseline at `9fbc1ea` contains `del_db.py`,
-`fix_double_credits.py`, and `migrate_db.py`. Do not run or preserve those
-utilities when reconciling the release. They are developer-specific, bypass the
-migration/ledger boundaries, and are intentionally replaced by Alembic
-migrations plus guarded Flask CLI commands.
+The exact candidate has not been pushed, so it has not had its own GitHub
+Actions run. No staging environment exists.
 
-## First checkout
+## Owner action 1: review the local candidate commit
 
-Install Git and Python 3.12, then use a normal clone. Do not copy another
-developer's `.venv`, `.env`, or SQLite database.
-
-### macOS or Linux
+Review `docs/RELEASE_SCOPE.md`, the complete commit diff, and
+`git diff-tree --no-commit-id --name-only -r HEAD`. The
+clean-tree/source-boundary command passes:
 
 ```bash
-git clone https://github.com/KingAbda/Relay.git
-cd Relay
-python3.12 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements-dev.txt
-python -m flask --app app.main db upgrade
-python -m flask --app app.main run --port 8000
+python scripts/check_release_scope.py --require-clean --require-origin-main-base
 ```
 
-### Windows PowerShell
+## Owner action 2: authorize publication for review
 
-```powershell
-git clone https://github.com/KingAbda/Relay.git
-Set-Location Relay
-py -3.12 -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -r requirements-dev.txt
-python -m flask --app app.main db upgrade
-python -m flask --app app.main run --port 8000
-```
+Separately authorize a release branch push and pull request. Require the `Relay
+safety gate / test` check to pass for the exact candidate commit before merge.
+Do not treat the green base-commit run as candidate evidence.
 
-Open <http://localhost:8000>. The default development configuration uses an
-ignored SQLite database and in-memory email delivery. A first local run does not
-need production credentials.
+GitHub still needs owner/admin configuration:
 
-If PowerShell blocks environment activation, use the virtual environment's
-Python directly: `.venv\Scripts\python.exe -m flask --app app.main db upgrade`.
-Do not loosen the machine-wide execution policy just for Relay.
+- require pull requests for `main`;
+- require the `test` check and an up-to-date branch;
+- require resolved review conversations;
+- block force-pushes and branch deletion; and
+- enable dependency-alert visibility if the owner accepts that repository
+  setting.
 
-## Verify a checkout
+## Owner action 3: choose and fund staging
 
-With the virtual environment active, run:
+Complete `docs/OWNER_DECISION_PACKET.md`: hosting account, recoverable
+PostgreSQL, Redis, real SMTP and sender domain, authenticated scheduler,
+central logs/error reporting, uptime/readiness alerts, backup retention and
+recovery targets, and the maximum monthly staging spend.
+
+Provisioning or deploying those resources is a separate external action and is
+not authorized by the code review.
+
+## Owner action 4: name people and obtain approvals
+
+Assign real people for trial decisions, primary and backup moderation,
+technical operation, support inbox, privacy requests, rollback, and
+backup/restore. Obtain qualified legal/privacy review of the rendered policies,
+consent, eligibility, retention, deletion, safety, and provider disclosures.
+
+## Owner action 5: run the staging rehearsal
+
+On the exact reviewed commit, prove:
+
+- migrations, exact database revision, production boot, Redis-backed readiness,
+  and the deployed proxy/NAT boundary;
+- real signup, verification, password reset, reminders, cancellation, and
+  delivery-failure handling through the real email provider;
+- two-participant booking, cancellation, completion, no-show, dispute,
+  moderation, export, and deletion;
+- alert delivery and operator acknowledgement; and
+- a provider/encrypted backup restored into an isolated target with readiness
+  and ledger reconciliation.
+
+Only after every launch gate is `PASS` should the owner separately approve
+production deployment and participant invitations.
+
+## Normal verification
 
 ```bash
 python -W error::DeprecationWarning -m unittest discover -v
 python -m compileall -q app migrations scripts tests
 python -m pip check
+python -m pip_audit --progress-spinner off
 python scripts/check_secret_patterns.py
 python scripts/check_release_scope.py
 python scripts/check_readiness_artifacts.py
-python -m pip_audit --requirement requirements.txt --progress-spinner off
+python scripts/check_direct_advisories.py
 git diff --check
 ```
 
-The ordinary suite currently contains 62 tests. GitHub Actions additionally
-starts disposable PostgreSQL and Redis services for migration, concurrency,
-shared-rate-limit, proxy, and production-shaped readiness checks.
-
-## Review and merge this release
-
-1. Require the release branch to contain the latest `origin/main` in its
-   history. Resolve the existing remote utility commit by retaining the removed
-   campaign behavior but deleting the three unsafe root database utilities.
-2. Open a pull request into `main`; do not push this release directly to
-   `main`.
-3. Read `docs/RELEASE_SCOPE.md`, then inspect the PR's changed-file list. It
-   must not contain `.env`, a database/dump, browser logs, local promo sources,
-   participant data, or the three unsafe utilities.
-4. Confirm the `Relay safety gate / test` workflow is green for the exact PR
-   head. A missing or skipped workflow is not a pass.
-5. Review the responsive screenshots and either attest the hero poster's
-   publication rights in `docs/OWNER_DECISION_PACKET.md` or replace it and
-   rerun the evidence.
-6. Merge only after the branch is current, checks pass, review conversations
-   are resolved, and the intended scope is understood. Keep deployment and
-   participant invitations separate.
-7. After merge, verify a fresh owner checkout using the commands above and run
-   `python -m flask --app app.main db current` to confirm revision
-   `20260713_01`.
-
-## GitHub settings only the owner can finish
-
-The current release collaborator can push but does not have repository admin
-permission. Abda should configure a `main` branch ruleset that:
-
-- requires a pull request instead of direct pushes;
-- requires the `test` status check from the Relay safety-gate workflow;
-- requires the branch to be current before merge;
-- requires conversations to be resolved; and
-- blocks force-pushes and branch deletion.
-
-`.github/CODEOWNERS` identifies `@KingAbda` as the final review owner. Enable
-Code Owner review only if another trusted collaborator will be available to
-approve owner-authored pull requests; otherwise that setting can deadlock a
-single-owner repository.
-
-## Normal owner workflow after merge
-
-```bash
-git switch main
-git pull --ff-only origin main
-source .venv/bin/activate  # Windows: .venv\Scripts\Activate.ps1
-python -m pip install -r requirements-dev.txt
-python -m flask --app app.main db upgrade
-python -W error::DeprecationWarning -m unittest discover -v
-```
-
-Review dependency changes before installing them. Never run a database repair
-script received in chat or committed ad hoc. Schema changes belong in Alembic;
-credit corrections belong in attributable, repeat-safe ledger operations.
-
-## What remains an owner decision
-
-The code being mergeable does not make the trial launchable. Abda must complete
-`docs/OWNER_DECISION_PACKET.md`, including:
-
-- poster rights or replacement;
-- staging provider and spending approval;
-- recoverable PostgreSQL, Redis, SMTP, monitoring, and alert destinations;
-- named moderation, technical, privacy, support, backup, and rollback owners;
-- legal/privacy review; and
-- a production-like two-user/operator rehearsal with backup restoration.
-
-Until every launch gate in `docs/TRIAL_READINESS_MATRIX.md` is `PASS`, keep
-automatic deploys off and do not invite participants.
-
-`RELAY_BUSINESS_PLAN.md`, `RELAY_DOC.md`, and the older
-`RELAY_BUSINESS_PLAN.pdf` are historical planning material. They include
-monetization ideas and unverified claims that are not current product behavior,
-launch evidence, or owner instructions.
+The ordinary suite contains 62 tests. GitHub Actions additionally starts
+disposable PostgreSQL and Redis services for migrations, concurrency,
+shared-rate-limit/proxy, and production-shaped readiness checks.
