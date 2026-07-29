@@ -1266,7 +1266,7 @@ def moderator_queue():
     reports = SafetyReport.query.filter(SafetyReport.status.in_(["open", "reviewing"])).order_by(SafetyReport.created_at).all()
     disputes = SessionDispute.query.filter_by(status="open").order_by(SessionDispute.created_at).all()
     dispute_sessions = {
-        d.id: Session.query.get(d.session_id) for d in disputes
+        d.id: db.session.get(Session, d.session_id) for d in disputes
     }
     actions = ModerationAction.query.order_by(ModerationAction.created_at.desc()).limit(50).all()
     return render_template(
