@@ -8,6 +8,7 @@ import secrets
 import hashlib
 import json
 import time
+from collections import deque
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urljoin
 from zoneinfo import ZoneInfo
@@ -32,7 +33,8 @@ from .database import db, init_db, normalize_database_url
 from .email_service import EmailDeliveryError, send_transactional_email
 from .ledger import InsufficientCredits, LedgerError, LedgerService
 from .policies import APPROVED_PUBLIC_LOCATIONS, validate_meeting_details, validate_trial_topic
-from .session_service import SessionStateMachine
+from .consent_enforcer import SAFETY_CRITICAL_DOCUMENTS, force_reaccept_needed
+from .session_service import SessionStateMachine, cleanup_stale_sessions
 from .trial_config import load_trial_config
 
 
@@ -119,6 +121,11 @@ app.config["RELAY_EMAIL_BACKEND"] = TRIAL.email_backend
 
 # ── Cache bust version for static assets ───────────────
 _CACHE_BUST = hashlib.md5(str(utc_now().timestamp()).encode()).hexdigest()[:8]
+
+# ── Signup rate monitor (sliding window) ──────────────
+_SIGNUP_TIMESTAMPS: deque[float] = deque()
+_SIGNUP_RATE_WINDOW_MINUTES = 10
+_SIGNUP_RATE_LIMIT = 5
 
 # ── Plugins ────────────────────────────────────────────
 csrf = CSRFProtect(app)
@@ -280,6 +287,9 @@ def require_onboarded():
     if not user.email_verified:
         return "redirect_verification"
     if missing_current_consents(user):
+        return "redirect_consent"
+    # Safety-critical documents force immediate re-accept if versions changed.
+    if force_reaccept_needed(user.id, CURRENT_CONSENT_VERSIONS):
         return "redirect_consent"
     return "redirect_onboarding" if not user.onboarded else user
 
@@ -544,7 +554,12 @@ def signup():
         return render_template("signup.html", user=None, ref="", error="Enter a valid institutional email address.")
     if not TRIAL.email_domain_allowed(email_domain):
         return render_template("signup.html", user=None, ref="", error="This controlled trial is limited to invited NYU email addresses.")
-    if not TRIAL.email_is_invited(email):
+    # Hard invite enforcement: always check the invited_emails list when deployed,
+    # regardless of the require_invite flag (runtime hardening against misconfiguration).
+    if TRIAL.is_deployed:
+        if email.strip().lower() not in TRIAL.invited_emails:
+            return render_template("signup.html", user=None, ref="", error="This email is not on the controlled-trial invite list.")
+    elif not TRIAL.email_is_invited(email):
         return render_template("signup.html", user=None, ref="", error="This email is not on the controlled-trial invite list.")
     if get_user_by_email(email):
         return render_template("signup.html", user=None, ref="", error="An account with this email already exists.")
@@ -584,6 +599,19 @@ def signup():
             "error.html", user=user, code=503,
             message="Your account was created, but Relay could not deliver the verification email. Try resending it later or contact support."
         ), 503
+    # ── Signup rate monitoring ─────────────────────────
+    now_ts = time.time()
+    _SIGNUP_TIMESTAMPS.append(now_ts)
+    cutoff = now_ts - _SIGNUP_RATE_WINDOW_MINUTES * 60
+    while _SIGNUP_TIMESTAMPS and _SIGNUP_TIMESTAMPS[0] < cutoff:
+        _SIGNUP_TIMESTAMPS.popleft()
+    if len(_SIGNUP_TIMESTAMPS) > _SIGNUP_RATE_LIMIT and TRIAL.is_deployed:
+        app.logger.warning(json.dumps({
+            "event": "signup_rate_exceeded",
+            "request_id": g.get("request_id"),
+            "signups_in_last_10min": len(_SIGNUP_TIMESTAMPS),
+            "threshold": _SIGNUP_RATE_LIMIT,
+        }, separators=(",", ":")))
     return redirect(url_for("verify_edu"))
 
 @app.route("/login", methods=["GET", "POST"])
@@ -1810,6 +1838,76 @@ def health_ready():
     return jsonify({"status": "ready"}), 200
 
 
+@app.route("/health/invariants")
+def health_invariants():
+    """Runtime invariant checks for deployed-mode contracts.
+
+    Returns a 200 with individual check results (all must pass) or a 503
+    describing which invariant(s) failed.
+    """
+    checks: dict[str, bool | str] = {}
+
+    # 1. require_invite must be True when deployed
+    if TRIAL.is_deployed:
+        checks["require_invite_is_true_when_deployed"] = TRIAL.require_invite
+    else:
+        checks["require_invite_is_true_when_deployed"] = True  # N/A in dev
+
+    # 2. TRIAL.is_deployed matches DATABASE_URL expectation
+    database_url = os.environ.get("DATABASE_URL", "").strip()
+    if TRIAL.is_deployed:
+        checks["database_url_is_postgres_when_deployed"] = database_url.startswith(
+            ("postgresql://", "postgresql+psycopg://")
+        )
+    else:
+        checks["database_url_is_postgres_when_deployed"] = True  # N/A
+
+    # 3. Signup rate within expected bounds (query DB for persistent data)
+    try:
+        one_hour_ago = utc_now() - timedelta(hours=1)
+        signups_last_hour = User.query.filter(
+            User.created_at >= one_hour_ago
+        ).count()
+        checks["signup_rate_within_bounds"] = signups_last_hour <= 60
+        checks["_signups_last_hour"] = signups_last_hour
+    except Exception:
+        checks["signup_rate_within_bounds"] = False
+        checks["_signups_last_hour"] = "query_failed"
+
+    # 4. No zero-signup edge case for deployed environments (no signups in 24h)
+    if TRIAL.is_deployed:
+        try:
+            one_day_ago = utc_now() - timedelta(hours=24)
+            signups_last_day = User.query.filter(
+                User.created_at >= one_day_ago
+            ).count()
+            checks["no_stale_signup_drought_when_deployed"] = signups_last_day > 0
+            checks["_signups_last_24h"] = signups_last_day
+        except Exception:
+            checks["no_stale_signup_drought_when_deployed"] = False
+            checks["_signups_last_24h"] = "query_failed"
+    else:
+        checks["no_stale_signup_drought_when_deployed"] = True  # N/A in dev
+
+    # 5. Current in-memory signup rate from sliding window
+    if TRIAL.is_deployed:
+        checks["in_memory_signup_rate_ok"] = len(_SIGNUP_TIMESTAMPS) <= _SIGNUP_RATE_LIMIT
+        checks["_in_memory_signups_in_last_10min"] = len(_SIGNUP_TIMESTAMPS)
+    else:
+        checks["in_memory_signup_rate_ok"] = True
+
+    all_pass = all(
+        isinstance(value, bool) and value
+        for key, value in checks.items()
+        if not key.startswith("_")
+    )
+    status_code = 200 if all_pass else 503
+    return jsonify({
+        "status": "ok" if all_pass else "degraded",
+        "checks": checks,
+    }), status_code
+
+
 @app.cli.command("reconcile-credits")
 @click.option("--user-id", help="Limit the read-only report to one account.")
 def reconcile_credits(user_id=None):
@@ -1894,6 +1992,78 @@ def settle_expired_requests(apply_changes=False, grace_minutes=60):
         raise click.ClickException(
             "Settlement succeeded, but one or more expiry notifications failed. Inspect secret-free delivery records."
         )
+
+
+@app.cli.command("cleanup-stale-sessions")
+@click.option("--apply", "apply_changes", is_flag=True, help="Commit auto-cancellations.")
+def cleanup_stale_cli(apply_changes=False):
+    """Find and auto-cancel sessions stuck in REQUESTED (>24h) or CONFIRMED (>48h)."""
+    result = cleanup_stale_sessions(apply=apply_changes)
+    click.echo(json.dumps(result, sort_keys=True))
+    if apply_changes and result["settled_count"]:
+        click.echo(f"Settled {result['settled_count']} stale session(s).")
+    elif not apply_changes and result["candidate_count"]:
+        click.echo(f"Dry-run: {result['candidate_count']} candidate(s) found. Re-run with --apply to cancel.")
+    else:
+        click.echo("No stale sessions found.")
+
+
+@app.cli.command("reconcile-ledger")
+@click.option("--fix", "apply_fix", is_flag=True, help="Post ADJUSTMENT transactions for mismatched accounts.")
+@click.option("--user-id", default=None, help="Only inspect/fix a single account.")
+def reconcile_ledger_cli(apply_fix=False, user_id=None):
+    """Scan credit accounts and optionally repair balance/ledger mismatches."""
+    mismatches = LedgerService.scan_all()
+    if user_id:
+        mismatches = [m for m in mismatches if m.user_id == user_id]
+        if not mismatches:
+            try:
+                account = CreditAccount.query.filter_by(user_id=user_id).first()
+                if account:
+                    click.echo(json.dumps({
+                        "user_id": user_id,
+                        "balance": account.balance,
+                        "status": "reconciled",
+                    }, sort_keys=True))
+                    return
+            except Exception:
+                pass
+
+    if not mismatches:
+        click.echo(json.dumps({"mode": "scan", "mismatch_count": 0}, sort_keys=True))
+        return
+
+    report = {
+        "mode": "fix" if apply_fix else "scan",
+        "mismatch_count": len(mismatches),
+        "accounts": [
+            {
+                "user_id": m.user_id,
+                "balance": m.balance,
+                "ledger_total": m.ledger_total,
+                "diff": m.balance - m.ledger_total,
+            }
+            for m in mismatches
+        ],
+        "fixed_count": 0,
+    }
+
+    if not apply_fix:
+        click.echo(json.dumps(report, sort_keys=True))
+        return
+
+    fixed = 0
+    try:
+        for m in mismatches:
+            LedgerService.fix_account(m.user_id, actor_user_id="reconciler-cli")
+            fixed += 1
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+
+    report["fixed_count"] = fixed
+    click.echo(json.dumps(report, sort_keys=True))
 
 
 @app.cli.command("send-session-reminders")
