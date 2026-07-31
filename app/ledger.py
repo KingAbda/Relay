@@ -251,3 +251,59 @@ class LedgerService:
             balance=account.balance,
             ledger_total=ledger_total,
         )
+
+    @staticmethod
+    def scan_all() -> list[ReconciliationResult]:
+        """Scan every credit account and return results for those that don't reconcile.
+
+        This is a read-only operation (no locks, no writes).
+        """
+        mismatches: list[ReconciliationResult] = []
+        for account in CreditAccount.query.order_by(CreditAccount.user_id).all():
+            ledger_total = sum(
+                t.amount for t in CreditTransaction.query.filter_by(user_id=account.user_id).all()
+            )
+            result = ReconciliationResult(
+                user_id=account.user_id,
+                balance=account.balance,
+                ledger_total=ledger_total,
+            )
+            if not result.reconciles:
+                mismatches.append(result)
+        return mismatches
+
+    @staticmethod
+    def fix_account(user_id: str, *, actor_user_id: str) -> tuple[CreditTransaction, bool]:
+        """Repair a single mismatched account by posting an ADJUSTMENT transaction.
+
+        Uses `LedgerService.apply` inside the caller's transaction so all balance
+        invariants (idempotency, non-negative) are respected. Returns the
+        adjustment transaction and whether it was newly created.
+
+        Raises LedgerError if the account reconciles already or if an adjustment
+        has already been posted for the current discrepancy (idempotency).
+        """
+        account = CreditAccount.query.filter_by(user_id=user_id).with_for_update().first()
+        if not account:
+            raise LedgerError("Credit account not found")
+
+        ledger_total = sum(
+            t.amount for t in CreditTransaction.query.filter_by(user_id=user_id).all()
+        )
+        diff = account.balance - ledger_total
+        if diff == 0:
+            raise LedgerError(f"Account {user_id} already reconciles (balance == ledger total)")
+
+        # Build an idempotency key rooted in the actual discrepancy so re-running
+        # after a partial fix is safe.
+        source_id = f"reconciliation:{user_id}:balance={account.balance}:ledger={ledger_total}"
+
+        return LedgerService.apply(
+            user_id=user_id,
+            amount=diff,
+            event_type=TransactionType.ADJUSTMENT,
+            source_type="reconciliation",
+            source_id=source_id,
+            reason=f"Auto-reconciliation adjustment (balance={account.balance}, ledger={ledger_total})",
+            actor_user_id=actor_user_id,
+        )

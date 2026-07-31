@@ -16,7 +16,8 @@ from tests import legacy_schema
 
 ROOT = Path(__file__).resolve().parents[1]
 LEGACY_REVISION = "20260713_00"
-HEAD_REVISION = "20260713_01"
+LEGACY_ADOPTION_REVISION = "20260713_01"
+HEAD_REVISION = "20260731_01"
 
 
 def _user(user_id, email, name):
@@ -271,15 +272,48 @@ class MigrationTestCase(unittest.TestCase):
         inspector = sa.inspect(engine)
         self.assertIn("role", {column["name"] for column in inspector.get_columns("users")})
         with engine.connect() as connection:
+            # Alembic unwinds one revision at a time. `auth_events` is empty here,
+            # so 20260731_01 rolls back cleanly and the chain halts at the legacy
+            # adoption guard. No business data is touched, which is what this test
+            # is protecting; the audit table gets its own refusal test below.
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                HEAD_REVISION,
+                LEGACY_ADOPTION_REVISION,
             )
             self.assertEqual(
                 connection.execute(sa.text("SELECT COUNT(*) FROM consent_acceptances")).scalar_one(),
                 1,
             )
             self.assertEqual(connection.execute(sa.text("SELECT COUNT(*) FROM users")).scalar_one(), 2)
+        engine.dispose()
+
+    def test_downgrade_refuses_to_discard_recorded_auth_events(self):
+        """Rolling back must never silently destroy the authentication trail."""
+        self.create_seeded_legacy_database()
+        self.run_db("upgrade", "head")
+        engine = sa.create_engine(self.database_url)
+        with engine.begin() as connection:
+            connection.execute(sa.text(
+                "INSERT INTO auth_events "
+                "(id, user_id, event, email_hash, ip_hash, request_id, created_at) "
+                "VALUES ('auth-1', 'learner', 'login_succeeded', 'hash', 'hash', 'req', "
+                "'2026-07-31 12:00:00')"
+            ))
+        engine.dispose()
+
+        result = self.run_db("downgrade", LEGACY_ADOPTION_REVISION, expect_success=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("auth_events contains 1 audit record(s)", result.stderr)
+
+        engine = sa.create_engine(self.database_url)
+        with engine.connect() as connection:
+            self.assertEqual(
+                connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
+                HEAD_REVISION,
+            )
+            self.assertEqual(
+                connection.execute(sa.text("SELECT COUNT(*) FROM auth_events")).scalar_one(), 1
+            )
         engine.dispose()
 
     def test_fresh_database_upgrades_to_head_without_schema_drift(self):

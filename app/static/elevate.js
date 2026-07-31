@@ -70,7 +70,7 @@
       setTimeout(function () { el.parentNode && el.parentNode.removeChild(el); }, 900);
     };
     el.addEventListener("click", finish); // click to skip
-    setTimeout(finish, 3900); // total choreography length (stage 1 + stage 2)
+    setTimeout(finish, 1800); // shortened — visitor sees Relay in 3 seconds, not 6
   })();
 
   /* ───────────────────── Smooth scroll (Lenis) ──────────────────── */

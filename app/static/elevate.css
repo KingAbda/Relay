@@ -145,11 +145,32 @@ a:focus-visible,button:focus-visible,summary:focus-visible,
 .trust-row span{transition:transform .3s var(--ease-out),box-shadow .3s ease,background .3s ease}
 .trust-row span:hover{transform:translateY(-2px);box-shadow:var(--elev-1);background:#fff}
 
+/* ── Smoothness pass ── */
+.site-nav{transition:background .35s ease,border-color .35s ease}
+.logo{transition:opacity .3s ease}
+.logo:hover{opacity:.8}
+.logo img{transition:transform .4s var(--ease-out)}
+.logo:hover img{transform:scale(1.03)}
+.nav-links a{transition:color .25s ease}
+.nav-join{transition:transform .3s var(--ease-out),box-shadow .3s ease,background .3s ease}
+.nav-join:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(124,92,252,.45)}
+.btn{transition:transform .3s var(--ease-out),box-shadow .3s ease,background .3s ease,color .25s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{transition:transform .3s var(--ease-out),box-shadow .3s ease,background .3s ease,color .25s ease}
+.btn-primary:hover{box-shadow:0 12px 32px rgba(255,107,53,.38)}
+.btn-secondary{transition:transform .3s var(--ease-out),box-shadow .3s ease,background .3s ease,border-color .25s ease}
+.btn-secondary:hover{background:rgba(45,40,72,.6);border-color:rgba(124,92,252,.3)}
+.cta-card{transition:transform .4s var(--ease-out),box-shadow .4s ease}
+.cta-card .btn-primary{transition:transform .3s var(--ease-out),box-shadow .3s ease,background .3s ease}
+.cta-card .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.3)}
+.section-title{transition:letter-spacing .4s var(--ease-out)}
+.site-footer a{transition:color .25s ease}
+
 /* ── Kinetic 3D word-swapper hero (Framer "3D Roll" feel) — centered ── */
 .campus-hero{padding:92px 0 56px}
 .hero-stage{position:relative;z-index:1;max-width:960px;margin:0 auto;text-align:center}
 .hero-stage .eyebrow{justify-content:center}
-.hero-stage .hero-sub{max-width:600px;margin:18px auto 0;font-size:20px}
+.hero-stage .hero-sub{max-width:600px;margin:18px auto 28px;font-size:20px}
 .hero-stage .hero-actions{justify-content:center}
 .hero-stage .trust-row{justify-content:center}
 .hero-kinetic{display:grid;grid-template-columns:max-content max-content;justify-content:center;

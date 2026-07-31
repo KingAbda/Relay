@@ -7,7 +7,9 @@ import uuid
 import secrets
 import hashlib
 import json
+import logging
 import time
+from collections import deque
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urljoin
 from zoneinfo import ZoneInfo
@@ -32,7 +34,8 @@ from .database import db, init_db, normalize_database_url
 from .email_service import EmailDeliveryError, send_transactional_email
 from .ledger import InsufficientCredits, LedgerError, LedgerService
 from .policies import APPROVED_PUBLIC_LOCATIONS, validate_meeting_details, validate_trial_topic
-from .session_service import SessionStateMachine
+from .consent_enforcer import SAFETY_CRITICAL_DOCUMENTS, force_reaccept_needed
+from .session_service import SessionStateMachine, cleanup_stale_sessions
 from .trial_config import load_trial_config
 
 
@@ -117,8 +120,30 @@ app.config["TRUSTED_HOSTS"] = list(TRIAL.trusted_hosts) if TRIAL.is_deployed els
 app.config["RELAY_PUBLIC_URL"] = TRIAL.public_url
 app.config["RELAY_EMAIL_BACKEND"] = TRIAL.email_backend
 
+# ── Logging ────────────────────────────────────────────
+# Flask leaves `app.logger` at NOTSET, so it inherits the root logger's WARNING
+# default and silently discards every `app.logger.info(...)` call — including the
+# structured per-request audit line in `add_security_headers`. Gunicorn's
+# `--log-level info` configures gunicorn's own loggers, not this one, so the
+# level has to be set explicitly or the request trail is never emitted at all.
+_LOG_LEVEL = os.environ.get("RELAY_LOG_LEVEL", "INFO").strip().upper()
+if _LOG_LEVEL not in {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}:
+    raise RuntimeError(
+        "RELAY_LOG_LEVEL must be DEBUG, INFO, WARNING, ERROR, or CRITICAL"
+    )
+# Flask already attached its own stderr handler to `app.logger`; setting the level
+# is enough to let records through it. Deliberately not calling
+# `logging.basicConfig()` — that adds a second root handler and, because
+# `app.logger` propagates, every line would be emitted twice.
+app.logger.setLevel(_LOG_LEVEL)
+
 # ── Cache bust version for static assets ───────────────
 _CACHE_BUST = hashlib.md5(str(utc_now().timestamp()).encode()).hexdigest()[:8]
+
+# ── Signup rate monitor (sliding window) ──────────────
+_SIGNUP_TIMESTAMPS: deque[float] = deque()
+_SIGNUP_RATE_WINDOW_MINUTES = 10
+_SIGNUP_RATE_LIMIT = 5
 
 # ── Plugins ────────────────────────────────────────────
 csrf = CSRFProtect(app)
@@ -172,12 +197,20 @@ RELAY_STARTER_CREDITS = TRIAL.starter_credits
 RELAY_SUPPLY_ONLY_MODE = False
 RELAY_MONETIZATION_ENABLED = False
 
+# How long an emailed verification link stays valid. One hour was too short for a
+# real cohort: an invited student who signs up at night and opens their inbox the
+# next morning finds a dead link, and recovering means discovering the resend
+# control unprompted. A day costs nothing here — the link is single-use, stored
+# only as a hash, and cleared the moment it is redeemed.
+VERIFICATION_LINK_TTL = timedelta(hours=24)
+
 # ── Import models after db init ────────────────────────
 from app.models import (
     User, UserSkill, UserWant, CreditAccount, CreditTransaction,
     Session, SessionReview, SkillCategory, SessionStatus, TransactionType,
     PasswordResetToken, EmailDelivery, ConsentAcceptance,
     UserBlock, SafetyReport, SessionDispute, ModerationAction,
+    AuthEvent, AUTH_EVENT_TYPES,
 )
 
 CURRENT_CONSENT_VERSIONS = {
@@ -187,7 +220,7 @@ CURRENT_CONSENT_VERSIONS = {
     "code_of_conduct": "2026-07-13-draft",
     "safety_rules": "2026-07-13-draft",
 }
-DATABASE_SCHEMA_REVISION = "20260713_01"
+DATABASE_SCHEMA_REVISION = "20260731_01"
 
 # ── Auto-seed demo data (defined before use) ──────────
 # ── Initialize DB tables ──────────────────────────────
@@ -223,6 +256,47 @@ def get_user_by_email(email):
 
 def hash_secret(value):
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def record_auth_event(event, *, user=None, email=None, commit=False):
+    """Append one authentication audit row and mirror it to the structured log.
+
+    Never raises. An audit trail that can take down a login attempt is worse than
+    one with a gap, so a failure here is logged and swallowed — the caller's own
+    transaction is left untouched.
+
+    Set `commit=True` only on paths that do not already commit; otherwise the row
+    is flushed with the caller's transaction so it lands atomically with the state
+    change it describes.
+    """
+    try:
+        remote_address = get_remote_address() if has_request_context() else None
+        entry = AuthEvent(
+            user_id=user.id if user else None,
+            event=event,
+            email_hash=hash_secret(email.strip().lower()) if email else None,
+            ip_hash=hash_secret(remote_address) if remote_address else None,
+            request_id=g.get("request_id") if has_request_context() else None,
+        )
+        db.session.add(entry)
+        if commit:
+            db.session.commit()
+        else:
+            db.session.flush()
+        app.logger.info(json.dumps({
+            "event": "auth_event",
+            "auth_event": event,
+            "user_id": user.id if user else None,
+            "request_id": g.get("request_id") if has_request_context() else None,
+        }, separators=(",", ":")))
+    except Exception:
+        # Do not let auditing break authentication.
+        db.session.rollback()
+        app.logger.warning(json.dumps({
+            "event": "auth_event_write_failed",
+            "auth_event": event,
+            "request_id": g.get("request_id") if has_request_context() else None,
+        }, separators=(",", ":")), exc_info=True)
 
 
 def missing_current_consents(user):
@@ -280,6 +354,9 @@ def require_onboarded():
     if not user.email_verified:
         return "redirect_verification"
     if missing_current_consents(user):
+        return "redirect_consent"
+    # Safety-critical documents force immediate re-accept if versions changed.
+    if force_reaccept_needed(user.id, CURRENT_CONSENT_VERSIONS):
         return "redirect_consent"
     return "redirect_onboarding" if not user.onboarded else user
 
@@ -544,7 +621,12 @@ def signup():
         return render_template("signup.html", user=None, ref="", error="Enter a valid institutional email address.")
     if not TRIAL.email_domain_allowed(email_domain):
         return render_template("signup.html", user=None, ref="", error="This controlled trial is limited to invited NYU email addresses.")
-    if not TRIAL.email_is_invited(email):
+    # Hard invite enforcement: always check the invited_emails list when deployed,
+    # regardless of the require_invite flag (runtime hardening against misconfiguration).
+    if TRIAL.is_deployed:
+        if email.strip().lower() not in TRIAL.invited_emails:
+            return render_template("signup.html", user=None, ref="", error="This email is not on the controlled-trial invite list.")
+    elif not TRIAL.email_is_invited(email):
         return render_template("signup.html", user=None, ref="", error="This email is not on the controlled-trial invite list.")
     if get_user_by_email(email):
         return render_template("signup.html", user=None, ref="", error="An account with this email already exists.")
@@ -559,7 +641,7 @@ def signup():
         email=email, password_hash=generate_password_hash(password, method='pbkdf2:sha256'),
         full_name=full_name,
         verification_token_hash=hash_secret(verification_secret),
-        verification_expires_at=now + timedelta(hours=1),
+        verification_expires_at=now + VERIFICATION_LINK_TTL,
         verification_sent_at=now,
     )
     db.session.add(user)
@@ -577,6 +659,8 @@ def signup():
         send_email(user, "Verify your Relay account",
             f"Hi {user.full_name.split()[0]},\n\n"
             f"Open this link to verify your invited NYU email:\n{verify_link}\n\n"
+            f"The link is valid for {VERIFICATION_LINK_TTL.days * 24} hours. If it expires, "
+            f"sign in and request a new one.\n\n"
             f"After verification, {RELAY_STARTER_CREDITS} starter credits will be added to your account.\n\n- Relay Team",
             message_type="verification", source_id=user.verification_token_hash)
     except EmailDeliveryError:
@@ -584,6 +668,19 @@ def signup():
             "error.html", user=user, code=503,
             message="Your account was created, but Relay could not deliver the verification email. Try resending it later or contact support."
         ), 503
+    # ── Signup rate monitoring ─────────────────────────
+    now_ts = time.time()
+    _SIGNUP_TIMESTAMPS.append(now_ts)
+    cutoff = now_ts - _SIGNUP_RATE_WINDOW_MINUTES * 60
+    while _SIGNUP_TIMESTAMPS and _SIGNUP_TIMESTAMPS[0] < cutoff:
+        _SIGNUP_TIMESTAMPS.popleft()
+    if len(_SIGNUP_TIMESTAMPS) > _SIGNUP_RATE_LIMIT and TRIAL.is_deployed:
+        app.logger.warning(json.dumps({
+            "event": "signup_rate_exceeded",
+            "request_id": g.get("request_id"),
+            "signups_in_last_10min": len(_SIGNUP_TIMESTAMPS),
+            "threshold": _SIGNUP_RATE_LIMIT,
+        }, separators=(",", ":")))
     return redirect(url_for("verify_edu"))
 
 @app.route("/login", methods=["GET", "POST"])
@@ -606,6 +703,7 @@ def login():
         and user.account_locked_until > utc_now()
     ):
         remaining = max(1, int((user.account_locked_until - utc_now()).total_seconds() // 60))
+        record_auth_event("login_blocked_locked", user=user, email=email, commit=True)
         return render_template("login.html", user=None, error=f"Account locked. Try again in {remaining} minutes."), 429
     if (
         not user
@@ -614,12 +712,21 @@ def login():
     ):
         if user and user.account_status == "active":
             user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
-            if user.failed_login_attempts >= 5:
+            locked_now = user.failed_login_attempts >= 5
+            if locked_now:
                 user.account_locked_until = utc_now() + timedelta(minutes=15)
+            record_auth_event("login_failed", user=user, email=email)
+            if locked_now:
+                record_auth_event("account_locked", user=user, email=email)
             db.session.commit()
+        else:
+            # Unknown address or a non-active account: no user row to attribute
+            # this to, so `email_hash` is the only thread tying attempts together.
+            record_auth_event("login_failed", email=email, commit=True)
         return render_template("login.html", user=None, error="Invalid email or password.")
     user.failed_login_attempts = 0
     user.account_locked_until = None
+    record_auth_event("login_succeeded", user=user, email=email)
     db.session.commit()
     session.clear()
     session["user_id"] = user.id
@@ -629,6 +736,15 @@ def login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
+    # Resolve the account before clearing the session; afterwards it is unknowable.
+    # Pass the address too, or `auth-log --email` silently omits logout events.
+    signed_in = current_user()
+    record_auth_event(
+        "logout",
+        user=signed_in,
+        email=signed_in.email if signed_in else None,
+        commit=True,
+    )
     session.clear()
     resp = make_response(redirect(url_for("home")))
     resp.delete_cookie("session")
@@ -645,6 +761,7 @@ def verify_email(token):
         user.verification_token_hash = None
         user.verification_expires_at = None
         LedgerService.grant_starter(user, RELAY_STARTER_CREDITS)
+        record_auth_event("email_verified", user=user, email=user.email)
         db.session.commit()
         session.clear()
         session["user_id"] = user.id
@@ -670,6 +787,7 @@ def forgot_password():
         expires = utc_now() + timedelta(hours=1)
         reset = PasswordResetToken(user_id=user.id, token_hash=hash_secret(token), expires_at=expires)
         db.session.add(reset)
+        record_auth_event("password_reset_requested", user=user, email=email)
         db.session.commit()
         reset_link = absolute_url("reset_password", token=token)
         try:
@@ -704,6 +822,7 @@ def reset_password(token):
     user.password_hash = generate_password_hash(password)
     user.session_version += 1
     PasswordResetToken.query.filter_by(user_id=user.id, used=False).update({"used": True})
+    record_auth_event("password_reset_completed", user=user, email=user.email)
     db.session.commit()
     session.clear()
     return redirect(url_for("login"))
@@ -1730,7 +1849,7 @@ def resend_verification():
         ), 429
     verification_secret = secrets.token_urlsafe(32)
     user.verification_token_hash = hash_secret(verification_secret)
-    user.verification_expires_at = now + timedelta(hours=1)
+    user.verification_expires_at = now + VERIFICATION_LINK_TTL
     user.verification_sent_at = now
     verify_link = absolute_url("verify_email", token=verification_secret)
     db.session.commit()
@@ -1808,6 +1927,200 @@ def health_ready():
     if not limiter_storage_ready:
         return jsonify({"status": "not_ready"}), 503
     return jsonify({"status": "ready"}), 200
+
+
+@app.route("/health/invariants")
+def health_invariants():
+    """Runtime invariant checks for deployed-mode contracts.
+
+    Returns a 200 with individual check results (all must pass) or a 503
+    describing which invariant(s) failed.
+    """
+    checks: dict[str, bool | str] = {}
+
+    # 1. require_invite must be True when deployed
+    if TRIAL.is_deployed:
+        checks["require_invite_is_true_when_deployed"] = TRIAL.require_invite
+    else:
+        checks["require_invite_is_true_when_deployed"] = True  # N/A in dev
+
+    # 2. TRIAL.is_deployed matches DATABASE_URL expectation
+    database_url = os.environ.get("DATABASE_URL", "").strip()
+    if TRIAL.is_deployed:
+        checks["database_url_is_postgres_when_deployed"] = database_url.startswith(
+            ("postgresql://", "postgresql+psycopg://")
+        )
+    else:
+        checks["database_url_is_postgres_when_deployed"] = True  # N/A
+
+    # 3. Signup rate within expected bounds (query DB for persistent data)
+    try:
+        one_hour_ago = utc_now() - timedelta(hours=1)
+        signups_last_hour = User.query.filter(
+            User.created_at >= one_hour_ago
+        ).count()
+        checks["signup_rate_within_bounds"] = signups_last_hour <= 60
+        checks["_signups_last_hour"] = signups_last_hour
+    except Exception:
+        checks["signup_rate_within_bounds"] = False
+        checks["_signups_last_hour"] = "query_failed"
+
+    # 4. No zero-signup edge case for deployed environments (no signups in 24h)
+    if TRIAL.is_deployed:
+        try:
+            one_day_ago = utc_now() - timedelta(hours=24)
+            signups_last_day = User.query.filter(
+                User.created_at >= one_day_ago
+            ).count()
+            checks["no_stale_signup_drought_when_deployed"] = signups_last_day > 0
+            checks["_signups_last_24h"] = signups_last_day
+        except Exception:
+            checks["no_stale_signup_drought_when_deployed"] = False
+            checks["_signups_last_24h"] = "query_failed"
+    else:
+        checks["no_stale_signup_drought_when_deployed"] = True  # N/A in dev
+
+    # 5. Current in-memory signup rate from sliding window
+    if TRIAL.is_deployed:
+        checks["in_memory_signup_rate_ok"] = len(_SIGNUP_TIMESTAMPS) <= _SIGNUP_RATE_LIMIT
+        checks["_in_memory_signups_in_last_10min"] = len(_SIGNUP_TIMESTAMPS)
+    else:
+        checks["in_memory_signup_rate_ok"] = True
+
+    all_pass = all(
+        isinstance(value, bool) and value
+        for key, value in checks.items()
+        if not key.startswith("_")
+    )
+    status_code = 200 if all_pass else 503
+    return jsonify({
+        "status": "ok" if all_pass else "degraded",
+        "checks": checks,
+    }), status_code
+
+
+@app.cli.command("make-moderator")
+@click.option("--email", "emails", multiple=True, help="Address to promote. Repeatable.")
+@click.option("--apply", "apply_changes", is_flag=True, help="Commit the promotion.")
+@click.option("--demote", is_flag=True, help="Return the named accounts to the 'user' role.")
+def make_moderator_cli(emails=(), apply_changes=False, demote=False):
+    """Grant or revoke the moderator role.
+
+    Nothing else in Relay can set `users.role`: it defaults to 'user', signup never
+    changes it, and no route exposes it. Without this command the /moderator
+    dashboard returns 404 for every account, so safety reports and disputes can be
+    filed but never actioned — the only alternative is hand-writing UPDATE
+    statements against the production database.
+
+    Addresses come from --email or, when none are given, RELAY_MODERATOR_EMAILS.
+    Dry-run by default; pass --apply to commit.
+    """
+    targets = [item.strip().lower() for item in emails if item.strip()]
+    if not targets:
+        targets = [
+            item.strip().lower()
+            for item in os.environ.get("RELAY_MODERATOR_EMAILS", "").split(",")
+            if item.strip()
+        ]
+    if not targets:
+        raise click.ClickException(
+            "No addresses given. Pass --email or set RELAY_MODERATOR_EMAILS."
+        )
+
+    new_role = "user" if demote else "moderator"
+    results = []
+    for address in targets:
+        account = get_user_by_email(address)
+        if not account:
+            # Almost always the operator running this before the person has signed up.
+            results.append({"email": address, "status": "no_such_account"})
+            continue
+        if account.account_status != "active":
+            results.append({"email": address, "status": "account_not_active"})
+            continue
+        if account.role == "admin" and demote:
+            results.append({"email": address, "status": "refused_admin_demotion"})
+            continue
+        if account.role == new_role:
+            results.append({"email": address, "status": "already_" + new_role, "user_id": account.id})
+            continue
+        if apply_changes:
+            account.role = new_role
+            # Force a fresh sign-in so the new role cannot be exercised from a
+            # session that predates it.
+            account.session_version += 1
+        results.append({
+            "email": address,
+            "status": ("promoted" if not demote else "demoted") if apply_changes else "would_change",
+            "user_id": account.id,
+            "from_role": "user" if not demote else "moderator",
+            "to_role": new_role,
+        })
+
+    changed = [row for row in results if row["status"] in {"promoted", "demoted"}]
+    if apply_changes and changed:
+        db.session.commit()
+        for row in changed:
+            app.logger.info(json.dumps({
+                "event": "role_changed",
+                "user_id": row["user_id"],
+                "to_role": row["to_role"],
+            }, separators=(",", ":")))
+    else:
+        db.session.rollback()
+
+    click.echo(json.dumps({
+        "mode": "apply" if apply_changes else "dry-run",
+        "role": new_role,
+        "results": results,
+    }, indent=2, sort_keys=True))
+    if not apply_changes:
+        click.echo("Dry run — no changes written. Re-run with --apply to commit.")
+    if any(row["status"] == "no_such_account" for row in results):
+        raise click.ClickException(
+            "One or more addresses have no account yet. They must sign up and verify first."
+        )
+
+
+@app.cli.command("auth-log")
+@click.option("--email", default=None, help="Filter by participant address (hashed locally; never stored or echoed).")
+@click.option("--user-id", default=None, help="Filter by account id.")
+@click.option("--event", default=None, help="Filter by a single event type.")
+@click.option("--hours", default=24, show_default=True, help="Look-back window in hours.")
+@click.option("--limit", "row_limit", default=100, show_default=True, help="Maximum rows to print.")
+def auth_log_cli(email=None, user_id=None, event=None, hours=24, row_limit=100):
+    """Read the authentication audit trail when a participant reports a sign-in problem.
+
+    Answers "did they ever get in, and what failed" without exposing raw
+    addresses or IPs. Read-only.
+    """
+    query = AuthEvent.query.filter(AuthEvent.created_at >= utc_now() - timedelta(hours=hours))
+    if email:
+        # Hashed here so the plaintext address stays out of the query and output.
+        query = query.filter(AuthEvent.email_hash == hash_secret(email.strip().lower()))
+    if user_id:
+        query = query.filter(AuthEvent.user_id == user_id)
+    if event:
+        if event not in AUTH_EVENT_TYPES:
+            raise click.BadParameter(f"event must be one of: {', '.join(AUTH_EVENT_TYPES)}")
+        query = query.filter(AuthEvent.event == event)
+    rows = query.order_by(AuthEvent.created_at.desc()).limit(row_limit).all()
+    click.echo(json.dumps({
+        "window_hours": hours,
+        "row_count": len(rows),
+        "truncated": len(rows) == row_limit,
+        "events": [
+            {
+                "at": row.created_at.isoformat(),
+                "event": row.event,
+                "user_id": row.user_id,
+                "request_id": row.request_id,
+                # First 12 hex chars: enough to correlate, not enough to reverse.
+                "ip_fingerprint": (row.ip_hash or "")[:12] or None,
+            }
+            for row in rows
+        ],
+    }, indent=2, sort_keys=True))
 
 
 @app.cli.command("reconcile-credits")
@@ -1894,6 +2207,78 @@ def settle_expired_requests(apply_changes=False, grace_minutes=60):
         raise click.ClickException(
             "Settlement succeeded, but one or more expiry notifications failed. Inspect secret-free delivery records."
         )
+
+
+@app.cli.command("cleanup-stale-sessions")
+@click.option("--apply", "apply_changes", is_flag=True, help="Commit auto-cancellations.")
+def cleanup_stale_cli(apply_changes=False):
+    """Find and auto-cancel sessions stuck in REQUESTED (>24h) or CONFIRMED (>48h)."""
+    result = cleanup_stale_sessions(apply=apply_changes)
+    click.echo(json.dumps(result, sort_keys=True))
+    if apply_changes and result["settled_count"]:
+        click.echo(f"Settled {result['settled_count']} stale session(s).")
+    elif not apply_changes and result["candidate_count"]:
+        click.echo(f"Dry-run: {result['candidate_count']} candidate(s) found. Re-run with --apply to cancel.")
+    else:
+        click.echo("No stale sessions found.")
+
+
+@app.cli.command("reconcile-ledger")
+@click.option("--fix", "apply_fix", is_flag=True, help="Post ADJUSTMENT transactions for mismatched accounts.")
+@click.option("--user-id", default=None, help="Only inspect/fix a single account.")
+def reconcile_ledger_cli(apply_fix=False, user_id=None):
+    """Scan credit accounts and optionally repair balance/ledger mismatches."""
+    mismatches = LedgerService.scan_all()
+    if user_id:
+        mismatches = [m for m in mismatches if m.user_id == user_id]
+        if not mismatches:
+            try:
+                account = CreditAccount.query.filter_by(user_id=user_id).first()
+                if account:
+                    click.echo(json.dumps({
+                        "user_id": user_id,
+                        "balance": account.balance,
+                        "status": "reconciled",
+                    }, sort_keys=True))
+                    return
+            except Exception:
+                pass
+
+    if not mismatches:
+        click.echo(json.dumps({"mode": "scan", "mismatch_count": 0}, sort_keys=True))
+        return
+
+    report = {
+        "mode": "fix" if apply_fix else "scan",
+        "mismatch_count": len(mismatches),
+        "accounts": [
+            {
+                "user_id": m.user_id,
+                "balance": m.balance,
+                "ledger_total": m.ledger_total,
+                "diff": m.balance - m.ledger_total,
+            }
+            for m in mismatches
+        ],
+        "fixed_count": 0,
+    }
+
+    if not apply_fix:
+        click.echo(json.dumps(report, sort_keys=True))
+        return
+
+    fixed = 0
+    try:
+        for m in mismatches:
+            LedgerService.fix_account(m.user_id, actor_user_id="reconciler-cli")
+            fixed += 1
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+
+    report["fixed_count"] = fixed
+    click.echo(json.dumps(report, sort_keys=True))
 
 
 @app.cli.command("send-session-reminders")
