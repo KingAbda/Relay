@@ -51,8 +51,78 @@ services:
         sync: false
       - key: RATE_LIMIT_STORAGE
         sync: false
+      # Comma-separated addresses promoted by `flask make-moderator`.
+      # Supply through the hosting secret UI; never commit real addresses.
+      - key: RELAY_MODERATOR_EMAILS
+        sync: false
+
+  # ── Scheduled maintenance ────────────────────────────────────────────
+  # Without these, three CLI commands that already exist simply never run.
+  # The consequential one is settle-expired-requests: a session request the
+  # teacher never accepts holds the learner's credit indefinitely. Participants
+  # start with two, so two ignored requests strand someone with no way to book
+  # and no message explaining why.
+  #
+  # Both jobs are dry-run by default in code; --apply is what commits, and
+  # settle-expired-requests additionally refuses to apply unless
+  # RELAY_SCHEDULER_AUTHENTICATED is true. That flag belongs ONLY on these
+  # cron services, never on the public web service.
+  #
+  # These are declarations only — provisioning them is a separate, deliberate
+  # decision by whoever owns the hosting account.
+  - type: cron
+    name: relay-settle-expired-requests
+    runtime: python
+    autoDeployTrigger: off
+    schedule: "*/30 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask --app app.main settle-expired-requests --apply
+    envVars:
+      - key: RELAY_SCHEDULER_AUTHENTICATED
+        value: "true"
+      - fromGroup: relay-shared
+
+  - type: cron
+    name: relay-session-reminders
+    runtime: python
+    autoDeployTrigger: off
+    schedule: "0 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask --app app.main send-session-reminders --apply
+    envVars:
+      - key: RELAY_SCHEDULER_AUTHENTICATED
+        value: "true"
+      - fromGroup: relay-shared
+
+  - type: cron
+    name: relay-cleanup-stale-sessions
+    runtime: python
+    autoDeployTrigger: off
+    schedule: "15 3 * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask --app app.main cleanup-stale-sessions --apply
+    envVars:
+      - key: RELAY_SCHEDULER_AUTHENTICATED
+        value: "true"
+      - fromGroup: relay-shared
+
+# The cron services read shared configuration (DATABASE_URL, RELAY_ENV, SMTP,
+# rate-limit storage, trial contract) from an environment group named
+# `relay-shared` so the web service and the schedulers cannot drift apart.
+# Create that group in the hosting UI with the same values listed above.
+envVarGroups:
+  - name: relay-shared
+    envVars:
+      - key: RELAY_ENV
+        value: production
+      - key: RELAY_LOG_LEVEL
+        value: INFO
 
 # No database is provisioned by this blueprint. DATABASE_URL must point to a
 # separately approved, recoverable PostgreSQL service before any deployment.
 # Run the reviewed Flask-Migrate revision separately; /health/ready refuses a
 # database that is not at the exact application schema head.
+#
+# Redis (RATE_LIMIT_STORAGE) is likewise not provisioned here. The app refuses
+# to boot in production without it, by design — rate limits and account lockout
+# are not enforceable across workers with in-memory storage.

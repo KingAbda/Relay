@@ -197,6 +197,13 @@ RELAY_STARTER_CREDITS = TRIAL.starter_credits
 RELAY_SUPPLY_ONLY_MODE = False
 RELAY_MONETIZATION_ENABLED = False
 
+# How long an emailed verification link stays valid. One hour was too short for a
+# real cohort: an invited student who signs up at night and opens their inbox the
+# next morning finds a dead link, and recovering means discovering the resend
+# control unprompted. A day costs nothing here — the link is single-use, stored
+# only as a hash, and cleared the moment it is redeemed.
+VERIFICATION_LINK_TTL = timedelta(hours=24)
+
 # ── Import models after db init ────────────────────────
 from app.models import (
     User, UserSkill, UserWant, CreditAccount, CreditTransaction,
@@ -634,7 +641,7 @@ def signup():
         email=email, password_hash=generate_password_hash(password, method='pbkdf2:sha256'),
         full_name=full_name,
         verification_token_hash=hash_secret(verification_secret),
-        verification_expires_at=now + timedelta(hours=1),
+        verification_expires_at=now + VERIFICATION_LINK_TTL,
         verification_sent_at=now,
     )
     db.session.add(user)
@@ -652,6 +659,8 @@ def signup():
         send_email(user, "Verify your Relay account",
             f"Hi {user.full_name.split()[0]},\n\n"
             f"Open this link to verify your invited NYU email:\n{verify_link}\n\n"
+            f"The link is valid for {VERIFICATION_LINK_TTL.days * 24} hours. If it expires, "
+            f"sign in and request a new one.\n\n"
             f"After verification, {RELAY_STARTER_CREDITS} starter credits will be added to your account.\n\n- Relay Team",
             message_type="verification", source_id=user.verification_token_hash)
     except EmailDeliveryError:
@@ -1840,7 +1849,7 @@ def resend_verification():
         ), 429
     verification_secret = secrets.token_urlsafe(32)
     user.verification_token_hash = hash_secret(verification_secret)
-    user.verification_expires_at = now + timedelta(hours=1)
+    user.verification_expires_at = now + VERIFICATION_LINK_TTL
     user.verification_sent_at = now
     verify_link = absolute_url("verify_email", token=verification_secret)
     db.session.commit()
@@ -1988,6 +1997,89 @@ def health_invariants():
         "status": "ok" if all_pass else "degraded",
         "checks": checks,
     }), status_code
+
+
+@app.cli.command("make-moderator")
+@click.option("--email", "emails", multiple=True, help="Address to promote. Repeatable.")
+@click.option("--apply", "apply_changes", is_flag=True, help="Commit the promotion.")
+@click.option("--demote", is_flag=True, help="Return the named accounts to the 'user' role.")
+def make_moderator_cli(emails=(), apply_changes=False, demote=False):
+    """Grant or revoke the moderator role.
+
+    Nothing else in Relay can set `users.role`: it defaults to 'user', signup never
+    changes it, and no route exposes it. Without this command the /moderator
+    dashboard returns 404 for every account, so safety reports and disputes can be
+    filed but never actioned — the only alternative is hand-writing UPDATE
+    statements against the production database.
+
+    Addresses come from --email or, when none are given, RELAY_MODERATOR_EMAILS.
+    Dry-run by default; pass --apply to commit.
+    """
+    targets = [item.strip().lower() for item in emails if item.strip()]
+    if not targets:
+        targets = [
+            item.strip().lower()
+            for item in os.environ.get("RELAY_MODERATOR_EMAILS", "").split(",")
+            if item.strip()
+        ]
+    if not targets:
+        raise click.ClickException(
+            "No addresses given. Pass --email or set RELAY_MODERATOR_EMAILS."
+        )
+
+    new_role = "user" if demote else "moderator"
+    results = []
+    for address in targets:
+        account = get_user_by_email(address)
+        if not account:
+            # Almost always the operator running this before the person has signed up.
+            results.append({"email": address, "status": "no_such_account"})
+            continue
+        if account.account_status != "active":
+            results.append({"email": address, "status": "account_not_active"})
+            continue
+        if account.role == "admin" and demote:
+            results.append({"email": address, "status": "refused_admin_demotion"})
+            continue
+        if account.role == new_role:
+            results.append({"email": address, "status": "already_" + new_role, "user_id": account.id})
+            continue
+        if apply_changes:
+            account.role = new_role
+            # Force a fresh sign-in so the new role cannot be exercised from a
+            # session that predates it.
+            account.session_version += 1
+        results.append({
+            "email": address,
+            "status": ("promoted" if not demote else "demoted") if apply_changes else "would_change",
+            "user_id": account.id,
+            "from_role": "user" if not demote else "moderator",
+            "to_role": new_role,
+        })
+
+    changed = [row for row in results if row["status"] in {"promoted", "demoted"}]
+    if apply_changes and changed:
+        db.session.commit()
+        for row in changed:
+            app.logger.info(json.dumps({
+                "event": "role_changed",
+                "user_id": row["user_id"],
+                "to_role": row["to_role"],
+            }, separators=(",", ":")))
+    else:
+        db.session.rollback()
+
+    click.echo(json.dumps({
+        "mode": "apply" if apply_changes else "dry-run",
+        "role": new_role,
+        "results": results,
+    }, indent=2, sort_keys=True))
+    if not apply_changes:
+        click.echo("Dry run — no changes written. Re-run with --apply to commit.")
+    if any(row["status"] == "no_such_account" for row in results):
+        raise click.ClickException(
+            "One or more addresses have no account yet. They must sign up and verify first."
+        )
 
 
 @app.cli.command("auth-log")
