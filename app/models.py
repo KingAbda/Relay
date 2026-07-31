@@ -397,3 +397,54 @@ class ModerationAction(db.Model):
     reason: Mapped[str] = mapped_column(Text, nullable=False)
     evidence_notes: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, nullable=False)
+
+
+AUTH_EVENT_TYPES = (
+    "login_succeeded",
+    "login_failed",
+    "login_blocked_locked",
+    "account_locked",
+    "logout",
+    "email_verified",
+    "password_reset_requested",
+    "password_reset_completed",
+)
+
+
+class AuthEvent(db.Model):
+    """Durable authentication audit trail.
+
+    Application logs are the wrong home for this: they are dropped on restart,
+    aged out by the host's retention window, and cannot be joined against user
+    rows when a participant reports being unable to sign in. `failed_login_attempts`
+    on `users` is a live lockout counter that resets on success, so it carries no
+    history either.
+
+    Privacy: no raw email address or IP is stored. Both are SHA-256 hashed, which
+    preserves the equality checks an operator actually needs ("same address?",
+    "same origin?") without retaining the identifier itself. This matches the
+    hashing already used for rate-limit keys in `submitted_email_limit_key`.
+    `email_hash` is what makes failed attempts against a non-existent account
+    correlatable, since those have no `user_id`.
+    """
+
+    __tablename__ = "auth_events"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    # Nullable: a failed login against an unknown address has no user to point at.
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=True, index=True)
+    event: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    email_hash: Mapped[str] = mapped_column(String(64), nullable=True, index=True)
+    ip_hash: Mapped[str] = mapped_column(String(64), nullable=True)
+    request_id: Mapped[str] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, nullable=False, index=True)
+
+    __table_args__ = (
+        CheckConstraint(
+            "event IN ("
+            "'login_succeeded', 'login_failed', 'login_blocked_locked', "
+            "'account_locked', 'logout', 'email_verified', "
+            "'password_reset_requested', 'password_reset_completed')",
+            name="ck_auth_events_event",
+        ),
+    )

@@ -7,6 +7,7 @@ import uuid
 import secrets
 import hashlib
 import json
+import logging
 import time
 from collections import deque
 from datetime import datetime, timedelta, timezone
@@ -119,6 +120,23 @@ app.config["TRUSTED_HOSTS"] = list(TRIAL.trusted_hosts) if TRIAL.is_deployed els
 app.config["RELAY_PUBLIC_URL"] = TRIAL.public_url
 app.config["RELAY_EMAIL_BACKEND"] = TRIAL.email_backend
 
+# ── Logging ────────────────────────────────────────────
+# Flask leaves `app.logger` at NOTSET, so it inherits the root logger's WARNING
+# default and silently discards every `app.logger.info(...)` call — including the
+# structured per-request audit line in `add_security_headers`. Gunicorn's
+# `--log-level info` configures gunicorn's own loggers, not this one, so the
+# level has to be set explicitly or the request trail is never emitted at all.
+_LOG_LEVEL = os.environ.get("RELAY_LOG_LEVEL", "INFO").strip().upper()
+if _LOG_LEVEL not in {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}:
+    raise RuntimeError(
+        "RELAY_LOG_LEVEL must be DEBUG, INFO, WARNING, ERROR, or CRITICAL"
+    )
+# Flask already attached its own stderr handler to `app.logger`; setting the level
+# is enough to let records through it. Deliberately not calling
+# `logging.basicConfig()` — that adds a second root handler and, because
+# `app.logger` propagates, every line would be emitted twice.
+app.logger.setLevel(_LOG_LEVEL)
+
 # ── Cache bust version for static assets ───────────────
 _CACHE_BUST = hashlib.md5(str(utc_now().timestamp()).encode()).hexdigest()[:8]
 
@@ -185,6 +203,7 @@ from app.models import (
     Session, SessionReview, SkillCategory, SessionStatus, TransactionType,
     PasswordResetToken, EmailDelivery, ConsentAcceptance,
     UserBlock, SafetyReport, SessionDispute, ModerationAction,
+    AuthEvent, AUTH_EVENT_TYPES,
 )
 
 CURRENT_CONSENT_VERSIONS = {
@@ -194,7 +213,7 @@ CURRENT_CONSENT_VERSIONS = {
     "code_of_conduct": "2026-07-13-draft",
     "safety_rules": "2026-07-13-draft",
 }
-DATABASE_SCHEMA_REVISION = "20260713_01"
+DATABASE_SCHEMA_REVISION = "20260731_01"
 
 # ── Auto-seed demo data (defined before use) ──────────
 # ── Initialize DB tables ──────────────────────────────
@@ -230,6 +249,47 @@ def get_user_by_email(email):
 
 def hash_secret(value):
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def record_auth_event(event, *, user=None, email=None, commit=False):
+    """Append one authentication audit row and mirror it to the structured log.
+
+    Never raises. An audit trail that can take down a login attempt is worse than
+    one with a gap, so a failure here is logged and swallowed — the caller's own
+    transaction is left untouched.
+
+    Set `commit=True` only on paths that do not already commit; otherwise the row
+    is flushed with the caller's transaction so it lands atomically with the state
+    change it describes.
+    """
+    try:
+        remote_address = get_remote_address() if has_request_context() else None
+        entry = AuthEvent(
+            user_id=user.id if user else None,
+            event=event,
+            email_hash=hash_secret(email.strip().lower()) if email else None,
+            ip_hash=hash_secret(remote_address) if remote_address else None,
+            request_id=g.get("request_id") if has_request_context() else None,
+        )
+        db.session.add(entry)
+        if commit:
+            db.session.commit()
+        else:
+            db.session.flush()
+        app.logger.info(json.dumps({
+            "event": "auth_event",
+            "auth_event": event,
+            "user_id": user.id if user else None,
+            "request_id": g.get("request_id") if has_request_context() else None,
+        }, separators=(",", ":")))
+    except Exception:
+        # Do not let auditing break authentication.
+        db.session.rollback()
+        app.logger.warning(json.dumps({
+            "event": "auth_event_write_failed",
+            "auth_event": event,
+            "request_id": g.get("request_id") if has_request_context() else None,
+        }, separators=(",", ":")), exc_info=True)
 
 
 def missing_current_consents(user):
@@ -634,6 +694,7 @@ def login():
         and user.account_locked_until > utc_now()
     ):
         remaining = max(1, int((user.account_locked_until - utc_now()).total_seconds() // 60))
+        record_auth_event("login_blocked_locked", user=user, email=email, commit=True)
         return render_template("login.html", user=None, error=f"Account locked. Try again in {remaining} minutes."), 429
     if (
         not user
@@ -642,12 +703,21 @@ def login():
     ):
         if user and user.account_status == "active":
             user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
-            if user.failed_login_attempts >= 5:
+            locked_now = user.failed_login_attempts >= 5
+            if locked_now:
                 user.account_locked_until = utc_now() + timedelta(minutes=15)
+            record_auth_event("login_failed", user=user, email=email)
+            if locked_now:
+                record_auth_event("account_locked", user=user, email=email)
             db.session.commit()
+        else:
+            # Unknown address or a non-active account: no user row to attribute
+            # this to, so `email_hash` is the only thread tying attempts together.
+            record_auth_event("login_failed", email=email, commit=True)
         return render_template("login.html", user=None, error="Invalid email or password.")
     user.failed_login_attempts = 0
     user.account_locked_until = None
+    record_auth_event("login_succeeded", user=user, email=email)
     db.session.commit()
     session.clear()
     session["user_id"] = user.id
@@ -657,6 +727,15 @@ def login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
+    # Resolve the account before clearing the session; afterwards it is unknowable.
+    # Pass the address too, or `auth-log --email` silently omits logout events.
+    signed_in = current_user()
+    record_auth_event(
+        "logout",
+        user=signed_in,
+        email=signed_in.email if signed_in else None,
+        commit=True,
+    )
     session.clear()
     resp = make_response(redirect(url_for("home")))
     resp.delete_cookie("session")
@@ -673,6 +752,7 @@ def verify_email(token):
         user.verification_token_hash = None
         user.verification_expires_at = None
         LedgerService.grant_starter(user, RELAY_STARTER_CREDITS)
+        record_auth_event("email_verified", user=user, email=user.email)
         db.session.commit()
         session.clear()
         session["user_id"] = user.id
@@ -698,6 +778,7 @@ def forgot_password():
         expires = utc_now() + timedelta(hours=1)
         reset = PasswordResetToken(user_id=user.id, token_hash=hash_secret(token), expires_at=expires)
         db.session.add(reset)
+        record_auth_event("password_reset_requested", user=user, email=email)
         db.session.commit()
         reset_link = absolute_url("reset_password", token=token)
         try:
@@ -732,6 +813,7 @@ def reset_password(token):
     user.password_hash = generate_password_hash(password)
     user.session_version += 1
     PasswordResetToken.query.filter_by(user_id=user.id, used=False).update({"used": True})
+    record_auth_event("password_reset_completed", user=user, email=user.email)
     db.session.commit()
     session.clear()
     return redirect(url_for("login"))
@@ -1906,6 +1988,47 @@ def health_invariants():
         "status": "ok" if all_pass else "degraded",
         "checks": checks,
     }), status_code
+
+
+@app.cli.command("auth-log")
+@click.option("--email", default=None, help="Filter by participant address (hashed locally; never stored or echoed).")
+@click.option("--user-id", default=None, help="Filter by account id.")
+@click.option("--event", default=None, help="Filter by a single event type.")
+@click.option("--hours", default=24, show_default=True, help="Look-back window in hours.")
+@click.option("--limit", "row_limit", default=100, show_default=True, help="Maximum rows to print.")
+def auth_log_cli(email=None, user_id=None, event=None, hours=24, row_limit=100):
+    """Read the authentication audit trail when a participant reports a sign-in problem.
+
+    Answers "did they ever get in, and what failed" without exposing raw
+    addresses or IPs. Read-only.
+    """
+    query = AuthEvent.query.filter(AuthEvent.created_at >= utc_now() - timedelta(hours=hours))
+    if email:
+        # Hashed here so the plaintext address stays out of the query and output.
+        query = query.filter(AuthEvent.email_hash == hash_secret(email.strip().lower()))
+    if user_id:
+        query = query.filter(AuthEvent.user_id == user_id)
+    if event:
+        if event not in AUTH_EVENT_TYPES:
+            raise click.BadParameter(f"event must be one of: {', '.join(AUTH_EVENT_TYPES)}")
+        query = query.filter(AuthEvent.event == event)
+    rows = query.order_by(AuthEvent.created_at.desc()).limit(row_limit).all()
+    click.echo(json.dumps({
+        "window_hours": hours,
+        "row_count": len(rows),
+        "truncated": len(rows) == row_limit,
+        "events": [
+            {
+                "at": row.created_at.isoformat(),
+                "event": row.event,
+                "user_id": row.user_id,
+                "request_id": row.request_id,
+                # First 12 hex chars: enough to correlate, not enough to reverse.
+                "ip_fingerprint": (row.ip_hash or "")[:12] or None,
+            }
+            for row in rows
+        ],
+    }, indent=2, sort_keys=True))
 
 
 @app.cli.command("reconcile-credits")

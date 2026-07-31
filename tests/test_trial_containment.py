@@ -73,7 +73,7 @@ class TrialContainmentTests(unittest.TestCase):
             db.drop_all()
             db.create_all()
             db.session.execute(text("CREATE TABLE alembic_version (version_num VARCHAR(32) NOT NULL)"))
-            db.session.execute(text("INSERT INTO alembic_version VALUES ('20260713_01')"))
+            db.session.execute(text("INSERT INTO alembic_version VALUES ('20260731_01')"))
             db.session.commit()
 
     def csrf(self, path: str = "/signup") -> str:
@@ -449,7 +449,7 @@ class TrialContainmentTests(unittest.TestCase):
         self.assertEqual(stale.get_json(), {"status": "not_ready"})
 
         with app.app_context():
-            db.session.execute(text("UPDATE alembic_version SET version_num = '20260713_01'"))
+            db.session.execute(text("UPDATE alembic_version SET version_num = '20260731_01'"))
             db.session.commit()
 
         with patch("app.main.db.session.execute", side_effect=RuntimeError("database unavailable")):

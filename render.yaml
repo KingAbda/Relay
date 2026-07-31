@@ -11,6 +11,8 @@ services:
     envVars:
       - key: RELAY_ENV
         value: production
+      - key: RELAY_LOG_LEVEL
+        value: INFO
       - key: RELAY_SECRET_KEY
         generateValue: true
       - key: DATABASE_URL

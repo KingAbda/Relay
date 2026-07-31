@@ -79,7 +79,7 @@ class PostgreSQLMigrationTests(unittest.TestCase):
         with self.engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "20260713_01",
+                "20260731_01",
             )
             self.assertEqual(
                 connection.execute(sa.text("SELECT balance FROM credit_accounts WHERE user_id='learner'")).scalar_one(),
