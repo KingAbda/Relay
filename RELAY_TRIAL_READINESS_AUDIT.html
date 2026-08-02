@@ -716,8 +716,8 @@
         </p>
       </div>
       <div class="update-status-grid" aria-label="Current readiness reconciliation">
-        <div class="update-status fixed"><strong>69</strong><span>62 warning-strict plus seven guarded infrastructure tests passing</span></div>
-        <div class="update-status partial"><strong>44 / 50</strong><span>Audit issues with current PASS evidence</span></div>
+        <div class="update-status fixed"><strong>95</strong><span>88 warning-strict plus seven guarded infrastructure tests passing</span></div>
+        <div class="update-status partial"><strong>45 / 50</strong><span>Audit issues with current PASS evidence</span></div>
         <div class="update-status attempted"><strong>5 / 12</strong><span>Launch gates passing; mocks and plans do not count</span></div>
         <div class="update-status risk"><strong>NO-GO</strong><span>Four gates are blocked; three are not tested</span></div>
       </div>
@@ -742,20 +742,20 @@
       <div class="callout good" style="margin-top: 16px;">
         <p><strong>Local verification:</strong></p>
         <ul class="verification-list">
-          <li><code>.venv/bin/python -W error::DeprecationWarning -m unittest discover -v</code> — 62 tests passed.</li>
+          <li><code>.venv/bin/python -W error::DeprecationWarning -m unittest discover -v</code> — 88 tests passed.</li>
           <li>The current homepage returned <code>200</code> at loopback-only <code>http://localhost:8000/</code>, emitted the expected security headers, and <code>/health/live</code> returned <code>{"status":"ok"}</code> before the preview was opened in an isolated local browser.</li>
-          <li>Four fresh/legacy/fail-closed SQLite migration tests passed.</li>
+          <li>Five fresh/legacy/fail-closed SQLite migration tests passed.</li>
           <li>Package consistency, all 14 direct pins, and the resolved runtime graph pass local advisory checks.</li>
           <li>Five guarded migration and competing-action tests passed on a fresh disposable PostgreSQL 16 database <code>relay_owner_ready_ci</code>.</li>
-          <li>Committed base <code>8c775556</code> passed the complete GitHub Actions safety gate, including disposable Redis/proxy and production-shaped infrastructure jobs.</li>
-          <li>Fresh isolated responsive/basic-accessibility browser checks passed on the calm-dark candidate; the exact candidate still awaits CI.</li>
+          <li>Merged application commit <code>1132a149</code> passed the complete GitHub Actions safety gate, including disposable Redis/proxy and production-shaped infrastructure jobs.</li>
+          <li>Fresh isolated responsive/basic-accessibility browser checks passed on the calm-dark candidate; exact-candidate CI also passed.</li>
         </ul>
       </div>
       <div class="callout warn" style="margin-top: 16px;">
-        <p><strong>Repository boundary:</strong> base <code>8c775556</code> is synchronized with <code>origin/main</code>. The redesign, edge-case fixes, tests, and current handoff documents are saved in one owner-approved local candidate commit. A fresh temporary PostgreSQL 16 cluster and localhost-only disposable Redis 7.4 container were used only for guarded tests; the exact candidate passed Redis/proxy and production-shaped readiness locally. No existing or remote database, account, push, deployment, credential, or participant communication was touched.</p>
+        <p><strong>Repository boundary:</strong> the reviewed application candidate is merged into <code>main</code> at <code>1132a149</code> and exact-candidate CI passed. Disposable PostgreSQL and Redis services were used only for guarded tests. No staging or production database, account, deployment, credential, or participant communication was touched.</p>
       </div>
       <div class="callout good" style="margin-top: 16px;">
-        <p><strong>Fresh browser proof · July 23:</strong> ten public routes and the redesigned homepage passed at 375, 500, 768, and 1440 pixels plus a 200% reflow approximation. Keyboard focus, skip link, mobile menu, reduced/static motion, reveal settling, same-origin requests, console errors, and AA palette contrast passed. This local proof does not establish exact-candidate CI, staging, SMTP, recovery, or deployment readiness.</p>
+        <p><strong>Fresh browser proof · July 23:</strong> ten public routes and the redesigned homepage passed at 375, 500, 768, and 1440 pixels plus a 200% reflow approximation. Keyboard focus, skip link, mobile menu, reduced/static motion, reveal settling, same-origin requests, console errors, and AA palette contrast passed. This local proof does not establish staging, SMTP, recovery, or deployment readiness.</p>
       </div>
     </section>
 
@@ -791,14 +791,14 @@
     <section class="shell" id="next-steps" aria-labelledby="next-steps-title">
       <div class="section-head">
         <p class="eyebrow">From here · work that can start now</p>
-        <h2 id="next-steps-title">Finish the release candidate before asking another operator to rehearse it</h2>
-        <p class="section-intro">These steps keep the trial at NO-GO while taking the saved local candidate through owner review, CI, and production-like staging evidence.</p>
+        <h2 id="next-steps-title">Move the merged candidate into approved staging</h2>
+        <p class="section-intro">The code and CI gate are complete. These steps keep the trial at NO-GO while the owner funds services and the team gathers production-like evidence.</p>
       </div>
       <div class="next-step-grid">
         <article class="next-step-card">
-          <h3>Review the synchronized candidate</h3>
-          <p>Base <code>8c775556</code> matches <code>origin/main</code>. Review the exact local candidate commit and its manifest before authorizing publication.</p>
-          <p class="boundary">Repository ancestry and local candidate scope are current; push approval remains separate.</p>
+          <h3>Use the published candidate</h3>
+          <p>Application commit <code>1132a149</code> is merged into <code>main</code> and its complete GitHub Actions safety gate passed.</p>
+          <p class="boundary">Publication is complete; deployment and invitations remain separate approvals.</p>
         </article>
         <article class="next-step-card">
           <h3>Approve the release scope</h3>
@@ -808,12 +808,12 @@
         <article class="next-step-card">
           <h3>Repeat the complete local gate</h3>
           <p>The warning-strict suite, PostgreSQL migration/concurrency, compilation, dependency consistency and advisory scans, secret scan, source check, deployment-blueprint parse, browser QA, and diff hygiene pass on July 23.</p>
-          <p class="boundary">Local gate is green; the exact candidate's Redis/proxy and full infrastructure checks must repeat in CI.</p>
+          <p class="boundary">Local and exact-candidate CI gates are green; repeat against the approved staging topology.</p>
         </article>
         <article class="next-step-card">
-          <h3>Create one release candidate</h3>
-          <p>The manifest paths are saved in one intentional local commit. Separately authorize a branch push and require green GitHub Actions on that exact commit before staging.</p>
-          <p class="boundary">No push has occurred; publication, merge, staging, and deployment remain separate approvals.</p>
+          <h3>Protect the published branch</h3>
+          <p>Require pull requests, the safety-gate check, resolved conversations, and block force-pushes or branch deletion on <code>main</code>.</p>
+          <p class="boundary">Repository safeguards do not authorize staging or production deployment.</p>
         </article>
         <article class="next-step-card">
           <h3>Prepare the staging configuration</h3>
@@ -1129,7 +1129,7 @@
               <li>Test through real HTTP routes with CSRF and authorization—not simplified copies of the code.</li>
               <li>Add CI so a known bug cannot quietly return.</li>
             </ul>
-            <div class="proof"><strong>Current evidence:</strong> unsafe routes are contained, the obsolete simulator is removed, CI is defined, and 62 warning-strict local tests pass.</div>
+            <div class="proof"><strong>Current evidence:</strong> unsafe routes are contained, the obsolete simulator is removed, CI is defined, and 88 warning-strict local tests pass.</div>
           </div>
         </article>
 
@@ -1239,7 +1239,7 @@
       </div>
       <div class="gate-grid">
         <article class="gate-card" data-gate="G01"><div class="gate-head"><strong>G01 · Production-like deployment works</strong><span class="status-pill status-not-tested">NOT TESTED</span></div><p class="gate-evidence">Production-shaped PostgreSQL migration/current/check, exact production import, live Redis limiter storage, trusted proxy/host behavior, and exact-head readiness passed locally with readiness 200; no real SMTP/provider or staging was used.</p><p class="gate-blocker"><strong>Required:</strong> recoverable staging PostgreSQL/Redis, real SMTP, and a successful full readiness transcript.</p></article>
-        <article class="gate-card" data-gate="G02"><div class="gate-head"><strong>G02 · Credits reconcile exactly under concurrency</strong><span class="status-pill status-pass">PASS</span></div><p class="gate-evidence">Local repeat-session tests and three guarded PostgreSQL 16.14 competing-action tests on disposable <code>relay_migration_ci</code> reconcile exactly.</p><p class="gate-blocker"><strong>Remaining:</strong> repeat in CI and the production-like G12 rehearsal.</p></article>
+        <article class="gate-card" data-gate="G02"><div class="gate-head"><strong>G02 · Credits reconcile exactly under concurrency</strong><span class="status-pill status-pass">PASS</span></div><p class="gate-evidence">Local and exact-candidate CI repeat-session and guarded PostgreSQL competing-action tests reconcile exactly.</p><p class="gate-blocker"><strong>Remaining:</strong> repeat in the production-like G12 rehearsal.</p></article>
         <article class="gate-card" data-gate="G03"><div class="gate-head"><strong>G03 · Verification is mandatory</strong><span class="status-pill status-pass">PASS</span></div><p class="gate-evidence">Invite/domain validation, hashed verification, delayed unique starter award, identity-safe preview, and the unverified authorization matrix pass.</p><p class="gate-blocker"><strong>Remaining:</strong> recheck in the full staging rehearsal.</p></article>
         <article class="gate-card" data-gate="G04"><div class="gate-head"><strong>G04 · Session logistics work for both parties</strong><span class="status-pill status-not-tested">NOT TESTED</span></div><p class="gate-evidence">Route tests cover Eastern scheduling, exact real details, acceptance, and refund-once; no two-browser staging rehearsal exists.</p><p class="gate-blocker"><strong>Required:</strong> two-participant browser rehearsal.</p></article>
         <article class="gate-card" data-gate="G05"><div class="gate-head"><strong>G05 · Safety operations work</strong><span class="status-pill status-blocked">BLOCKED</span></div><p class="gate-evidence">Automated end-to-end drills pass and reconcile, including malformed settlement and repeat-resolution cases.</p><p class="gate-blocker"><strong>Required:</strong> a named moderator completes and signs the human incident rehearsal.</p></article>
@@ -1260,12 +1260,12 @@
         <p class="section-intro">The trial contract is now fixed in code. These are the remaining approvals, live-service proofs, and accountable-person requirements.</p>
       </div>
       <div class="decision-grid">
-        <article class="decision-card"><h3>Production-like database evidence</h3><p>Repeat the passing PostgreSQL suites in CI, then prove the full application boot/readiness path in staging before any persistent migration.</p></article>
+        <article class="decision-card"><h3>Production-like database evidence</h3><p>The PostgreSQL suites passed in exact-candidate CI; now prove the full application boot/readiness path in staging before any persistent migration.</p></article>
         <article class="decision-card"><h3>Recoverable infrastructure</h3><p>Provision approved PostgreSQL, Redis, SMTP, scheduler, log/error, uptime alert, backup, and isolated restore targets. These cannot be simulated into a passing gate.</p></article>
         <article class="decision-card"><h3>Performance trace</h3><p>Configure the Chrome DevTools performance connector only if an official lab trace/Core Web Vitals artifact is required; responsive and basic-accessibility browser evidence now passes locally.</p></article>
         <article class="decision-card"><h3>Named people and support</h3><p>Assign primary and backup moderator, technical operator, privacy contact, monitored support inbox, decision-maker, and rollback approver; then rehearse coverage.</p></article>
         <article class="decision-card"><h3>Legal and privacy review</h3><p>Have external counsel/privacy reviewers approve the versioned terms, privacy, age eligibility, conduct, safety, retention, and operator procedures.</p></article>
-        <article class="decision-card"><h3>Release remains separate</h3><p>The owner must separately approve the branch push/PR, staging spend/deployment, production deployment, invitation, and participant communication. The local commit is saved and base CI is green; exact-candidate CI is still required.</p></article>
+        <article class="decision-card"><h3>Release remains separate</h3><p>The owner must separately approve staging spend/deployment, production deployment, invitations, and participant communication. Repository publication and exact-candidate CI are complete.</p></article>
       </div>
     </section>
 
@@ -1291,7 +1291,7 @@
 
   <footer class="footer">
     <div class="shell">
-      <strong>Scope:</strong> repository source and working tree, 62 warning-strict local migration/route/unit/CLI/static-rendering tests, five fresh guarded disposable PostgreSQL 16 migration/concurrency tests, a fresh shared-Redis/proxy test, fresh production-shaped PostgreSQL/Redis readiness, green committed-base CI, synthetic logical restore, fresh isolated responsive/basic-accessibility browser checks, dependency/advisory checks, static security checks, deployment configuration, and documented external boundaries. No real inbox, provider recovery, exact-candidate CI, staging/deployment, deployed proxy/NAT exercise, official performance trace, human screen-reader review, or legal approval is claimed. This is an engineering readiness report, not legal advice. Exact locators live in <a href="docs/TRIAL_EVIDENCE_INDEX.md">the evidence index</a> and authoritative statuses in <a href="docs/TRIAL_READINESS_MATRIX.md">the readiness matrix</a>.
+      <strong>Scope:</strong> repository source and working tree, 88 warning-strict local migration/route/unit/CLI/static-rendering tests, five guarded disposable PostgreSQL migration/concurrency tests, shared-Redis/proxy and production-shaped readiness tests, green exact-candidate CI, synthetic logical restore, fresh isolated responsive/basic-accessibility browser checks, dependency/advisory checks, static security checks, deployment configuration, and documented external boundaries. No real inbox, provider recovery, staging/deployment, deployed proxy/NAT exercise, official performance trace, human screen-reader review, or legal approval is claimed. This is an engineering readiness report, not legal advice. Exact locators live in <a href="docs/TRIAL_EVIDENCE_INDEX.md">the evidence index</a> and authoritative statuses in <a href="docs/TRIAL_READINESS_MATRIX.md">the readiness matrix</a>.
     </div>
   </footer>
 
@@ -1299,12 +1299,12 @@
     (function () {
       const issues = Array.from(document.querySelectorAll('.issue'));
       const issueEvidence = [
-        ["C01", "PASS", "Provider-issued postgresql:// URLs normalize to the installed Psycopg 3 dialect under regression coverage. Exact production configuration previously booted against disposable PostgreSQL 16.14 and Redis 7.4.9 after migration/current/check with readiness 200.", "Repeat the updated provider-shaped production test in CI; full staging still requires recoverable infrastructure and real SMTP under G01."],
+        ["C01", "PASS", "Provider-issued postgresql:// URLs normalize to the installed Psycopg 3 dialect under regression coverage. Exact-candidate CI booted against disposable PostgreSQL 16 and Redis after migration/current/check with readiness 200.", "Full staging still requires recoverable infrastructure and real SMTP under G01."],
         ["C02", "PASS", "Booking uses the ledger helper once; a real CSRF-enabled route test proves one-credit balance and ledger agreement.", "Local PostgreSQL concurrency now passes under G02; repeat in staging."],
         ["C03", "PASS", "Requested/confirmed cancellation and authenticated expiry settlement use the source-unique ledger; repeat actions refund once and reconcile.", "Local PostgreSQL concurrency passes under G02/C05; repeat in staging."],
         ["C04", "PASS", "Payout identity is the session ID; two sessions for the same pair and skill each pay once and reconcile under repeat calls.", "Local PostgreSQL concurrency passes under G02/C05; repeat in staging."],
-        ["C05", "PASS", "Three guarded PostgreSQL 16.14 tests on disposable relay_migration_ci prove competing holds cannot overdraw, completion confirmations pay once, and cancellation racing one confirmation refunds once; every account reconciles.", "Repeat the guarded transcript in CI and production-like staging."],
-        ["C06", "PASS", "NYU/invite validation, hashed one-hour secrets, resend cooldown, delayed starter credits, privacy-safe preview, and authorization-matrix tests pass.", "Production-like abuse rehearsal remains G07/G12."],
+        ["C05", "PASS", "Local and exact-candidate CI PostgreSQL tests prove competing holds cannot overdraw, completion confirmations pay once, and cancellation racing one confirmation refunds once; every account reconciles.", "Repeat in production-like staging."],
+        ["C06", "PASS", "NYU/invite validation, hashed 24-hour secrets, resend cooldown, delayed starter credits, privacy-safe preview, and authorization-matrix tests pass.", "Production-like abuse rehearsal remains G07/G12."],
         ["C07", "PASS", "Signup grants no referral awards; referral UI and copy are absent and the program is intentionally disabled.", "Use the documented re-enable conditions before restoring it."],
         ["C08", "PASS", "/proof-video returns 404; proof links and reward claims are not rendered; containment tests pass.", "Re-enable only with exact-host validation and moderation."],
         ["C09", "PASS", "Proof and ambassador endpoints return 404; verification is the only starter-credit source and repeat verification grants once.", "Keep reward programs disabled until database source uniqueness and eligibility rules are approved."],
@@ -1313,10 +1313,10 @@
         ["C12", "PASS", "Acceptance requires an approved public location or exact-host HTTPS link; substring attacks return 400 and no URL is invented.", "The two-browser logistics rehearsal remains G04/G12."],
         ["C13", "BLOCKED", "SMTP fails honestly; secret-free idempotent outcomes are stored; production requires SMTP settings; failed-delivery routes are tested.", "Prove real provider/inbox delivery, sender-domain setup, and production-like failure/retry behavior."],
         ["C14", "PASS", "Links derive only from RELAY_PUBLIC_URL; production trusted hosts and explicit proxy-hop counts are required; token/body logging is removed; attacker-Host and rightmost-hop regressions pass.", "Production proxy/header exercise remains G07."],
-        ["C15", "PASS", "Versioned legacy/current revisions pass four SQLite safety cases plus guarded PostgreSQL 16.14 fresh/no-drift and representative legacy forward-and-rollback tests.", "Verify backup/restore and production-like preflight before any persistent migration."],
+        ["C15", "PASS", "Versioned revisions pass five SQLite safety cases plus guarded PostgreSQL fresh/no-drift and representative legacy forward-and-rollback tests, including fail-closed authentication-audit rollback.", "Verify backup/restore and production-like preflight before any persistent migration."],
         ["H01", "PASS", "Five failed route logins increment a known account and create a 15-minute lock; successful login resets it.", "Shared limiter evidence remains H02/G07."],
         ["H02", "PASS", "Account-scoped and hashed-identity limits pass campus isolation; two app instances share disposable Redis 7.4.9 limits, spoofed leftmost proxy input is ignored, an independent address retains allowance, and production readiness passes with the store.", "Repeat with the real deployed proxy/NAT topology under G12."],
-        ["H03", "PASS", "Verification uses a cryptographic URL secret stored only as SHA-256, expires in one hour, has resend cooldown and route limits, and is repeat-safe.", "Production abuse exercise remains G07/G12."],
+        ["H03", "PASS", "Verification uses a cryptographic URL secret stored only as SHA-256, expires in 24 hours, has resend cooldown and route limits, and is repeat-safe.", "Production abuse exercise remains G07/G12."],
         ["H04", "PASS", "Sessions last 12 hours and carry a server-checked version; reset, suspension, and deletion revoke existing sessions.", "Production cookie/header review remains G07."],
         ["H05", "PASS", "External scripts are removed, core controls are self-hosted, script-src excludes unsafe inline script, and all four browser widths produced zero external requests, console/page errors, or request failures.", "Repeat after any asset or deployment-header change."],
         ["H06", "PASS", "Only confirmed sessions can complete; the CSRF route regression keeps a requested session requested and unpaid.", "PostgreSQL competing-action proof passes under G02; repeat in staging."],
@@ -1328,9 +1328,9 @@
         ["H12", "PASS", "Full profiles return 404 without a verified session; public browse removes names, avatars, profile links, and free-form descriptions.", "Browser privacy review remains part of the rehearsal."],
         ["H13", "PASS", "Constrained roles, protected queue, mandatory reasons/evidence, append-only actions, session revocation, and admin-only moderator suspension rules are tested.", "Named staff and safe initial role provisioning remain G10/migrations."],
         ["H14", "PASS", "Integer/check/unique constraints enforce nonnegative balances, nonzero events, one-credit price, distinct participants, valid ratings, and unique reviews/sources; PostgreSQL tests and production-shaped boot pass.", "Repeat against staging under G12."],
-        ["H15", "PASS", "Flask 3.1.3 and Werkzeug 3.1.8 are pinned; all 14 direct pins, resolved-graph pip-audit, pip check, and 62 warning-strict tests pass.", "CI must repeat the checks before release."],
+        ["H15", "PASS", "Flask 3.1.3 and Werkzeug 3.1.8 are pinned; all 14 direct pins, resolved-graph pip-audit, pip check, and 88 warning-strict tests pass locally and in exact-candidate CI.", "Repeat before release if dependencies change."],
         ["H16", "BLOCKED", "The unsafe free-database declaration is removed; Render requires an approved external database URL, but no recoverable service or restore evidence exists.", "Provision a recoverable trial database and successfully restore a real backup."],
-        ["H17", "PASS", "The simulator is removed; 62 warning-strict tests plus seven guarded PostgreSQL/Redis/infrastructure tests exercise migrations, concurrency, production readiness, provider-issued PostgreSQL URL normalization, constraints, CSRF routes, throttling, authorization, safety, privacy, email, and ledger behavior.", "CI must repeat all suites before release."],
+        ["H17", "PASS", "The simulator is removed; 88 warning-strict tests plus guarded PostgreSQL/Redis/infrastructure tests exercise migrations, concurrency, production readiness, provider-issued PostgreSQL URL normalization, constraints, CSRF routes, throttling, authorization, safety, privacy, email, and ledger behavior.", "Repeat all suites before release."],
         ["M01", "PASS", "TrialConfig fixes the cost at one and booking ignores legacy listing prices; route and UI regressions prove one credit.", "Variable pricing remains disabled."],
         ["M02", "PASS", "Pricing and campaign sections are not rendered; top-up and membership routes return 404.", "Use documented re-enable conditions before adding monetization."],
         ["M03", "PASS", "Trial price is one and starter default is two in one configuration; booking, rendered copy, and email derive from it.", "No remaining blocker within the contained scope."],
@@ -1342,10 +1342,10 @@
         ["M09", "PASS", "The calm-dark page uses one quiet reveal layer; OS reduced-motion and explicit static mode leave all content visible with zero active animation.", "Repeat after motion-layer changes."],
         ["M10", "PASS", "Fresh isolated Chrome at all required widths plus 200% reflow passes overflow, labels, keyboard focus, skip link, menu state, reduced/static motion, reveal settling, and AA palette contrast.", "Targeted human assistive-technology review remains prudent before a broader release."],
         ["M11", "PASS", "The redesigned home requests no external font, campaign, map, video, GIF, frame, or dormant hero poster; browser runs are same-origin with no request or console failures.", "No official performance trace or field Core Web Vitals claim is made."],
-        ["M12", "PASS", "The intentional redesign, edge-case fixes, tests, and handoff docs are saved in one owner-approved local commit containing only the release manifest.", "No remaining repository blocker; review the local commit before separately authorizing publication."],
-        ["M13", "BLOCKED", "Liveness/readiness checks exact Alembic head and limiter storage; Redis exceptions return clean 503 not_ready, while the exact local candidate returned 200 with healthy disposable PostgreSQL/Redis on July 23.", "Prove exact-candidate CI, external log retention, alert delivery, and a production failure exercise."],
+        ["M12", "PASS", "The intentional redesign, edge-case fixes, operations changes, tests, and handoff docs are merged into main and exact-candidate CI passed.", "No remaining repository blocker."],
+        ["M13", "BLOCKED", "Liveness/readiness checks exact Alembic head and limiter storage; exact-candidate CI returned 200 with healthy disposable PostgreSQL/Redis.", "Prove external log retention, alert delivery, and a production failure exercise."],
         ["M14", "BLOCKED", "The mutating web route returns 404; guarded dry-run-first CLIs are repeat-safe, refused unauthenticated apply, and accepted authenticated no-candidate runs.", "Provision and authenticate the scheduler and verify schedules and alerting in staging."],
-        ["M15", "BLOCKED", "The least-privilege workflow passed for committed base 8c775556; the exact local candidate is committed but unpushed, and staging is absent.", "Approve the candidate push, require green exact-candidate CI and branch protections, then provision staging."],
+        ["M15", "BLOCKED", "The least-privilege workflow passed on exact application candidate 1132a149; staging is absent.", "Require branch protections and provision staging."],
         ["M16", "PASS", "trial-health-report emits tested aggregate, read-only participant, listing, session, safety, email, and ledger counts without names or addresses.", "Operator interpretation and interviews remain external trial work."],
         ["L01", "PASS", "Unsafe one-off repair scripts are absent from the synchronized current base and candidate diff.", "Future maintenance must use reviewed commands or migrations."],
         ["L02", "PASS", "Ambassador, inferred reliability/no-show/report, and proof badges are not rendered.", "Re-enable reputation only from immutable, auditable events."]

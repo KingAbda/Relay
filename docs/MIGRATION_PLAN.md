@@ -1,6 +1,6 @@
 # Controlled-trial database migration runbook
 
-Last updated: 2026-07-13
+Last updated: 2026-08-02
 
 Status: **SQLite and disposable PostgreSQL 16 forward/rollback proven; persistent migration remains prohibited without production-like readiness and recovery evidence**.
 
@@ -8,7 +8,8 @@ Relay uses Flask-Migrate 4.1.0 and Alembic 1.18.5. Application startup never
 creates or upgrades persistent tables. The migration history contains:
 
 - `20260713_00`: the frozen schema represented by the committed pre-readiness models.
-- `20260713_01`: the controlled-trial adoption revision and current model head.
+- `20260713_01`: the controlled-trial adoption revision.
+- `20260731_01`: the additive authentication-event audit trail and current model head.
 
 The independent legacy fixture in `tests/legacy_schema.py` is not imported by a
 migration. Tests seed users, accounts, signed ledger entries, sessions, a series,
@@ -25,7 +26,8 @@ idempotency keys and retain their IDs, amounts, descriptions, related users, and
 timestamps. Legacy verification secrets are invalidated. Reset secrets are changed
 to SHA-256 while the raw submitted token remains usable after upgrade.
 
-Downgrade to the legacy revision is intentionally fail-closed when new moderation,
+Downgrade is intentionally fail-closed when authentication audit events exist.
+Downgrade to the legacy revision is also fail-closed when new moderation,
 consent, email, dispute, block, role/account-state, disputed-session, or controlled-
 trial ledger data exists. That data cannot be represented safely by the old app.
 An immediate compatibility rollback preserves users, balances, session rows, and
@@ -55,7 +57,7 @@ exception through a reviewed, attributable decision rather than editing balances
 DATABASE_URL=postgresql+psycopg://... \
   .venv/bin/flask --app app.main db stamp 20260713_00
 DATABASE_URL=postgresql+psycopg://... \
-  .venv/bin/flask --app app.main db upgrade 20260713_01
+  .venv/bin/flask --app app.main db upgrade 20260731_01
 DATABASE_URL=postgresql+psycopg://... \
   .venv/bin/flask --app app.main db current
 DATABASE_URL=postgresql+psycopg://... \

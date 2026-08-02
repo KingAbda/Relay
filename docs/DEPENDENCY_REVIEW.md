@@ -1,8 +1,8 @@
 # Relay dependency security review
 
-Last updated: 2026-07-23
+Last updated: 2026-08-02
 
-Status: **PASS locally; committed base CI passed; exact local candidate awaits CI**.
+Status: **PASS locally and in exact-candidate CI**.
 
 All runtime requirements are exact direct pins. The security updates and newly
 authorized operational dependencies are:
@@ -38,16 +38,15 @@ Primary package metadata: [Flask](https://pypi.org/project/Flask/),
 # No known vulnerabilities found
 
 .venv/bin/python -W error::DeprecationWarning -m unittest discover -v
-# 62 tests passed
+# 88 tests passed
 ```
 
 The direct check fails closed if PyPI release metadata is unavailable. `pip-audit`
 checks the resolved runtime dependency graph against published vulnerability data.
 Neither result proves future safety, package provenance, licenses, or reproducible
-hashes. The `Relay safety gate` repeated the checks successfully for committed
-base `8c775556`. The exact local redesign/edge-case candidate is saved in one
-local commit, so it requires a new CI run after an owner-approved push. No dependency
-or lockfile changed in this candidate.
+hashes. The `Relay safety gate` repeated the checks successfully for merged
+application commit `1132a149` in run `30608587671`. No dependency or lockfile
+changed in that candidate.
 
 ## Release rule
 
