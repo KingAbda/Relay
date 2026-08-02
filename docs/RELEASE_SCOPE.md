@@ -1,23 +1,21 @@
-# Relay owner-ready candidate scope
+# Relay published controlled-trial scope
 
-Last reviewed: 2026-07-23
+Last reviewed: 2026-08-02
 
-Status: **OWNER-READY LOCAL CANDIDATE / NO-GO FOR DEPLOYMENT.** This manifest
-defines the contents of the owner-approved local candidate commit. It does not
-authorize a push, deployment, paid resource, database migration, participant
-contact, or launch.
+Status: **PUBLISHED TO `main` / NO-GO FOR DEPLOYMENT.** This manifest records
+the reviewed application candidate now on GitHub. Publication does not authorize
+a deployment, paid resource, persistent database migration, participant contact,
+or launch.
 
 ## Base and branch state
 
-- Local `main` and `origin/main` both point to
-  `8c775556ae19540089058d4748e001816814855a`.
-- The committed base passed the `Relay safety gate` GitHub Actions workflow in
-  run `29427792008`.
-- The candidate below is saved as one local commit on top of that base. It has
-  not been pushed or run in GitHub Actions.
+- The reviewed application candidate is merged into `main` at
+  `1132a1497eff38a5d3eed39dff1b4a9958a2982e`.
+- The exact commit passed the `Relay safety gate` GitHub Actions workflow in
+  run `30608587671`.
 - Automatic Render deployment remains disabled.
 
-## One intended change set
+## Published change set
 
 The candidate consists of these coupled groups:
 
@@ -46,9 +44,8 @@ The candidate consists of these coupled groups:
    - `docs/TRIAL_FINAL_REPORT.md`
    - `docs/TRIAL_READINESS_MATRIX.md`
 
-These groups were saved together as one local commit. Reconfirm the exact list
-with `git diff-tree --no-commit-id --name-only -r HEAD` before authorizing a
-push.
+These groups are retained as the historical publication boundary. Subsequent
+changes must use a focused pull request and pass the same safety gate.
 
 ## What is deliberately excluded
 
@@ -73,12 +70,11 @@ For source-boundary verification, the unchanged dormant poster at
 
 ## Verification boundary
 
-The local candidate passes the standard release-scope check, all 62 ordinary
+The published candidate passes the standard release-scope check, all 88 ordinary
 tests, five guarded PostgreSQL 16 migration/concurrency tests, the guarded
 Redis/proxy test, production-shaped PostgreSQL/Redis boot and readiness,
 dependency and secret checks, and fresh headless responsive/accessibility QA.
-The exact local candidate still needs its GitHub Actions run after a separately
-approved push.
+The exact-candidate GitHub Actions run passed.
 
 Candidate verification:
 
@@ -89,11 +85,11 @@ git ls-files --others --exclude-standard
 git diff-tree --no-commit-id --name-only -r HEAD
 ```
 
-After creating the owner-approved local commit:
+For a clean checkout based on current `origin/main`:
 
 ```text
 python scripts/check_release_scope.py --require-clean --require-origin-main-base
 ```
 
-The clean-tree form passes for the local candidate. Publication, deployment,
-and invitations remain separately blocked by `TRIAL_READINESS_MATRIX.md`.
+Publication is complete. Deployment and invitations remain separately blocked
+by `TRIAL_READINESS_MATRIX.md`.

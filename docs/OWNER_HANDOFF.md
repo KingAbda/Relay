@@ -1,20 +1,19 @@
 # Relay repository owner handoff
 
-Last reviewed: 2026-07-23
+Last reviewed: 2026-08-02
 
 Audience: Abda, repository owner for `KingAbda/Relay`.
 
-Status: **READY FOR OWNER CODE REVIEW / NO-GO FOR DEPLOYMENT OR INVITATIONS.**
+Status: **CODE MERGED AND CI GREEN / NO-GO FOR DEPLOYMENT OR INVITATIONS.**
 
 ## Where the project is now
 
-The committed `main` branch and `origin/main` are synchronized at
-`8c775556ae19540089058d4748e001816814855a`. GitHub Actions passed on that exact
-committed base. The calm-dark redesign, two operational fixes, regression
-coverage, and current readiness documents are saved together in one
-owner-approved local commit on top of that base.
+The reviewed application candidate is merged into `main` at
+`1132a1497eff38a5d3eed39dff1b4a9958a2982e`. GitHub Actions run `30608587671`
+passed on that exact commit. Automatic deployment remains disabled and no
+staging environment exists.
 
-The local candidate now:
+The published candidate:
 
 - removes the blocked Google Font request and uses system fallbacks;
 - keeps the calm-dark direction while passing mobile, desktop, keyboard, focus,
@@ -22,7 +21,7 @@ The local candidate now:
 - makes Redis readiness exceptions return a clean `503 not_ready`;
 - tells the deleting user when session-cancellation emails fail while still
   completing the account closure;
-- passes all 62 ordinary tests and five guarded PostgreSQL migration/concurrency
+- passes all 88 ordinary tests and five guarded PostgreSQL migration/concurrency
   tests;
 - passes the guarded shared-Redis/trusted-proxy test and production-shaped
   PostgreSQL/Redis readiness at exact migration head;
@@ -31,24 +30,7 @@ The local candidate now:
 - excludes `Relay Backend Architecture.tldraw` from release scope without
   deleting the owner's local file.
 
-The exact candidate has not been pushed, so it has not had its own GitHub
-Actions run. No staging environment exists.
-
-## Owner action 1: review the local candidate commit
-
-Review `docs/RELEASE_SCOPE.md`, the complete commit diff, and
-`git diff-tree --no-commit-id --name-only -r HEAD`. The
-clean-tree/source-boundary command passes:
-
-```bash
-python scripts/check_release_scope.py --require-clean --require-origin-main-base
-```
-
-## Owner action 2: authorize publication for review
-
-Separately authorize a release branch push and pull request. Require the `Relay
-safety gate / test` check to pass for the exact candidate commit before merge.
-Do not treat the green base-commit run as candidate evidence.
+## Owner action 1: maintain GitHub safeguards
 
 GitHub still needs owner/admin configuration:
 
@@ -59,9 +41,11 @@ GitHub still needs owner/admin configuration:
 - enable dependency-alert visibility if the owner accepts that repository
   setting.
 
-## Owner action 3: choose and fund staging
+## Owner action 2: purchase the domain and fund staging
 
-Complete `docs/OWNER_DECISION_PACKET.md`: hosting account, recoverable
+Purchase the public domain in an owner-controlled registrar account with 2FA
+and auto-renewal, then grant engineering DNS access. Complete
+`docs/OWNER_DECISION_PACKET.md`: hosting account, recoverable
 PostgreSQL, Redis, real SMTP and sender domain, authenticated scheduler,
 central logs/error reporting, uptime/readiness alerts, backup retention and
 recovery targets, and the maximum monthly staging spend.
@@ -69,14 +53,14 @@ recovery targets, and the maximum monthly staging spend.
 Provisioning or deploying those resources is a separate external action and is
 not authorized by the code review.
 
-## Owner action 4: name people and obtain approvals
+## Owner action 3: name people and obtain approvals
 
 Assign real people for trial decisions, primary and backup moderation,
 technical operation, support inbox, privacy requests, rollback, and
 backup/restore. Obtain qualified legal/privacy review of the rendered policies,
 consent, eligibility, retention, deletion, safety, and provider disclosures.
 
-## Owner action 5: run the staging rehearsal
+## Engineering action after owner approval: run the staging rehearsal
 
 On the exact reviewed commit, prove:
 
@@ -107,6 +91,6 @@ python scripts/check_direct_advisories.py
 git diff --check
 ```
 
-The ordinary suite contains 62 tests. GitHub Actions additionally starts
+The ordinary suite contains 88 tests. GitHub Actions additionally starts
 disposable PostgreSQL and Redis services for migrations, concurrency,
 shared-rate-limit/proxy, and production-shaped readiness checks.

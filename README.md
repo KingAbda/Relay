@@ -6,11 +6,10 @@ Relay is a one-credit campus skill exchange being prepared for a tightly control
 
 **NO-GO for deployment or participant invitations.** Local containment,
 dependencies, SQLite/PostgreSQL migrations and concurrency, and fresh
-responsive/basic-accessibility browser checks pass. The committed `main` base is
-synchronized with `origin/main` and has green CI. The exact local candidate is
-saved in one owner-approved local commit but has not been pushed or run in CI;
-real email, real recovery, deployed proxy/NAT, staging/deployment, legal review,
-and named operations ownership remain unresolved.
+responsive/basic-accessibility browser checks pass. The reviewed application
+candidate is merged into `main` at `1132a149` and its full GitHub Actions safety
+gate passed. Real email, real recovery, deployed proxy/NAT, staging/deployment,
+legal review, and named operations ownership remain unresolved.
 
 - [Readiness matrix](docs/TRIAL_READINESS_MATRIX.md) — all 50 audit issues and 12 launch gates
 - [Engineering report](docs/TRIAL_FINAL_REPORT.md) — exact commands, results, and remaining actions
@@ -70,7 +69,7 @@ ruby -e 'require "yaml"; YAML.load_file("render.yaml"); YAML.load_file("render.s
 git diff --check
 ```
 
-All listed local checks pass; the warning-strict suite currently runs 62 tests.
+All listed local checks pass; the warning-strict suite currently runs 88 tests.
 The advisory checks require network access and fail closed when published data
 cannot be obtained.
 

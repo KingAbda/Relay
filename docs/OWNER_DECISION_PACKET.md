@@ -1,6 +1,6 @@
 # Relay controlled-trial owner decision packet
 
-Last updated: 2026-07-23
+Last updated: 2026-08-02
 
 Status: **UNAPPROVED / NO-GO.** Blank fields are intentional. This packet
 collects decisions that cannot be made by repository tests. Filling it out does
@@ -10,15 +10,13 @@ launch; each external action remains separately approved.
 Never place credentials, invite-list addresses, participant data, private inbox
 contents, or legal advice in this file.
 
-## 1. Local candidate and publication decision
+## 1. Repository publication record
 
 - Reviewed release manifest: `docs/RELEASE_SCOPE.md`
-- Proposed branch: not created; owner to approve a name before push
-- Committed base reviewed:
-  `8c775556ae19540089058d4748e001816814855a`
-- Base CI evidence: `Relay safety gate` run `29427792008` passed
-- Candidate state: saved in one owner-approved local commit, not pushed, and
-  not yet run in CI
+- Published application commit:
+  `1132a1497eff38a5d3eed39dff1b4a9958a2982e`
+- Exact-candidate CI evidence: `Relay safety gate` run `30608587671` passed
+- Candidate state: merged into `main`; automatic deployment remains disabled
 
 The redesigned homepage does not request the already tracked hero poster. Choose
 one dormant-media outcome before any future use:
@@ -27,14 +25,12 @@ one dormant-media outcome before any future use:
       future re-enable.
 - [ ] Remove or replace it in a separately reviewed change.
 
-Local Git decision:
+Publication record:
 
-- [x] Approve one local commit containing only the manifest paths
-      (authorized 2026-07-23).
-- [ ] Approve a branch name and push for pull-request review.
-- [ ] Keep merge, deployment, migrations, and invitations as separate approvals.
+- [x] Candidate merged into `main` and exact-candidate CI passed.
+- [x] Deployment, migrations, and invitations remain separate approvals.
 
-Owner name: `[UNASSIGNED]`  Date: `[UNASSIGNED]`
+Repository owner: Abda  Publication date: 2026-07-31
 
 ## 2. Staging provider and spend decision
 
@@ -44,6 +40,7 @@ approval. Record only provider/product names and non-secret decisions here.
 | Decision | Approved value | Owner | Status |
 |---|---|---|---|
 | Staging hosting account/workspace | `[UNASSIGNED]` | `[UNASSIGNED]` | PENDING |
+| Public domain and DNS registrar account | `[UNASSIGNED]` | Abda | PENDING |
 | PostgreSQL plan and recovery tier | `[UNASSIGNED]` | `[UNASSIGNED]` | PENDING |
 | Redis/Key Value plan | `[UNASSIGNED]` | `[UNASSIGNED]` | PENDING |
 | SMTP provider and verified sender domain | `[UNASSIGNED]` | `[UNASSIGNED]` | PENDING |

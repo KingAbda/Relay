@@ -55,7 +55,7 @@ Local evidence on 2026-07-13 proved exact-head application readiness `200` again
 ## Participant onboarding and support
 
 1. Add only vetted addresses to the secret allowlist through the approved environment-secret workflow.
-2. The participant signs up, affirmatively accepts all five current documents, and receives a one-hour verification link.
+2. The participant signs up, affirmatively accepts all five current documents, and receives a 24-hour verification link.
 3. Starter credits are granted once, only after successful verification. A participant cannot onboard, view identities, list, book, complete, or receive rewards while unverified.
 4. If verification delivery fails, check only the aggregate health report and the participant's secret-free delivery record. Never copy a token or message body into logs or tickets. Ask the participant to use resend only after the five-minute cooldown.
 5. For account access, use password reset; never set or ask for a participant password. A successful reset revokes existing sessions.
