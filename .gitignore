@@ -29,3 +29,6 @@ app/static/relay-intro-animation.mp4
 app/static/relay-intro-frames/
 app/static/relay-pre-smile-mark.png
 app/static/relay-pre-smile-mark.svg
+
+# Generated static waitlist build (source remains in landing/)
+landing/dist/

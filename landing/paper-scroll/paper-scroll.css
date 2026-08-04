@@ -1,0 +1,325 @@
+/* Relay landing — "The Approach"
+   The landscape is deconstructed into five parallax plates. Scrolling dollies
+   the camera forward through them: the canopy and meadow rush past and out of
+   frame, the mid hills rise, the far range barely moves, the sky holds still.
+   The copy changes act by act as the camera travels.
+
+   All motion is driven by a single --p (0 → 1) written by paper-scroll.js each
+   frame; the CSS derives every transform from it, so there is one source of
+   truth for where the camera is. */
+
+@font-face { font-family: "Relay Oswald"; src: url("fonts/Oswald-VariableFont.ttf") format("truetype"); font-weight: 200 700; font-display: swap; }
+@font-face { font-family: "Fraunces"; src: url("fonts/Fraunces-Variable.ttf") format("truetype"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Public Sans"; src: url("fonts/PublicSans-Variable.ttf") format("truetype"); font-weight: 100 900; font-display: swap; }
+
+* { box-sizing: border-box; }
+
+:root {
+  --paper: #f1e8d6;
+  --paper-light: #fdf6e9;
+  --ink: #14110d;
+  --ink-soft: #2b251d;
+  --muted: #635a4e;
+  --line: rgba(20, 17, 13, 0.88);
+  --rule: rgba(20, 17, 13, 0.15);
+  --violet: #3b2f5c;
+  --violet-soft: #574a7d;
+
+  --display: "Fraunces", Georgia, serif;
+  --sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --faq: "Relay Oswald", "Arial Narrow", sans-serif;
+  --wrap: min(1160px, calc(100vw - 72px));
+
+  /* Camera position, written by JS. */
+  --p: 0;
+  --a1: 1; --a2: 0; --a3: 0;
+  --n1: 0; --n2: 0; --n3: 0;
+}
+
+html { scroll-behavior: smooth; background: var(--paper); }
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.55;
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  opacity: .14;
+  mix-blend-mode: multiply;
+  background-image:
+    radial-gradient(circle, rgba(20,17,13,.2) 0 1px, transparent 1.3px),
+    radial-gradient(circle, rgba(255,255,255,.36) 0 1px, transparent 1.4px);
+  background-size: 23px 26px, 37px 31px;
+  background-position: 0 0, 9px 13px;
+}
+
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2.5px solid var(--violet); outline-offset: 3px; }
+
+.wrap { width: var(--wrap); margin: 0 auto; }
+
+.skip-link { position: fixed; top: -60px; left: 18px; z-index: 300; padding: 11px 14px; background: var(--ink); color: var(--paper-light); }
+.skip-link:focus { top: 12px; }
+
+.eyebrow { margin: 0 0 20px; color: var(--violet); font: 600 11px/1.3 var(--sans); text-transform: uppercase; letter-spacing: .28em; }
+
+/* ---------- nav ---------- */
+
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 120;
+  min-height: 66px;
+  padding: 12px max(4vw, 26px);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(rgba(241,232,214,.86), rgba(241,232,214,0));
+}
+.brand { display: inline-flex; width: 122px; height: 38px; align-items: center; overflow: hidden; }
+.brand img { display: block; width: 122px; height: auto; }
+.nav-links { display: flex; gap: 30px; justify-self: center; font: 600 11px/1 var(--sans); text-transform: uppercase; letter-spacing: .2em; color: var(--muted); }
+.nav-links a:hover { color: var(--ink); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 13px 22px;
+  border: 1px solid var(--line);
+  background: rgba(253, 246, 233, .7);
+  color: var(--ink);
+  font: 600 11px/1 var(--sans);
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  transition: background .2s ease, color .2s ease;
+}
+.btn:hover { background: var(--ink); color: var(--paper-light); }
+.btn.primary { background: var(--violet); color: var(--paper-light); border-color: var(--violet); }
+.btn.primary:hover { background: var(--violet-soft); }
+.btn[aria-disabled="true"] { cursor: not-allowed; opacity: .84; }
+
+/* ---------- the travelling stage ---------- */
+
+/* The scroll runway. Its height is how far the camera travels. */
+.stage-wrap { position: relative; height: 460vh; }
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+
+.scene { position: absolute; inset: 0; background: var(--paper); }
+
+.layer {
+  position: absolute;
+  inset: -2% -2% -2% -2%;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* Vanishing point sits on the horizon, a little above centre — that is what
+     makes the movement read as travelling forward rather than zooming. */
+  transform-origin: 50% 60%;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Depth order and rate. Near plates move far more than distant ones. */
+.layer-sky {
+  background-image: url("assets/layer-sky.webp");
+  background-position: center top;
+  transform: scale(calc(1 + var(--p) * 0.12)) translateY(calc(var(--p) * -1.5vh));
+}
+.layer-far {
+  background-image: url("assets/layer-far.webp");
+  transform: scale(calc(1 + var(--p) * 0.44)) translateY(calc(var(--p) * -4vh));
+}
+.layer-mid {
+  background-image: url("assets/layer-mid.webp");
+  transform: scale(calc(1 + var(--p) * 1.05)) translateY(calc(var(--p) * 9vh));
+}
+.layer-near {
+  background-image: url("assets/layer-near.webp");
+  transform: scale(calc(1 + var(--p) * 2.4)) translateY(calc(var(--p) * 46vh));
+}
+.layer-canopy {
+  background-image: url("assets/layer-canopy.webp");
+  background-position: center top;
+  transform-origin: 50% 22%;
+  transform: scale(calc(1 + var(--p) * 3)) translateY(calc(var(--p) * -46vh));
+  opacity: calc(1 - var(--p) * 1.9);
+}
+
+/* Cream veil. Deepens as the camera travels so the later acts stay readable
+   against the busier mid-ground. */
+.veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--paper-light);
+  opacity: calc(.1 + var(--p) * .48);
+}
+
+/* ---------- the acts ---------- */
+
+.acts { position: absolute; inset: 0; display: grid; place-items: center; padding: 90px max(6vw, 24px) 70px; }
+.act { grid-area: 1 / 1; width: var(--wrap); text-align: center; }
+
+.act-1 { opacity: var(--a1); transform: translateY(calc((1 - var(--a1)) * -26px)); }
+.act-2 { opacity: var(--a2); transform: translateY(calc((1 - var(--a2)) * 30px)); }
+.act-3 { opacity: var(--a3); transform: translateY(calc((1 - var(--a3)) * 30px)); }
+.act[aria-hidden="true"] { pointer-events: none; }
+
+h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; font-variation-settings: "SOFT" 18, "WONK" 0, "opsz" 144; letter-spacing: -.022em; text-wrap: balance; }
+h1 { margin-inline: auto; max-width: 15ch; font-size: clamp(46px, 7.4vw, 118px); line-height: .94; }
+.act-1 p { margin: 26px auto 0; max-width: 50ch; font-size: clamp(16px, 1.6vw, 20px); line-height: 1.5; color: var(--ink-soft); }
+.act-1 .hero-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.act-1 .form-note { margin: 16px 0 0; font-size: 14px; color: var(--muted); }
+
+.act-2 h2 { margin-inline: auto; max-width: 14ch; font-size: clamp(44px, 6.6vw, 104px); line-height: .96; }
+.act-2 p { margin: 26px auto 0; max-width: 48ch; font-size: clamp(16px, 1.6vw, 20px); line-height: 1.5; color: var(--ink-soft); }
+
+/* The three steps arrive one at a time as the camera keeps moving. */
+.act-3 .act-head { margin: 0 auto 44px; max-width: 46ch; }
+.act-3 .act-head p { margin: 12px 0 0; font-size: clamp(15px, 1.5vw, 18px); color: var(--ink-soft); }
+.act-3 h2 { margin-inline: auto; font-size: clamp(32px, 4.4vw, 62px); }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.steps article {
+  padding: 26px 22px 28px;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: rgba(253, 246, 233, .82);
+  backdrop-filter: blur(3px);
+}
+.steps article:nth-child(1) { opacity: var(--n1); transform: translateY(calc((1 - var(--n1)) * 26px)); }
+.steps article:nth-child(2) { opacity: var(--n2); transform: translateY(calc((1 - var(--n2)) * 26px)); }
+.steps article:nth-child(3) { opacity: var(--n3); transform: translateY(calc((1 - var(--n3)) * 26px)); }
+.steps span { color: var(--violet); font: 600 11px var(--sans); letter-spacing: .28em; }
+.steps h3 { margin: 30px 0 8px; font-family: var(--display); font-variation-settings: "SOFT" 18, "WONK" 0, "opsz" 60; font-size: clamp(24px, 2.6vw, 34px); font-weight: 500; line-height: 1.02; letter-spacing: -.025em; }
+.steps p { margin: 0; font-size: 15px; color: var(--muted); }
+
+/* Scroll cue — fades out the moment the camera starts moving. */
+.cue {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  margin: 0;
+  font: 600 10px var(--sans);
+  text-transform: uppercase;
+  letter-spacing: .3em;
+  color: var(--muted);
+  opacity: calc(1 - var(--p) * 9);
+}
+.cue::after { content: ""; display: block; width: 1px; height: 26px; margin: 10px auto 0; background: var(--muted); }
+
+/* ---------- static sections below the stage ---------- */
+
+.section { padding: 104px 0 112px; border-bottom: 1px solid var(--line); scroll-margin-top: 80px; }
+.section h2 { max-width: 16ch; font-size: clamp(44px, 5.6vw, 88px); line-height: .98; }
+.section-copy { max-width: 660px; margin: 26px 0 0; font-size: clamp(17px, 1.6vw, 20px); line-height: 1.55; color: var(--ink-soft); }
+
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }
+.facts div { min-height: 128px; padding: 26px 30px; display: flex; flex-direction: column; justify-content: center; gap: 10px; border-right: 1px solid var(--rule); }
+.facts div:last-child { border-right: 0; }
+.facts span { color: var(--violet); font: 600 10px/1 var(--sans); text-transform: uppercase; letter-spacing: .28em; }
+.facts b { font-family: var(--display); font-variation-settings: "SOFT" 18, "WONK" 0, "opsz" 40; font-size: clamp(19px, 1.9vw, 26px); font-weight: 500; line-height: 1.15; letter-spacing: -.02em; }
+
+.scope { display: grid; grid-template-columns: repeat(2, 1fr); margin-top: 52px; border-top: 1px solid var(--line); }
+.scope article { padding: 28px 30px 32px 0; display: flex; flex-direction: column; gap: 14px; border-bottom: 1px solid var(--rule); }
+.scope article:nth-child(even) { padding-left: 30px; border-left: 1px solid var(--rule); }
+.scope span { color: var(--violet); font: 600 10px var(--sans); text-transform: uppercase; letter-spacing: .28em; }
+.scope b { font-family: var(--display); font-variation-settings: "SOFT" 18, "WONK" 0, "opsz" 60; font-size: clamp(22px, 2.4vw, 33px); font-weight: 500; line-height: 1.1; letter-spacing: -.025em; }
+
+.faq-head { max-width: 740px; margin-bottom: 44px; }
+.faq { border-top: 1px solid var(--line); }
+.faq details { border-bottom: 1px solid var(--rule); }
+.faq summary { min-height: 104px; padding: 24px 0; display: grid; grid-template-columns: 44px 1fr 34px; align-items: center; gap: 12px; cursor: pointer; list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; grid-column: 3; justify-self: end; color: var(--violet); font: 400 28px var(--sans); }
+.faq details[open] summary::after { content: "\2212"; }
+.faq summary span { color: var(--violet); font: 600 10px var(--sans); letter-spacing: .28em; }
+.faq summary b { font-family: var(--faq); font-size: clamp(26px, 3.2vw, 46px); font-weight: 500; line-height: 1; text-transform: uppercase; letter-spacing: -.01em; }
+.faq details > p { margin: 0; padding: 0 78px 30px; max-width: 760px; font-size: 16px; line-height: 1.6; color: var(--muted); }
+
+.closing { min-height: 620px; padding: 120px max(6vw, 30px) 72px; display: flex; align-items: flex-end; border-bottom: 1px solid var(--line); background: linear-gradient(rgba(253,246,233,.24), rgba(253,246,233,.4)), url("assets/footer-paper-landscape.webp") center / cover no-repeat; }
+.closing-inner { width: min(640px, 100%); }
+.closing h2 { font-size: clamp(38px, 4.6vw, 66px); }
+.closing p { margin: 20px 0 30px; font-size: 17px; line-height: 1.55; color: var(--ink-soft); }
+
+.footer { padding: 52px max(6vw, 30px) 46px; display: grid; grid-template-columns: 1fr auto; gap: 30px 60px; }
+.footer-brand img { width: 118px; height: auto; display: block; }
+.footer-brand p { margin: 16px 0 6px; font-size: 15px; }
+.footer-brand small { color: var(--muted); font-size: 12px; }
+.footer nav { display: flex; gap: 26px; align-items: center; font: 600 11px var(--sans); text-transform: uppercase; letter-spacing: .2em; color: var(--muted); }
+.privacy { grid-column: 1 / -1; margin: 0; padding-top: 24px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--muted); max-width: 740px; }
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1040px) {
+  .nav-links { display: none; }
+  .stage-wrap { height: 380vh; }
+  .steps { grid-template-columns: 1fr; gap: 12px; }
+  .steps article { padding: 18px 18px 20px; }
+  .steps h3 { margin-top: 16px; }
+  .act-3 .act-head { margin-bottom: 26px; }
+}
+
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+  h1 { max-width: none; font-size: clamp(34px, 9.4vw, 54px); }
+  .section h2, .act-2 h2 { max-width: none; font-size: clamp(30px, 8.4vw, 46px); }
+  .nav { min-height: 58px; padding: 10px 16px; gap: 10px; }
+  .brand { width: 102px; height: 32px; }
+  .brand img { width: 102px; }
+  .btn { padding: 11px 14px; letter-spacing: .12em; }
+  .stage-wrap { height: 320vh; }
+  .acts { padding: 84px 20px 64px; }
+  .act-1 .hero-actions { margin-top: 24px; }
+  .facts, .scope { grid-template-columns: 1fr; }
+  .facts div { border-right: 0; border-bottom: 1px solid var(--rule); min-height: 0; }
+  .facts div:last-child { border-bottom: 0; }
+  .scope article, .scope article:nth-child(even) { padding: 22px 0 24px; border-left: 0; }
+  .section { padding: 64px 0 68px; }
+  .faq summary { min-height: 82px; padding: 18px 0; grid-template-columns: 32px 1fr 26px; }
+  .faq details > p { padding: 0 0 24px; }
+  .closing { min-height: 480px; padding: 84px 20px 48px; }
+  .closing h2 { font-size: clamp(30px, 8.4vw, 44px); }
+  .footer { grid-template-columns: 1fr; padding: 40px 20px 36px; }
+}
+
+/* ---------- reduced motion ----------
+   No camera move at all: the runway collapses, the stage stops sticking, and
+   the three acts become ordinary stacked sections over a still landscape. */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+
+  .stage-wrap { height: auto; }
+  .stage { position: static; height: auto; }
+  .scene { position: absolute; inset: 0; }
+  .layer, .veil { transform: none !important; opacity: 1; }
+  .layer-canopy { opacity: .9; }
+  .veil { opacity: .46; }
+  .acts { position: relative; display: block; padding: 130px max(6vw, 24px) 90px; }
+  .act { width: auto; opacity: 1 !important; transform: none !important; }
+  .act + .act { margin-top: 96px; }
+  .steps article { opacity: 1 !important; transform: none !important; }
+  .cue { display: none; }
+}
