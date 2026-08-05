@@ -6,12 +6,9 @@
   <title>Relay — Teach what you know</title>
   <meta name="description" content="Relay is a campus skill swap where thirty minutes of teaching earns thirty minutes of learning." />
   <meta name="theme-color" content="#f1e8d6" />
+  <meta name="referrer" content="no-referrer" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-  <link rel="preload" as="image" href="assets/layer-sky.webp" />
-  <link rel="preload" as="image" href="assets/layer-far.webp" />
-  <link rel="preload" as="image" href="assets/layer-mid.webp" />
-  <link rel="preload" as="image" href="assets/layer-near.webp" />
-  <link rel="preload" as="image" href="assets/layer-canopy.webp" />
+  <link rel="preload" as="image" href="assets/layer-sky.webp" fetchpriority="high" />
   <link rel="stylesheet" href="paper-scroll.css" />
 </head>
 <body>
@@ -28,7 +25,7 @@
     <a class="btn" href="#join">Interest list</a>
   </header>
 
-  <main id="main">
+  <main id="main" tabindex="-1">
     <div class="stage-wrap" id="top">
       <div class="stage">
         <div class="scene" aria-hidden="true">
@@ -46,10 +43,10 @@
             <h1 id="act1-title">Teach what you know. Learn what you need.</h1>
             <p>A campus exchange where thirty minutes of teaching earns you thirty minutes of learning. No cash changes hands between students.</p>
             <div class="hero-actions">
-              <a class="btn primary" href="#join" aria-disabled="true">Join the interest list</a>
+              <a class="btn primary" href="#join" aria-disabled="true">Interest form coming next</a>
               <a class="btn" href="#scope">The first cohort</a>
             </div>
-            <p class="form-note">The form opens once the first cohort is confirmed.</p>
+            <p class="form-note">We are preparing the interest form for the first cohort.</p>
           </section>
 
           <section class="act act-2" aria-labelledby="act2-title">
@@ -132,18 +129,19 @@
           </details>
           <details>
             <summary><span>05</span><b>Does the interest list guarantee a place?</b></summary>
-            <p>No. Everyone who signs up gets the form. We then pick a cohort that balances what people can teach against what people want to learn.</p>
+            <p>No. We will select a cohort that balances what people can teach, what they want to learn and when they are available.</p>
           </details>
         </div>
       </div>
     </section>
 
     <section class="closing" id="join" aria-labelledby="closing-title">
+      <img class="closing-art" src="assets/footer-paper-landscape.webp" alt="" loading="lazy" decoding="async" aria-hidden="true" />
       <div class="closing-inner">
         <p class="eyebrow">First NYU cohort</p>
         <h2 id="closing-title">Put your skill on the board.</h2>
-        <p>Join the interest list and we will write to you when the form opens.</p>
-        <a class="btn primary" href="#join" aria-disabled="true">Join the interest list</a>
+        <p>The interest form is coming next. A submission will not guarantee a place.</p>
+        <a class="btn primary" href="#join" aria-disabled="true">Interest form coming next</a>
       </div>
     </section>
   </main>
@@ -161,6 +159,6 @@
     <p class="privacy">Interest-list information will be used only for Relay trial updates and selection communication. Please do not submit sensitive personal information.</p>
   </footer>
 
-  <script src="paper-scroll.js"></script>
+  <script src="paper-scroll.js" defer></script>
 </body>
 </html>

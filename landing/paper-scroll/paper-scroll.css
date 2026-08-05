@@ -8,9 +8,9 @@
    frame; the CSS derives every transform from it, so there is one source of
    truth for where the camera is. */
 
-@font-face { font-family: "Relay Oswald"; src: url("fonts/Oswald-VariableFont.ttf") format("truetype"); font-weight: 200 700; font-display: swap; }
-@font-face { font-family: "Fraunces"; src: url("fonts/Fraunces-Variable.ttf") format("truetype"); font-weight: 100 900; font-display: swap; }
-@font-face { font-family: "Public Sans"; src: url("fonts/PublicSans-Variable.ttf") format("truetype"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Relay Oswald"; src: url("fonts/Oswald-VariableFont.woff2") format("woff2"), url("fonts/Oswald-VariableFont.ttf") format("truetype"); font-weight: 200 700; font-display: swap; }
+@font-face { font-family: "Fraunces"; src: url("fonts/Fraunces-Variable.woff2") format("woff2"), url("fonts/Fraunces-Variable.ttf") format("truetype"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Public Sans"; src: url("fonts/PublicSans-Variable.woff2") format("woff2"), url("fonts/PublicSans-Variable.ttf") format("truetype"); font-weight: 100 900; font-display: swap; }
 
 * { box-sizing: border-box; }
 
@@ -257,8 +257,10 @@ h1 { margin-inline: auto; max-width: 15ch; font-size: clamp(46px, 7.4vw, 118px);
 .faq summary b { font-family: var(--faq); font-size: clamp(26px, 3.2vw, 46px); font-weight: 500; line-height: 1; text-transform: uppercase; letter-spacing: -.01em; }
 .faq details > p { margin: 0; padding: 0 78px 30px; max-width: 760px; font-size: 16px; line-height: 1.6; color: var(--muted); }
 
-.closing { min-height: 620px; padding: 120px max(6vw, 30px) 72px; display: flex; align-items: flex-end; border-bottom: 1px solid var(--line); background: linear-gradient(rgba(253,246,233,.24), rgba(253,246,233,.4)), url("assets/footer-paper-landscape.webp") center / cover no-repeat; }
-.closing-inner { width: min(640px, 100%); }
+.closing { position: relative; min-height: 620px; padding: 120px max(6vw, 30px) 72px; display: flex; align-items: flex-end; overflow: hidden; border-bottom: 1px solid var(--line); background: var(--paper-light); }
+.closing::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(rgba(253,246,233,.24), rgba(253,246,233,.4)); }
+.closing-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.closing-inner { position: relative; z-index: 2; width: min(640px, 100%); }
 .closing h2 { font-size: clamp(38px, 4.6vw, 66px); }
 .closing p { margin: 20px 0 30px; font-size: 17px; line-height: 1.55; color: var(--ink-soft); }
 
@@ -311,8 +313,25 @@ h1 { margin-inline: auto; max-width: 15ch; font-size: clamp(46px, 7.4vw, 118px);
   html { scroll-behavior: auto; }
   * { transition: none !important; }
 
-  .stage-wrap { height: auto; }
+  .stage-wrap { height: auto; overflow: hidden; }
   .stage { position: static; height: auto; }
+  .scene { position: absolute; inset: 0; }
+  .layer, .veil { transform: none !important; opacity: 1; }
+  .layer-canopy { opacity: .9; }
+  .veil { opacity: .46; }
+  .acts { position: relative; display: block; padding: 130px max(6vw, 24px) 90px; }
+  .act { width: auto; opacity: 1 !important; transform: none !important; }
+  .act + .act { margin-top: 96px; }
+  .steps article { opacity: 1 !important; transform: none !important; }
+  .cue { display: none; }
+}
+
+/* Printed pages and full-document capture tools cannot reproduce a sticky
+   scroll timeline. Use the same readable, linear fallback as reduced motion. */
+@media print {
+  .nav { position: absolute; }
+  .stage-wrap { height: auto; overflow: hidden; }
+  .stage { position: static; height: auto; overflow: hidden; }
   .scene { position: absolute; inset: 0; }
   .layer, .veil { transform: none !important; opacity: 1; }
   .layer-canopy { opacity: .9; }

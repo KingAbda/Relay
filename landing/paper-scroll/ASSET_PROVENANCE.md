@@ -36,4 +36,6 @@ about 1.3 MB total instead of about 9.8 MB.
 ## Fonts
 
 `fonts/` holds Fraunces (display), Public Sans (body) and Oswald (FAQ headings).
-All three are SIL Open Font License; see `fonts/OFL.txt`.
+The WOFF2 files are browser-optimized conversions of the corresponding TTF
+sources in the same directory. All three are SIL Open Font License; see
+`fonts/OFL.txt`.

@@ -10,7 +10,6 @@
   "use strict";
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-  if (reduced.matches) return;
 
   var wrap = document.querySelector(".stage-wrap");
   var stage = document.querySelector(".stage");
@@ -43,8 +42,24 @@
 
   var ticking = false;
 
+  function resetForReducedMotion() {
+    ["--p", "--a1", "--a2", "--a3", "--n1", "--n2", "--n3"].forEach(function (name) {
+      stage.style.removeProperty(name);
+    });
+    acts.forEach(function (act) {
+      if (!act) return;
+      act.removeAttribute("aria-hidden");
+      act.removeAttribute("inert");
+    });
+  }
+
   function update() {
     ticking = false;
+
+    if (reduced.matches) {
+      resetForReducedMotion();
+      return;
+    }
 
     var travel = wrap.offsetHeight - stage.offsetHeight;
     var p = travel > 0 ? clamp(-wrap.getBoundingClientRect().top / travel) : 0;
@@ -66,7 +81,10 @@
 
     /* Keep faded-out acts out of the tab order and off the screen reader. */
     [a1, a2, a3].forEach(function (a, i) {
-      if (acts[i]) acts[i].setAttribute("aria-hidden", a < 0.05 ? "true" : "false");
+      if (!acts[i]) return;
+      var hidden = a < 0.05;
+      acts[i].setAttribute("aria-hidden", hidden ? "true" : "false");
+      acts[i].toggleAttribute("inert", hidden);
     });
   }
 
@@ -78,5 +96,10 @@
 
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll);
+  if (typeof reduced.addEventListener === "function") {
+    reduced.addEventListener("change", onScroll);
+  } else if (typeof reduced.addListener === "function") {
+    reduced.addListener(onScroll);
+  }
   update();
 })();
