@@ -211,6 +211,7 @@ from app.models import (
     PasswordResetToken, EmailDelivery, ConsentAcceptance,
     UserBlock, SafetyReport, SessionDispute, ModerationAction,
     AuthEvent, AUTH_EVENT_TYPES,
+    InterestSignup,
 )
 
 CURRENT_CONSENT_VERSIONS = {
@@ -593,7 +594,22 @@ def add_security_headers(response):
 @app.route("/")
 def home():
     user = current_user()
-    return render_template("index.html", user=user)
+    return render_template("landing.html", user=user)
+
+@app.route("/interest", methods=["POST"])
+def interest_signup():
+    email = (request.form.get("email", "") or "").strip().lower()
+    name = (request.form.get("name", "") or "").strip()
+    if not email or "@" not in email:
+        return jsonify({"ok": False, "error": "Please enter a real email address."}), 400
+    existing = InterestSignup.query.filter_by(email=email).first()
+    if existing:
+        return jsonify({"ok": True, "message": "You're already on the list. We'll be in touch!"})
+    db.session.add(InterestSignup(email=email, name=name))
+    db.session.commit()
+    return jsonify({"ok": True, "message": "You're on the list! We'll let you know when the form opens."})
+
+csrf.exempt(interest_signup)
 
 @app.route("/signup", methods=["GET", "POST"])
 @limiter.limit("60 per hour")

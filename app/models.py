@@ -448,3 +448,17 @@ class AuthEvent(db.Model):
             name="ck_auth_events_event",
         ),
     )
+
+
+# ── Landing page interest list ─────────────────────────
+
+class InterestSignup(db.Model):
+    __tablename__ = "interest_signups"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    email: Mapped[str] = mapped_column(String(254), nullable=False, unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(100), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, nullable=False)
+
+    def __repr__(self):
+        return f"<InterestSignup {self.email}>"

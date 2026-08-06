@@ -6,20 +6,20 @@
   <title>Relay — Teach what you know</title>
   <meta name="description" content="Relay is a campus skill swap where thirty minutes of teaching earns thirty minutes of learning." />
   <meta name="theme-color" content="#f1e8d6" />
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-  <link rel="preload" as="image" href="assets/layer-sky.webp" />
-  <link rel="preload" as="image" href="assets/layer-far.webp" />
-  <link rel="preload" as="image" href="assets/layer-mid.webp" />
-  <link rel="preload" as="image" href="assets/layer-near.webp" />
-  <link rel="preload" as="image" href="assets/layer-canopy.webp" />
-  <link rel="stylesheet" href="paper-scroll.css" />
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml" />
+  <link rel="preload" as="image" href="{{ url_for('static', filename='landing/assets/layer-sky.webp') }}" />
+  <link rel="preload" as="image" href="{{ url_for('static', filename='landing/assets/layer-far.webp') }}" />
+  <link rel="preload" as="image" href="{{ url_for('static', filename='landing/assets/layer-mid.webp') }}" />
+  <link rel="preload" as="image" href="{{ url_for('static', filename='landing/assets/layer-near.webp') }}" />
+  <link rel="preload" as="image" href="{{ url_for('static', filename='landing/assets/layer-canopy.webp') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='landing/paper-scroll.css') }}" />
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
 
   <header class="nav">
     <a class="brand" href="#top" aria-label="Relay home">
-      <img src="assets/relay-logo-violet.svg" alt="Relay" width="245" height="106" />
+      <img src="{{ url_for('static', filename='landing/assets/relay-logo-violet.svg') }}" alt="Relay" width="245" height="106" />
     </a>
     <nav class="nav-links" aria-label="Primary">
       <a href="#scope">The first cohort</a>
@@ -155,7 +155,7 @@
 
   <footer class="footer">
     <div class="footer-brand">
-      <img src="assets/relay-logo-violet.svg" alt="Relay" width="245" height="106" loading="lazy" />
+      <img src="{{ url_for('static', filename='landing/assets/relay-logo-violet.svg') }}" alt="Relay" width="245" height="106" loading="lazy" />
       <p>Trade skills, not money. Built by students, for students.</p>
       <small>Controlled NYU trial · gathering interest</small>
     </div>
@@ -166,6 +166,6 @@
     <p class="privacy">Interest-list info is only used for Relay trial updates and picking the cohort. Please don't send anything sensitive.</p>
   </footer>
 
-  <script src="paper-scroll.js"></script>
+  <script src="{{ url_for('static', filename='landing/paper-scroll.js') }}"></script>
 </body>
 </html>
