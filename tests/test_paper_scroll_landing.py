@@ -6,7 +6,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-LANDING = ROOT / "landing" / "paper-scroll"
+LANDING = ROOT / "landing"
+RUNTIME = LANDING / "paper-scroll"
 
 
 class LandingParser(HTMLParser):
@@ -15,6 +16,7 @@ class LandingParser(HTMLParser):
         self.assets = []
         self.forms = 0
         self.inputs = 0
+        self.iframes = []
         self.inline_scripts = 0
         self._inside_script = False
         self._script_has_source = False
@@ -25,6 +27,8 @@ class LandingParser(HTMLParser):
             self.forms += 1
         elif tag == "input":
             self.inputs += 1
+        elif tag == "iframe":
+            self.iframes.append(values)
         elif tag == "script":
             self._inside_script = True
             self._script_has_source = bool(values.get("src"))
@@ -46,7 +50,7 @@ class LandingParser(HTMLParser):
 
 
 class PaperScrollLandingTests(unittest.TestCase):
-    def test_page_is_static_local_and_truthful(self):
+    def test_page_is_canonical_and_embeds_only_the_reviewed_form(self):
         html = (LANDING / "index.html").read_text(encoding="utf-8")
         parser = LandingParser()
         parser.feed(html)
@@ -55,10 +59,14 @@ class PaperScrollLandingTests(unittest.TestCase):
         self.assertEqual(parser.inputs, 0)
         self.assertEqual(parser.inline_scripts, 0)
         self.assertTrue(all(not asset.startswith(("http://", "https://")) for asset in parser.assets))
+        self.assertEqual(len(parser.iframes), 1)
+        self.assertTrue(parser.iframes[0]["src"].startswith("https://docs.google.com/forms/"))
+        self.assertEqual(parser.iframes[0].get("title"), "Relay interest list")
         self.assertIn('<main id="main" tabindex="-1">', html)
         self.assertIn('<meta name="referrer" content="no-referrer"', html)
-        self.assertIn("Interest form coming next", html)
-        self.assertIn("will not guarantee", html)
+        self.assertIn("doesn't guarantee", html)
+        self.assertIn("Built from 300+ student interviews at NYU", html)
+        self.assertNotIn("Daniel Porter", html)
         self.assertNotIn("August 15", html)
 
     def test_runtime_assets_exist(self):
@@ -70,7 +78,7 @@ class PaperScrollLandingTests(unittest.TestCase):
             self.assertTrue(path.is_file(), f"missing landing asset: {relative}")
 
         for name in ("Fraunces-Variable", "Oswald-VariableFont", "PublicSans-Variable"):
-            self.assertTrue((LANDING / "fonts" / f"{name}.woff2").is_file())
+            self.assertTrue((RUNTIME / "fonts" / f"{name}.woff2").is_file())
 
     def test_security_headers_are_fail_closed(self):
         headers = (LANDING / "_headers").read_text(encoding="utf-8")
@@ -80,6 +88,7 @@ class PaperScrollLandingTests(unittest.TestCase):
             "frame-ancestors 'none'",
             "object-src 'none'",
             "script-src 'self'",
+            "frame-src https://docs.google.com",
             "Permissions-Policy:",
             "Referrer-Policy: no-referrer",
             "Cross-Origin-Opener-Policy: same-origin",
@@ -90,14 +99,14 @@ class PaperScrollLandingTests(unittest.TestCase):
             self.assertIn(marker, headers)
 
     def test_hidden_scroll_acts_leave_the_tab_order(self):
-        script = (LANDING / "paper-scroll.js").read_text(encoding="utf-8")
+        script = (RUNTIME / "paper-scroll.js").read_text(encoding="utf-8")
         self.assertIn('toggleAttribute("inert", hidden)', script)
         self.assertIn('reduced.addEventListener("change", onScroll)', script)
         self.assertNotIn("innerHTML", script)
         self.assertNotIn("eval(", script)
 
     def test_reduced_motion_and_print_have_linear_fallbacks(self):
-        styles = (LANDING / "paper-scroll.css").read_text(encoding="utf-8")
+        styles = (RUNTIME / "paper-scroll.css").read_text(encoding="utf-8")
         self.assertIn("@media (prefers-reduced-motion: reduce)", styles)
         self.assertIn("@media print", styles)
         self.assertIn(".stage-wrap { height: auto; overflow: hidden; }", styles)
