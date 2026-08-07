@@ -1,18 +1,14 @@
 /* Relay landing camera.
 
-   Writes a single scroll progress value (--p, 0 → 1) plus the per-act opacities
-   onto the stage element. Every transform in paper-scroll.css is derived from those,
-   so the CSS owns the look and this file only owns "where are we".
-
-   Uses a lightweight lerp to smooth the camera movement so rapid scrolls don't
-   feel jittery. The lerp chases the raw scroll position each frame. */
+   Wheel input is normalized into one continuous, speed-limited camera move
+   while the illustrated stage is active. Native scrolling resumes at either
+   edge. CSS owns the visuals; this file keeps them synchronized and keeps
+   inactive acts out of the accessibility tree. */
 
 (function () {
   "use strict";
 
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-  if (reduced.matches) return;
-
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce), (max-width: 760px) and (max-height: 700px)");
   var wrap = document.querySelector(".stage-wrap");
   var stage = document.querySelector(".stage");
   if (!wrap || !stage) return;
@@ -25,120 +21,231 @@
 
   function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 
-  /* Smoothstep — eases the ends so acts don't snap on or off. */
   function ramp(v, a, b) {
     var t = clamp((v - a) / (b - a));
     return t * t * (3 - 2 * t);
   }
 
-  /* Visible between `inA`→`inB`, hidden again from `outA`→`outB`. */
   function band(p, inA, inB, outA, outB) {
     return ramp(p, inA, inB) * (1 - ramp(p, outA, outB));
   }
 
-  /* ?p=0.42 pins the camera at a fixed point without scrolling, which is how
-     the styleframes are captured. */
+  /* ?p=0.42 pins the camera for deterministic styleframes. */
   var forced = /[?&]p=(0?\.\d+|0|1(?:\.0+)?)\b/.exec(location.search);
   var pinned = forced ? clamp(parseFloat(forced[1])) : null;
-
-  /* Lerp factor — higher = snappier, lower = smoother. 0.12 feels buttery
-     without lagging behind fast scrolls. */
-  var LERP = 0.12;
-
-  var ticking = false;
   var travel = 0;
-  var targetP = 0;   /* raw scroll position */
-  var currentP = 0;  /* lerped position we actually render */
+  var stageStart = 0;
   var lastWrittenP = -1;
+  var ticking = false;
+  var controlledTarget = 0;
+  var controlledFrame = 0;
+  var controlledActive = false;
+  var lastControlTime = 0;
+  var INPUT_SCALE = 0.85;
+  var MAX_INPUT_DELTA = 120;
+  var MAX_FORWARD_SPEED = 0.96;
+  var MAX_REVERSE_SPEED = 0.84;
 
-  function measure() {
-    travel = Math.max(0, wrap.offsetHeight - stage.offsetHeight);
+  function rawProgress() {
+    if (pinned !== null) return pinned;
+    return travel > 0 ? clamp(-wrap.getBoundingClientRect().top / travel) : 0;
   }
 
-  function lerp(a, b, t) {
-    return a + (b - a) * t;
+  function resetForReducedMotion() {
+    ["--p", "--a1", "--a2", "--a3", "--n1", "--n2", "--n3"].forEach(function (name) {
+      stage.style.removeProperty(name);
+    });
+    acts.forEach(function (act) {
+      if (!act) return;
+      act.removeAttribute("aria-hidden");
+      act.removeAttribute("inert");
+    });
+  }
+
+  function schedule() {
+    if (ticking || reduced.matches) return;
+    ticking = true;
+    requestAnimationFrame(update);
   }
 
   function update() {
     ticking = false;
-
-    /* Chase the raw target — this runs every rAF so even if scroll stops
-       the lerp keeps catching up over a few frames. */
-    currentP = lerp(currentP, targetP, LERP);
-
-    /* Once we're close enough, snap to avoid floating-point drift. */
-    if (Math.abs(targetP - currentP) < 0.0002) {
-      currentP = targetP;
-    }
-
-    var p = pinned !== null ? pinned : currentP;
-
-    /* Skip rewriting CSS when nothing changed. */
-    if (Math.abs(p - lastWrittenP) < 0.0001) {
-      /* Keep the loop alive while the lerp hasn't settled. */
-      if (currentP !== targetP && !ticking) {
-        ticking = true;
-        requestAnimationFrame(update);
-      }
+    if (reduced.matches) {
+      resetForReducedMotion();
       return;
     }
-    lastWrittenP = p;
 
-    var a1 = 1 - ramp(p, 0.16, 0.30);
-    var a2 = band(p, 0.34, 0.46, 0.60, 0.70);
-    var a3 = ramp(p, 0.68, 0.78);
+    var p = rawProgress();
+    if (Math.abs(p - lastWrittenP) >= 0.0001) {
+      lastWrittenP = p;
+      var a1 = 1 - ramp(p, 0.16, 0.30);
+      var a2 = band(p, 0.34, 0.46, 0.60, 0.70);
+      var a3 = ramp(p, 0.68, 0.78);
 
-    stage.style.setProperty("--p", p.toFixed(4));
-    stage.style.setProperty("--a1", a1.toFixed(3));
-    stage.style.setProperty("--a2", a2.toFixed(3));
-    stage.style.setProperty("--a3", a3.toFixed(3));
+      stage.style.setProperty("--p", p.toFixed(4));
+      stage.style.setProperty("--a1", a1.toFixed(3));
+      stage.style.setProperty("--a2", a2.toFixed(3));
+      stage.style.setProperty("--a3", a3.toFixed(3));
+      stage.style.setProperty("--n1", ramp(p, 0.74, 0.82).toFixed(3));
+      stage.style.setProperty("--n2", ramp(p, 0.80, 0.88).toFixed(3));
+      stage.style.setProperty("--n3", ramp(p, 0.86, 0.94).toFixed(3));
 
-    /* The three steps arrive one after another rather than together. */
-    stage.style.setProperty("--n1", ramp(p, 0.74, 0.82).toFixed(3));
-    stage.style.setProperty("--n2", ramp(p, 0.80, 0.88).toFixed(3));
-    stage.style.setProperty("--n3", ramp(p, 0.86, 0.94).toFixed(3));
-
-    /* Keep faded-out acts out of the tab order and off the screen reader. */
-    [a1, a2, a3].forEach(function (a, i) {
-      if (acts[i]) acts[i].setAttribute("aria-hidden", a < 0.05 ? "true" : "false");
-    });
-
-    /* Keep looping while the lerp hasn't caught up to the target. */
-    if (currentP !== targetP && !ticking) {
-      ticking = true;
-      requestAnimationFrame(update);
+      [a1, a2, a3].forEach(function (opacity, index) {
+        if (!acts[index]) return;
+        var hidden = opacity < 0.05;
+        acts[index].setAttribute("aria-hidden", hidden ? "true" : "false");
+        acts[index].toggleAttribute("inert", hidden);
+      });
     }
+
+  }
+
+  function measureAndUpdate() {
+    cancelControlledScroll();
+    travel = Math.max(0, wrap.offsetHeight - stage.offsetHeight);
+    stageStart = wrap.getBoundingClientRect().top + window.scrollY;
+    lastWrittenP = -1;
+    schedule();
   }
 
   function onScroll() {
-    /* Read raw scroll position on every event. */
-    targetP = travel > 0 ? clamp(-wrap.getBoundingClientRect().top / travel) : 0;
-    if (pinned !== null) targetP = pinned;
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(update);
+    schedule();
+  }
+
+  function cancelControlledScroll() {
+    cancelAnimationFrame(controlledFrame);
+    controlledActive = false;
+    controlledFrame = 0;
+    controlledTarget = window.scrollY;
+  }
+
+  function controlledScrollFrame(now) {
+    var current = window.scrollY;
+    var difference = controlledTarget - current;
+    var elapsed = lastControlTime ? Math.min(now - lastControlTime, 34) : 16;
+    var maxSpeed = difference > 0 ? MAX_FORWARD_SPEED : MAX_REVERSE_SPEED;
+    var maxStep = maxSpeed * elapsed;
+    var step = difference * 0.16;
+    lastControlTime = now;
+
+    if (Math.abs(step) > maxStep) step = Math.sign(step) * maxStep;
+    if (Math.abs(difference) < 0.5) {
+      window.scrollTo(0, controlledTarget);
+      controlledActive = false;
+      controlledFrame = 0;
+      return;
+    }
+
+    window.scrollTo(0, current + step);
+    controlledFrame = requestAnimationFrame(controlledScrollFrame);
+  }
+
+  function wheelDeltaPixels(event) {
+    var delta = event.deltaY;
+    if (event.deltaMode === 1) delta *= 16;
+    if (event.deltaMode === 2) delta *= window.innerHeight;
+    return delta;
+  }
+
+  function normalizeWheelDelta(delta) {
+    return Math.max(-MAX_INPUT_DELTA, Math.min(MAX_INPUT_DELTA, delta));
+  }
+
+  function queueControlledDelta(rawDelta, stageEnd) {
+    /* A fast upward flick means “replay the stage.” Keep the cinematic speed
+       cap, but send the target to the beginning so momentum cannot stop the
+       reverse sequence halfway through. Gentle input remains incremental. */
+    if (rawDelta < -MAX_INPUT_DELTA) {
+      controlledTarget = stageStart;
+      return;
+    }
+
+    var delta = normalizeWheelDelta(rawDelta);
+    controlledTarget = Math.max(
+      stageStart,
+      Math.min(stageEnd, controlledTarget + delta * INPUT_SCALE)
+    );
+  }
+
+  function shouldCatchReverseEntry(rawDelta, y, stageEnd) {
+    var fastEntryRange = Math.max(window.innerHeight * 1.5, 900);
+    var fastEntry = rawDelta < -MAX_INPUT_DELTA &&
+      y <= stageEnd + fastEntryRange;
+
+    return rawDelta < 0 &&
+      (controlledActive || fastEntry || y + rawDelta <= stageEnd + 2);
+  }
+
+  function startControlledMove(target) {
+    cancelAnimationFrame(controlledFrame);
+    controlledTarget = target;
+    controlledActive = true;
+    lastControlTime = 0;
+    controlledFrame = requestAnimationFrame(controlledScrollFrame);
+  }
+
+  function onWheel(event) {
+    if (pinned !== null || reduced.matches) return;
+
+    var rawDelta = wheelDeltaPixels(event);
+    var delta = normalizeWheelDelta(rawDelta);
+    if (Math.abs(delta) < 1) return;
+
+    var y = window.scrollY;
+    var stageEnd = stageStart + travel;
+    if (y > stageEnd + 2) {
+      if (shouldCatchReverseEntry(rawDelta, y, stageEnd)) {
+        event.preventDefault();
+        if (!controlledActive) {
+          /* Anchor at the final frame before rewinding. Without this handoff,
+             browser momentum can leap from the FAQ straight to the hero. */
+          window.scrollTo(0, stageEnd);
+          controlledTarget = stageEnd;
+        }
+        queueControlledDelta(rawDelta, stageEnd);
+        if (!controlledActive) startControlledMove(controlledTarget);
+      }
+      return;
+    }
+    if (y < stageStart - 2) return;
+
+    if ((delta < 0 && y <= stageStart + 4) ||
+        (delta > 0 && y >= stageEnd - 4)) {
+      cancelControlledScroll();
+      return;
+    }
+
+    event.preventDefault();
+    if (!controlledActive) controlledTarget = y;
+    queueControlledDelta(rawDelta, stageEnd);
+
+    if (!controlledActive) {
+      startControlledMove(controlledTarget);
     }
   }
 
-  function onResize() {
-    measure();
-    /* Re-sync so we don't lerp from a stale position. */
-    targetP = travel > 0 ? clamp(-wrap.getBoundingClientRect().top / travel) : 0;
-    if (pinned !== null) targetP = pinned;
-    currentP = targetP;
-    lastWrittenP = -1;
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(update);
+  function onMotionPreferenceChange() {
+    if (reduced.matches) {
+      cancelControlledScroll();
+      resetForReducedMotion();
+      return;
     }
+    measureAndUpdate();
   }
 
   window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onResize, { passive: true });
-  window.addEventListener("load", function () { measure(); targetP = 0; currentP = 0; lastWrittenP = -1; update(); }, { once: true });
-  if (window.ResizeObserver) {
-    new ResizeObserver(onResize).observe(wrap);
+  window.addEventListener("wheel", onWheel, { passive: false });
+  window.addEventListener("pointerdown", cancelControlledScroll, { passive: true });
+  window.addEventListener("keydown", cancelControlledScroll, { passive: true });
+  window.addEventListener("resize", measureAndUpdate, { passive: true });
+  window.addEventListener("load", measureAndUpdate, { once: true });
+  if (window.ResizeObserver) new ResizeObserver(measureAndUpdate).observe(wrap);
+  if (typeof reduced.addEventListener === "function") {
+    reduced.addEventListener("change", onMotionPreferenceChange);
+  } else if (typeof reduced.addListener === "function") {
+    reduced.addListener(onMotionPreferenceChange);
   }
-  measure();
-  update();
+
+  if (reduced.matches) resetForReducedMotion();
+  else measureAndUpdate();
 })();

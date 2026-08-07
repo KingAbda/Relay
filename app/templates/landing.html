@@ -6,7 +6,7 @@
   <title>Relay — Teach what you know</title>
   <meta name="description" content="Relay is a campus skill swap where thirty minutes of teaching earns thirty minutes of learning." />
   <meta name="theme-color" content="#f1e8d6" />
-  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml" />
+  <link rel="icon" href="{{ url_for('static', filename='landing/assets/favicon.svg') }}" type="image/svg+xml" />
   <link rel="preload" as="image" href="{{ url_for('static', filename='landing/assets/layer-sky.webp') }}" />
   <link rel="preload" as="image" href="{{ url_for('static', filename='landing/assets/layer-far.webp') }}" />
   <link rel="preload" as="image" href="{{ url_for('static', filename='landing/assets/layer-mid.webp') }}" />
@@ -25,10 +25,10 @@
       <a href="#scope">The first cohort</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a class="btn" href="#join">Interest list</a>
+    <a class="btn" href="#join">Interest List</a>
   </header>
 
-  <main id="main">
+  <main id="main" tabindex="-1">
     <div class="stage-wrap" id="top">
       <div class="stage">
         <div class="scene" aria-hidden="true">
@@ -46,10 +46,10 @@
             <h1 id="act1-title">Teach what you know. Learn what you want.</h1>
             <p>A campus swap where half an hour of your time gets you half an hour of someone else's. No money, no catch.</p>
             <div class="hero-actions">
-              <a class="btn primary" href="#join">Join the interest list</a>
+              <a class="btn primary" href="#join">Join the Interest List</a>
               <a class="btn" href="#scope">What we're building</a>
             </div>
-            <p class="trust-line">Built from 300+ student interviews at NYU. Mentored by Daniel Porter, founder of Overtime.</p>
+            <p class="trust-line">Built from 300+ student interviews at NYU.</p>
           </section>
 
           <section class="act act-2" aria-labelledby="act2-title">
@@ -83,7 +83,6 @@
           </section>
         </div>
 
-        <p class="cue">Scroll</p>
       </div>
     </div>
 
@@ -139,16 +138,17 @@
     </section>
 
     <section class="closing" id="join" aria-labelledby="closing-title">
+      <img class="closing-art" src="{{ url_for('static', filename='landing/assets/footer-paper-landscape.webp') }}"
+           alt="" aria-hidden="true" loading="lazy" decoding="async">
       <div class="closing-inner">
         <p class="eyebrow">First NYU cohort</p>
         <h2 id="closing-title">Put your skill on the board.</h2>
-        <p>Fill out the form below and we'll hit you up when the cohort is locked in.</p>
-        <div class="google-form-wrap">
-          <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf5AY36RTQXhs15-SQ0QvucUQJuX0k-k2BsYl59WKrLmWAxgg/viewform?embedded=true"
-                  width="100%" height="700" frameborder="0" marginheight="0" marginwidth="0"
-                  title="Relay interest list">Loading…</iframe>
+        <p>Open the short form and we'll be in touch when the cohort is locked in.</p>
+        <div class="form-cta">
+          <a class="btn primary" href="https://docs.google.com/forms/d/e/1FAIpQLSf5AY36RTQXhs15-SQ0QvucUQJuX0k-k2BsYl59WKrLmWAxgg/viewform"
+             target="_blank" rel="noopener noreferrer">Join the Interest List <span aria-hidden="true">↗</span></a>
         </div>
-        <p class="form-note">The cohort form opens once the first group is confirmed. We'll email you either way.</p>
+        <p class="form-note">Joining the list doesn't guarantee a place. We'll only use your answers for the Relay trial.</p>
       </div>
     </section>
   </main>
@@ -166,6 +166,6 @@
     <p class="privacy">Interest-list info is only used for Relay trial updates and picking the cohort. Please don't send anything sensitive.</p>
   </footer>
 
-  <script src="{{ url_for('static', filename='landing/paper-scroll.js') }}"></script>
+  <script src="{{ url_for('static', filename='landing/paper-scroll.js') }}" defer></script>
 </body>
 </html>
