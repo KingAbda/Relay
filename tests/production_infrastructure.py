@@ -110,7 +110,7 @@ class ProductionInfrastructureTests(unittest.TestCase):
         self.run_db("upgrade", "head")
         current = self.run_db("current")
         drift = self.run_db("check")
-        self.assertIn("20260731_01", current.stdout + current.stderr)
+        self.assertIn("20260806_01", current.stdout + current.stderr)
         self.assertIn("No new upgrade operations detected", drift.stdout + drift.stderr)
 
         from app.main import app, db

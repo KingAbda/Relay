@@ -221,7 +221,7 @@ CURRENT_CONSENT_VERSIONS = {
     "code_of_conduct": "2026-07-13-draft",
     "safety_rules": "2026-07-13-draft",
 }
-DATABASE_SCHEMA_REVISION = "20260731_01"
+DATABASE_SCHEMA_REVISION = "20260806_01"
 
 # ── Auto-seed demo data (defined before use) ──────────
 # ── Initialize DB tables ──────────────────────────────
