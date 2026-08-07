@@ -269,20 +269,6 @@ h1 { margin-inline: auto; max-width: 15ch; font-size: clamp(46px, 7.4vw, 118px);
 
 /* ---------- interest form ---------- */
 
-.interest-form { margin-top: 0; }
-.form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
-.form-input {
-  flex: 1;
-  min-width: 160px;
-  padding: 13px 16px;
-  border: 1px solid var(--line);
-  background: rgba(253, 246, 233, .9);
-  color: var(--ink);
-  font: 16px var(--sans);
-  outline: none;
-}
-.form-input:focus { border-color: var(--violet); box-shadow: 0 0 0 2px rgba(59, 47, 92, .15); }
-.form-input::placeholder { color: var(--muted); }
 .form-note { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
 
 /* social proof line in hero */
@@ -291,19 +277,7 @@ h1 { margin-inline: auto; max-width: 15ch; font-size: clamp(46px, 7.4vw, 118px);
   font-size: 13px;
   color: var(--muted);
   font-style: italic;
-}
-
-/* Google Form embed */
-.google-form-wrap {
-  margin-top: 24px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  overflow: hidden;
-  background: rgba(253, 246, 233, .7);
-}
-.google-form-wrap iframe {
-  display: block;
-  min-height: 600px;
+  text-align: center;
 }
 
 .footer { padding: 52px max(6vw, 30px) 46px; display: grid; grid-template-columns: 1fr auto; gap: 30px 60px; }
