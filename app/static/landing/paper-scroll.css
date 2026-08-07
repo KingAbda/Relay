@@ -248,10 +248,8 @@ h1 { margin-inline: auto; max-width: 15ch; font-size: clamp(46px, 7.4vw, 118px);
 .faq summary b { font-family: var(--faq); font-size: clamp(26px, 3.2vw, 46px); font-weight: 500; line-height: 1; text-transform: uppercase; letter-spacing: -.01em; }
 .faq details > p { margin: 0; padding: 0 78px 30px; max-width: 760px; font-size: 16px; line-height: 1.6; color: var(--muted); }
 
-.closing { position: relative; min-height: 540px; padding: 72px max(6vw, 30px); display: flex; align-items: center; justify-content: center; overflow: hidden; scroll-margin-top: 80px; border-bottom: 1px solid var(--line); background: var(--paper-light); }
-.closing::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(rgba(253,246,233,.24), rgba(253,246,233,.4)); }
-.closing-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.closing-inner { position: relative; z-index: 2; width: min(900px, 100%); text-align: center; }
+.closing { min-height: 540px; padding: 72px max(6vw, 30px); display: flex; align-items: center; justify-content: center; scroll-margin-top: 80px; border-bottom: 1px solid var(--line); background: linear-gradient(rgba(253,246,233,.24), rgba(253,246,233,.4)), url("assets/footer-paper-landscape.webp") center / cover no-repeat; }
+.closing-inner { width: min(900px, 100%); text-align: center; }
 .closing h2 { font-size: clamp(44px, 5.4vw, 76px); }
 .closing p { max-width: 720px; margin: 20px auto 0; font-size: 18px; line-height: 1.55; color: var(--ink-soft); }
 .closing .eyebrow { width: 100%; max-width: none; margin: 0 0 20px; text-align: center; font-size: 11px; line-height: 1.3; color: var(--violet); }
