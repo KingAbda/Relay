@@ -187,7 +187,9 @@ a { color: inherit; text-decoration: none; }
 .act-1 { opacity: var(--a1); transform: translateY(calc((1 - var(--a1)) * -26px)); }
 .act-2 { opacity: var(--a2); transform: translateY(calc((1 - var(--a2)) * 30px)); }
 .act-3 { opacity: var(--a3); transform: translateY(calc((1 - var(--a3)) * 30px)); }
-.act[aria-hidden="true"] { pointer-events: none; }
+/* Remove inactive acts from painting as well as hit-testing. Mobile Safari can
+   otherwise leave a faint composited copy behind after an opacity transition. */
+.act[aria-hidden="true"] { visibility: hidden; pointer-events: none; }
 
 h1, h2 { margin: 0; font-family: var(--display); font-weight: 500; font-variation-settings: "SOFT" 18, "WONK" 0, "opsz" 144; letter-spacing: -.022em; text-wrap: balance; }
 h1 { margin-inline: auto; max-width: 15ch; font-size: clamp(46px, 7.4vw, 118px); line-height: .94; }

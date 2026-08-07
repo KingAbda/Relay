@@ -178,6 +178,11 @@ class WaitlistLandingTests(unittest.TestCase):
         self.assertIn('<meta name="referrer" content="no-referrer"', html)
         script = (paper / "paper-scroll.js").read_text(encoding="utf-8")
         self.assertIn('toggleAttribute("inert", hidden)', script)
+        stylesheet = (paper / "paper-scroll.css").read_text(encoding="utf-8")
+        self.assertIn(
+            '.act[aria-hidden="true"] { visibility: hidden; pointer-events: none; }',
+            stylesheet,
+        )
 
     def test_waitlist_url_accepts_only_https_google_forms(self):
         self.assertEqual(
