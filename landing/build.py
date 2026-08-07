@@ -20,6 +20,9 @@ DEFAULT_FORM_URL = (
 )
 PAPER_ASSETS = (
     "favicon.svg",
+    "favicon.ico",
+    "favicon-32x32.png",
+    "apple-touch-icon.png",
     "relay-logo-violet.svg",
     "hero-paper-landscape.webp",
     "footer-paper-landscape.webp",
@@ -67,6 +70,9 @@ def build(output: Path, form_url: str | None) -> None:
     shutil.copytree(PAPER_VARIANT / "fonts", paper_output / "fonts")
     for asset in PAPER_ASSETS:
         shutil.copy2(PAPER_VARIANT / "assets" / asset, paper_assets / asset)
+
+    shutil.copy2(PAPER_VARIANT / "assets" / "favicon.ico", output / "favicon.ico")
+    shutil.copy2(PAPER_VARIANT / "assets" / "apple-touch-icon.png", output / "apple-touch-icon.png")
 
     shutil.copy2(LANDING / "_headers", output / "_headers")
 

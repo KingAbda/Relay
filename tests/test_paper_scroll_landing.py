@@ -64,11 +64,12 @@ class PaperScrollLandingTests(unittest.TestCase):
         self.assertTrue(all(not asset.startswith(("http://", "https://")) for asset in parser.assets))
         self.assertEqual(parser.iframes, [])
         form_links = [link for link in parser.links if link.get("href", "").startswith("https://docs.google.com/forms/")]
-        self.assertEqual(len(form_links), 1)
-        self.assertEqual(form_links[0].get("target"), "_blank")
-        self.assertIn("noopener", form_links[0].get("rel", ""))
-        self.assertEqual(html.count("Join the Interest List"), 2)
-        self.assertIn('<a class="btn" href="#join">Interest List</a>', html)
+        self.assertEqual(len(form_links), 4)
+        for link in form_links:
+            self.assertEqual(link.get("target"), "_blank")
+            self.assertIn("noopener", link.get("rel", ""))
+        self.assertEqual(html.count("Join the Interest List"), 1)
+        self.assertIn(">Interest form</a>", html)
         self.assertIn('<main id="main" tabindex="-1">', html)
         self.assertIn('<meta name="referrer" content="no-referrer"', html)
         self.assertIn("doesn't guarantee", html)
@@ -87,6 +88,15 @@ class PaperScrollLandingTests(unittest.TestCase):
 
         for name in ("Fraunces-Variable", "Oswald-VariableFont", "PublicSans-Variable"):
             self.assertTrue((RUNTIME / "fonts" / f"{name}.ttf").is_file())
+
+    def test_favicon_uses_the_landing_brand_mark_and_colors(self):
+        favicon = (RUNTIME / "assets" / "favicon.svg").read_text(encoding="utf-8")
+
+        self.assertIn('#f1e8d6', favicon)
+        self.assertIn('#3b2f5c', favicon)
+        self.assertIn('M244.5 91.5', favicon)
+        self.assertNotIn('#1b1c22', favicon)
+        self.assertNotIn('#8a7ef2', favicon)
 
     def test_security_headers_are_fail_closed(self):
         headers = (LANDING / "_headers").read_text(encoding="utf-8")
