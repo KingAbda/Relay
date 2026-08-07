@@ -7,7 +7,9 @@
   <meta name="description" content="Relay is a campus skill swap where students teach what they know, earn time credits, and learn what they need without cash." />
   <meta name="theme-color" content="#0f0d1a" />
   {% block head %}{% endblock %}
+  <link rel="icon" href="{{ url_for('static', filename='favicon-32x32.png') }}" sizes="32x32" type="image/png" />
   <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ cache_bust }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='elevate.css') }}?v={{ cache_bust }}" />
   <noscript><style>[data-split],[data-reveal],[data-reveal-stagger]>*{opacity:1!important}</style></noscript>
