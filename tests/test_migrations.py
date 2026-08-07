@@ -17,7 +17,8 @@ from tests import legacy_schema
 ROOT = Path(__file__).resolve().parents[1]
 LEGACY_REVISION = "20260713_00"
 LEGACY_ADOPTION_REVISION = "20260713_01"
-HEAD_REVISION = "20260731_01"
+AUTH_EVENTS_REVISION = "20260731_01"
+HEAD_REVISION = "20260806_01"
 
 
 def _user(user_id, email, name):
@@ -309,7 +310,7 @@ class MigrationTestCase(unittest.TestCase):
         with engine.connect() as connection:
             self.assertEqual(
                 connection.execute(sa.text("SELECT version_num FROM alembic_version")).scalar_one(),
-                HEAD_REVISION,
+                AUTH_EVENTS_REVISION,
             )
             self.assertEqual(
                 connection.execute(sa.text("SELECT COUNT(*) FROM auth_events")).scalar_one(), 1

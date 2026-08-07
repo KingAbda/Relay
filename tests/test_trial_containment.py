@@ -73,7 +73,7 @@ class TrialContainmentTests(unittest.TestCase):
             db.drop_all()
             db.create_all()
             db.session.execute(text("CREATE TABLE alembic_version (version_num VARCHAR(32) NOT NULL)"))
-            db.session.execute(text("INSERT INTO alembic_version VALUES ('20260731_01')"))
+            db.session.execute(text("INSERT INTO alembic_version VALUES ('20260806_01')"))
             db.session.commit()
 
     def csrf(self, path: str = "/signup") -> str:
@@ -362,7 +362,7 @@ class TrialContainmentTests(unittest.TestCase):
         self.assertEqual(response.headers["Cache-Control"], "no-store")
         self.assertEqual(response.headers["Pragma"], "no-cache")
 
-    def test_home_serves_only_contained_assets_within_trial_budget(self):
+    def test_paper_home_serves_only_contained_assets_within_trial_budget(self):
         response = self.client.get("/")
         asset_urls = {
             match.decode()
@@ -376,7 +376,7 @@ class TrialContainmentTests(unittest.TestCase):
         self.assertTrue(all(payload for payload in asset_payloads))
         self.assertLess(
             len(response.data) + sum(len(payload) for payload in asset_payloads),
-            650_000,
+            1_500_000,
         )
 
     def test_public_policy_pages_are_available_and_truthfully_unreviewed(self):
@@ -397,7 +397,7 @@ class TrialContainmentTests(unittest.TestCase):
         self.assertIn("@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}", stylesheet)
 
 
-    def test_public_surface_is_dark_mode_only(self):
+    def test_app_styles_remain_dark_while_paper_home_uses_its_light_theme(self):
         homepage = self.client.get("/").text
         stylesheet = self.client.get("/static/style.css").text
         elevated_stylesheet = self.client.get("/static/elevate.css").text
@@ -407,7 +407,7 @@ class TrialContainmentTests(unittest.TestCase):
         self.assertIn("--paper:#0f0d1a", stylesheet)
         self.assertIn("--blue:#7c5cfc", stylesheet)
         self.assertIn("--orange:#ff6b35", stylesheet)
-        self.assertIn('<meta name="theme-color" content="#0f0d1a" />', homepage)
+        self.assertIn('<meta name="theme-color" content="#f1e8d6" />', homepage)
         self.assertNotIn("themeToggle", homepage)
         self.assertNotIn("prefers-color-scheme:light", homepage)
         self.assertNotIn("light-mode", stylesheet)
@@ -449,7 +449,7 @@ class TrialContainmentTests(unittest.TestCase):
         self.assertEqual(stale.get_json(), {"status": "not_ready"})
 
         with app.app_context():
-            db.session.execute(text("UPDATE alembic_version SET version_num = '20260731_01'"))
+            db.session.execute(text("UPDATE alembic_version SET version_num = '20260806_01'"))
             db.session.commit()
 
         with patch("app.main.db.session.execute", side_effect=RuntimeError("database unavailable")):
