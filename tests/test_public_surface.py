@@ -109,7 +109,7 @@ class PublicSurfaceTests(unittest.TestCase):
             db.drop_all()
             db.create_all()
             db.session.execute(text("CREATE TABLE alembic_version (version_num VARCHAR(32) NOT NULL)"))
-            db.session.execute(text("INSERT INTO alembic_version VALUES ('20260731_01')"))
+            db.session.execute(text("INSERT INTO alembic_version VALUES ('20260806_01')"))
             db.session.commit()
 
     def test_rendered_public_routes_have_accessible_truthful_static_markup(self):

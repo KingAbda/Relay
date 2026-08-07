@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Relay — Teach what you know</title>
-  <meta name="description" content="Relay is a campus skill swap where thirty minutes of teaching earns thirty minutes of learning. Gathering interest for a controlled NYU trial." />
+  <meta name="description" content="Relay is a campus skill swap where thirty minutes of teaching earns thirty minutes of learning." />
   <meta name="theme-color" content="#f1e8d6" />
-  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml" />
+  <link rel="icon" href="{{ url_for('static', filename='landing/assets/favicon.svg') }}" type="image/svg+xml" />
   <link rel="preload" as="image" href="{{ url_for('static', filename='landing/assets/layer-sky.webp') }}" />
   <link rel="preload" as="image" href="{{ url_for('static', filename='landing/assets/layer-far.webp') }}" />
   <link rel="preload" as="image" href="{{ url_for('static', filename='landing/assets/layer-mid.webp') }}" />
@@ -25,10 +25,10 @@
       <a href="#scope">The first cohort</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a class="btn" href="https://docs.google.com/forms/d/e/1XJAHBHmTYHE79b5rl_p7Vo_irCVJYSRtRH2H5NrrW3A/viewform" target="_blank" rel="noopener noreferrer">Interest form</a>
+    <a class="btn" href="#join">Interest List</a>
   </header>
 
-  <main id="main">
+  <main id="main" tabindex="-1">
     <div class="stage-wrap" id="top">
       <div class="stage">
         <div class="scene" aria-hidden="true">
@@ -46,7 +46,7 @@
             <h1 id="act1-title">Teach what you know. Learn what you want.</h1>
             <p>A campus swap where half an hour of your time gets you half an hour of someone else's. No money, no catch.</p>
             <div class="hero-actions">
-              <a class="btn primary" href="https://docs.google.com/forms/d/e/1XJAHBHmTYHE79b5rl_p7Vo_irCVJYSRtRH2H5NrrW3A/viewform" target="_blank" rel="noopener noreferrer">Join the interest list</a>
+              <a class="btn primary" href="#join">Join the Interest List</a>
               <a class="btn" href="#scope">What we're building</a>
             </div>
             <p class="trust-line">Built from 300+ student interviews at NYU.</p>
@@ -83,7 +83,6 @@
           </section>
         </div>
 
-        <p class="cue">Scroll</p>
       </div>
     </div>
 
@@ -97,7 +96,7 @@
       <div class="wrap">
         <p class="eyebrow">The first run</p>
         <h2>Starting small on purpose.</h2>
-        <p class="section-copy">The first Relay group is about twenty NYU students, invited by hand, trading creative skills. Joining the interest list doesn't guarantee a spot — we're looking for a balanced group where everyone can both teach and learn. We'll let you know either way.</p>
+        <p class="section-copy">The first Relay group is about twenty NYU students, invited by hand, trading creative skills. Joining the interest list doesn't guarantee a spot — we'll let you know either way.</p>
         <div class="scope">
           <article><span>Group size</span><b>About twenty people, hand-picked</b></article>
           <article><span>Who can join</span><b>A verified NYU email is all you need</b></article>
@@ -132,7 +131,7 @@
           </details>
           <details>
             <summary><span>05</span><b>Does the interest list mean I'm in?</b></summary>
-            <p>No. Everyone on the list gets reviewed. We pick a group that makes sense — matching up what people can teach with what people want to learn. You'll hear from us either way.</p>
+            <p>No. Everyone on the list gets the form when it opens. Then we pick a group that makes sense — matching up what people can teach with what people want to learn.</p>
           </details>
         </div>
       </div>
@@ -142,9 +141,12 @@
       <div class="closing-inner">
         <p class="eyebrow">First NYU cohort</p>
         <h2 id="closing-title">Put your skill on the board.</h2>
-        <p>Fill out the interest form and we'll be in touch when we're ready to select the cohort. This doesn't guarantee a spot — we're putting together a balanced group of about twenty people.</p>
-        <a class="btn primary" href="https://docs.google.com/forms/d/e/1XJAHBHmTYHE79b5rl_p7Vo_irCVJYSRtRH2H5NrrW3A/viewform" target="_blank" rel="noopener noreferrer">Fill out the interest form</a>
-        <p class="form-note">Relay is student-built and is not affiliated with or endorsed by NYU.</p>
+        <p>Open the short form and we'll be in touch when the cohort is locked in.</p>
+        <div class="form-cta">
+          <a class="btn primary" href="https://docs.google.com/forms/d/e/1XJAHBHmTYHE79b5rl_p7Vo_irCVJYSRtRH2H5NrrW3A/viewform"
+             target="_blank" rel="noopener noreferrer">Join the Interest List <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="form-note">Joining the list doesn't guarantee a place. We'll only use your answers for the Relay trial.</p>
       </div>
     </section>
   </main>
@@ -158,11 +160,10 @@
     <nav aria-label="Footer">
       <a href="#scope">First cohort</a>
       <a href="#faq">FAQ</a>
-      <a href="https://docs.google.com/forms/d/e/1XJAHBHmTYHE79b5rl_p7Vo_irCVJYSRtRH2H5NrrW3A/viewform" target="_blank" rel="noopener noreferrer">Interest form</a>
     </nav>
-    <p class="privacy">Interest-list information is only used for Relay trial selection. Please don't send anything sensitive. Relay is not affiliated with or endorsed by NYU.</p>
+    <p class="privacy">Interest-list info is only used for Relay trial updates and picking the cohort. Please don't send anything sensitive.</p>
   </footer>
 
-  <script src="{{ url_for('static', filename='landing/paper-scroll.js') }}"></script>
+  <script src="{{ url_for('static', filename='landing/paper-scroll.js') }}" defer></script>
 </body>
 </html>

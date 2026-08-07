@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Canonical Relay landing page. Runtime assets live in paper-scroll/. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -6,29 +7,30 @@
   <title>Relay — Teach what you know</title>
   <meta name="description" content="Relay is a campus skill swap where thirty minutes of teaching earns thirty minutes of learning. Gathering interest for a controlled NYU trial." />
   <meta name="theme-color" content="#f1e8d6" />
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-  <link rel="preload" as="image" href="assets/layer-sky.webp" />
-  <link rel="preload" as="image" href="assets/layer-far.webp" />
-  <link rel="preload" as="image" href="assets/layer-mid.webp" />
-  <link rel="preload" as="image" href="assets/layer-near.webp" />
-  <link rel="preload" as="image" href="assets/layer-canopy.webp" />
-  <link rel="stylesheet" href="paper-scroll.css" />
+  <meta name="referrer" content="no-referrer" />
+  <link rel="icon" href="paper-scroll/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preload" as="image" href="paper-scroll/assets/layer-sky.webp" fetchpriority="high" />
+  <link rel="stylesheet" href="paper-scroll/paper-scroll.css" />
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
 
   <header class="nav">
     <a class="brand" href="#top" aria-label="Relay home">
-      <img src="assets/relay-logo-violet.svg" alt="Relay" width="245" height="106" />
+      <img src="paper-scroll/assets/relay-logo-violet.svg" alt="Relay" width="245" height="106" />
     </a>
     <nav class="nav-links" aria-label="Primary">
       <a href="#scope">The first cohort</a>
       <a href="#faq">FAQ</a>
     </nav>
+<<<<<<< HEAD:landing/paper-scroll/index.html
     <a class="btn" href="https://docs.google.com/forms/d/e/1XJAHBHmTYHE79b5rl_p7Vo_irCVJYSRtRH2H5NrrW3A/viewform" target="_blank" rel="noopener noreferrer">Interest form</a>
+=======
+    <a class="btn" href="#join">Interest List</a>
+>>>>>>> a7d82c3188686ffb6c1f45cfc1cd090d12a76004:landing/index.html
   </header>
 
-  <main id="main">
+  <main id="main" tabindex="-1">
     <div class="stage-wrap" id="top">
       <div class="stage">
         <div class="scene" aria-hidden="true">
@@ -46,7 +48,11 @@
             <h1 id="act1-title">Teach what you know. Learn what you want.</h1>
             <p>A campus swap where half an hour of your time gets you half an hour of someone else's. No money, no catch.</p>
             <div class="hero-actions">
+<<<<<<< HEAD:landing/paper-scroll/index.html
               <a class="btn primary" href="https://docs.google.com/forms/d/e/1XJAHBHmTYHE79b5rl_p7Vo_irCVJYSRtRH2H5NrrW3A/viewform" target="_blank" rel="noopener noreferrer">Join the interest list</a>
+=======
+              <a class="btn primary" href="#join">Join the Interest List</a>
+>>>>>>> a7d82c3188686ffb6c1f45cfc1cd090d12a76004:landing/index.html
               <a class="btn" href="#scope">What we're building</a>
             </div>
             <p class="trust-line">Built from 300+ student interviews at NYU.</p>
@@ -83,7 +89,6 @@
           </section>
         </div>
 
-        <p class="cue">Scroll</p>
       </div>
     </div>
 
@@ -97,7 +102,11 @@
       <div class="wrap">
         <p class="eyebrow">The first run</p>
         <h2>Starting small on purpose.</h2>
+<<<<<<< HEAD:landing/paper-scroll/index.html
         <p class="section-copy">The first Relay group is about twenty NYU students, invited by hand, trading creative skills. Joining the interest list doesn't guarantee a spot — we're looking for a balanced group where everyone can both teach and learn. We'll let you know either way.</p>
+=======
+        <p class="section-copy">The first Relay group is about twenty NYU students, invited by hand, trading creative skills. Joining the interest list doesn't guarantee a spot. We'll let you know either way.</p>
+>>>>>>> a7d82c3188686ffb6c1f45cfc1cd090d12a76004:landing/index.html
         <div class="scope">
           <article><span>Group size</span><b>About twenty people, hand-picked</b></article>
           <article><span>Who can join</span><b>A verified NYU email is all you need</b></article>
@@ -119,12 +128,12 @@
             <p>Nope. Joining is free and no money moves between students. You pay with your time, period.</p>
           </details>
           <details>
-            <summary><span>02</span><b>How do the credits work?</b></summary>
+            <summary><span>02</span><b>How do credits work?</b></summary>
             <p>Simple. Teach one thirty-minute session, you get one credit. Spend that credit to book a thirty-minute session with anyone else on the platform.</p>
           </details>
           <details>
             <summary><span>03</span><b>What can I actually teach?</b></summary>
-            <p>For this first round, creative stuff only — design, music, writing, photography, things like that. Nothing medical, nothing dangerous, nothing sketchy.</p>
+            <p>For this first round, creative stuff only: design, music, writing, photography, things like that. Nothing medical, dangerous, or sketchy.</p>
           </details>
           <details>
             <summary><span>04</span><b>Who gets in?</b></summary>
@@ -132,7 +141,11 @@
           </details>
           <details>
             <summary><span>05</span><b>Does the interest list mean I'm in?</b></summary>
+<<<<<<< HEAD:landing/paper-scroll/index.html
             <p>No. Everyone on the list gets reviewed. We pick a group that makes sense — matching up what people can teach with what people want to learn. You'll hear from us either way.</p>
+=======
+            <p>No. Everyone on the list gets the form when it opens. Then we pick a group that makes sense, matching what people can teach with what they want to learn.</p>
+>>>>>>> a7d82c3188686ffb6c1f45cfc1cd090d12a76004:landing/index.html
           </details>
         </div>
       </div>
@@ -142,16 +155,25 @@
       <div class="closing-inner">
         <p class="eyebrow">First NYU cohort</p>
         <h2 id="closing-title">Put your skill on the board.</h2>
+<<<<<<< HEAD:landing/paper-scroll/index.html
         <p>Fill out the interest form and we'll be in touch when we're ready to select the cohort. This doesn't guarantee a spot — we're putting together a balanced group of about twenty people.</p>
         <a class="btn primary" href="https://docs.google.com/forms/d/e/1XJAHBHmTYHE79b5rl_p7Vo_irCVJYSRtRH2H5NrrW3A/viewform" target="_blank" rel="noopener noreferrer">Fill out the interest form</a>
         <p class="form-note">Relay is student-built and is not affiliated with or endorsed by NYU.</p>
+=======
+        <p>Open the short form and we'll be in touch when the cohort is locked in.</p>
+        <div class="form-cta">
+          <a class="btn primary" href="https://docs.google.com/forms/d/e/1XJAHBHmTYHE79b5rl_p7Vo_irCVJYSRtRH2H5NrrW3A/viewform"
+             target="_blank" rel="noopener noreferrer">Join the Interest List <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="form-note">Joining the list doesn't guarantee a place. We'll only use your answers for the Relay trial.</p>
+>>>>>>> a7d82c3188686ffb6c1f45cfc1cd090d12a76004:landing/index.html
       </div>
     </section>
   </main>
 
   <footer class="footer">
     <div class="footer-brand">
-      <img src="assets/relay-logo-violet.svg" alt="Relay" width="245" height="106" loading="lazy" />
+      <img src="paper-scroll/assets/relay-logo-violet.svg" alt="Relay" width="245" height="106" loading="lazy" />
       <p>Trade skills, not money. Built by students, for students.</p>
       <small>Controlled NYU trial · gathering interest</small>
     </div>
@@ -163,6 +185,6 @@
     <p class="privacy">Interest-list information is only used for Relay trial selection. Please don't send anything sensitive. Relay is not affiliated with or endorsed by NYU.</p>
   </footer>
 
-  <script src="paper-scroll.js"></script>
+  <script src="paper-scroll/paper-scroll.js" defer></script>
 </body>
 </html>
